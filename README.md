@@ -38,6 +38,36 @@ baissée sous la voix, titre de l'animé en grand, 1080×1920 à 60 fps).
 En ligne de commande : `python -m anime_tiktok present-plan --script script.txt --name erased`, puis
 `python -m anime_tiktok present-render --name erased`.
 
+## Vidéos « oddly satisfying » générées (`satisfying/`)
+
+Vidéos 100 % créées par le code : image, son et légende. Aucun épisode, aucun média extérieur, donc aucun
+problème de droits, et au-delà d'une minute elles sont éligibles à la rémunération TikTok. Pas de GPU : une
+vidéo de 64 s en 1080×1920 à 60 fps se rend en 5 à 7 minutes sur un processeur ordinaire.
+
+```bash
+sudo apt-get install -y libegl1 && pip install skia-python numpy
+python -m satisfying                      # concept choisi automatiquement (le moins récemment utilisé)
+python -m satisfying --concept pendulum   # ou grow, escape, spiro, multiply
+python -m satisfying --preview 6          # test rapide : 6 premières secondes
+```
+
+| Concept | Ce qui se passe | Fin |
+|---|---|---|
+| `grow` | une balle grossit à chaque rebond jusqu'à remplir le cercle | elle redevient petite : la vidéo boucle |
+| `escape` | une balle s'échappe d'anneaux qui tournent, chacun éclate en billes | les anneaux se reforment |
+| `pendulum` | vague de pendules vue de dessus : motifs, désordre, réalignement | réalignement parfait : boucle exacte |
+| `spiro` | des bras articulés dessinent lentement une rosace | la rosace s'efface |
+| `multiply` | chaque rebond fait naître une balle, le cercle se remplit | toutes se rejoignent en une seule |
+
+Chaque vidéo tire au hasard sa palette (pastels clairs ou nuit douce), son timbre (goutte, kalimba, cristal,
+piano doux), sa tonalité, sa suite d'accords et tous les paramètres du concept : deux vidéos du même concept
+ne se ressemblent pas. Chaque impact joue une note juste dans l'accord en cours, sur une nappe très discrète.
+`satisfying/history.json` garde la trace des vidéos produites pour alterner les concepts et les palettes.
+Sortie : `output/satisfying/<date>_<concept>_<graine>.mp4` et un `.txt` avec la légende et les hashtags.
+
+Ajouter un concept : un module dans `satisfying/concepts/` avec `TITLE` et `render(ctx)`, puis son nom dans
+`concepts.NAMES`.
+
 ## Utilisation rapide (Kaggle ou Colab)
 
 Ouvrez `notebooks/anime_tiktok.ipynb` dans Kaggle (*File → Import Notebook*) ou Colab, activez le GPU,

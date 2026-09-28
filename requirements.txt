@@ -13,3 +13,5 @@ soundfile
 transformers
 sentence-transformers>=3.0
 pillow
+# Vidéos « oddly satisfying » générées (python -m satisfying) ; sous Linux il faut aussi libegl1
+skia-python>=87
