@@ -39,11 +39,13 @@ depuis le téléphone).
 La même application existe en version web. Chaque modification de `mobile/` la compile (workflow
 « Web app (iPhone) ») et la publie sur la branche `web-build`. Deux façons de l'ouvrir :
 
-- **Adresse fixe (recommandé, une seule fois)** : créez un compte gratuit sur
-  [Cloudflare Pages](https://pages.cloudflare.com) → *Create a project → Connect to Git* → choisissez ce
-  dépôt → branche de production **`web-build`**, *Framework preset* : None, **commande de build vide**,
-  dossier de sortie **`/`**. Vous obtenez une adresse `https://<nom>.pages.dev`, mise à jour automatiquement.
-  Netlify fonctionne pareil (branche `web-build`, pas de commande de build, dossier `.`).
+- **Adresse fixe (recommandé, une seule fois)** : compte gratuit Cloudflare → *Workers & Pages → Create →
+  Import a repository* → ce dépôt. Dans *Settings → Build* du Worker créé :
+  **branche de production `web-build`**, **commande de build vide**, commande de déploiement
+  `npx wrangler deploy` (celle par défaut). La branche contient déjà `wrangler.jsonc` ; si votre Worker ne
+  s'appelle pas `mon-dashboard-client`, changez `"name"` dans `mobile/web/wrangler.jsonc`.
+  Vous obtenez une adresse `https://<nom>.<compte>.workers.dev`, mise à jour à chaque modification.
+  (Cloudflare Pages ou Netlify fonctionnent aussi : branche `web-build`, pas de commande de build, dossier `/`.)
 - **Sans compte** : la télécommande du notebook sert aussi la web app, à l'adresse publique affichée par la
   cellule (`https://xxxx.trycloudflare.com`). Cette adresse change à chaque session.
 

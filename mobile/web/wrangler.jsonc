@@ -1,0 +1,10 @@
+// Déploiement Cloudflare (Workers « static assets ») : `npx wrangler deploy` depuis la branche web-build.
+// "name" doit être celui du Worker créé dans Cloudflare.
+{
+  "name": "mon-dashboard-client",
+  "compatibility_date": "2026-09-01",
+  "assets": {
+    "directory": ".",
+    "not_found_handling": "single-page-application"
+  }
+}
