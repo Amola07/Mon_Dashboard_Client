@@ -20,7 +20,7 @@ from .media import require_ffmpeg
 def main() -> None:
     parser = argparse.ArgumentParser(prog="anime_tiktok", description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("command", choices=["analyze", "select", "make", "run", "backends"])
+    parser.add_argument("command", choices=["analyze", "select", "make", "run", "backends", "serve"])
     parser.add_argument("--config", default="config.yaml")
     parser.add_argument("--set", action="append", default=[], metavar="CLE=VALEUR",
                         help="surcharge une valeur de config, ex. --set render.fps=240")
@@ -28,7 +28,16 @@ def main() -> None:
     parser.add_argument("--music", help="musique à utiliser pour les styles rythmés")
     parser.add_argument("--only", nargs="*", help="ids d'extraits à traiter (par défaut : tous ceux avec keep=1)")
     parser.add_argument("--force", action="store_true", help="refait l'analyse même si elle existe déjà")
+    parser.add_argument("--port", type=int, default=8000, help="serve : port HTTP")
+    parser.add_argument("--token", help="serve : mot de passe de l'application (sinon ANIME_TIKTOK_TOKEN ou aléatoire)")
+    parser.add_argument("--tunnel", action="store_true", help="serve : adresse publique https via Cloudflare")
+    parser.add_argument("--ntfy-topic", help="serve : sujet ntfy.sh pour publier l'adresse et les notifications")
     args = parser.parse_args()
+
+    if args.command == "serve":
+        from .server import serve
+        serve(args.config, args.set, args.port, args.token, args.tunnel, args.ntfy_topic)
+        return
 
     cfg = load_config(args.config, args.set)
     local_ffmpeg = cfg.path("tools") / "ffmpeg" / "bin"

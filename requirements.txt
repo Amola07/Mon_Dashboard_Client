@@ -3,3 +3,7 @@ opencv-python-headless>=4.8
 pyyaml>=6.0
 # Agrandissement Real-ESRGAN sur GPU CUDA (Kaggle / Colab : torch est déjà installé)
 spandrel>=0.4
+# Serveur de contrôle pour l'application mobile (python -m anime_tiktok serve)
+fastapi>=0.110
+uvicorn>=0.29
+python-multipart>=0.0.9
