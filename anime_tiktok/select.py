@@ -13,7 +13,7 @@ from .analyze import episodes, load_analysis
 from .config import Config
 from .media import grab_frame
 
-CSV_FIELDS = ["id", "keep", "episode", "file", "start", "end", "duration", "score", "peak"]
+CSV_FIELDS = ["id", "keep", "kind", "episode", "file", "start", "end", "duration", "score", "peak"]
 
 
 def selection_dir(cfg: Config) -> Path:
@@ -87,14 +87,63 @@ def candidate_windows(meta: dict, score: np.ndarray, valid: np.ndarray, min_s: f
     return out
 
 
-def run_selection(cfg: Config) -> Path:
+def aesthetic_shots(cfg: Config, meta: dict, feats: dict) -> list[dict]:
+    """Plans « aesthetic » : couleurs vives, contrastés, nets, lumineux, sans agitation.
+    Un candidat = un plan entier (entre deux changements de plan), recentré s'il est long."""
+    missing = [k for k in ("colorfulness", "brightness", "contrast", "sharpness") if k not in feats]
+    if missing:
+        raise SystemExit("Analyse trop ancienne pour les « beaux plans » : relancez « Analyser les épisodes ».")
+    a = cfg["selection"]["aesthetic"]
+    w = a["weights"]
+    hop = meta["hop"]
+    _, valid = moment_scores(cfg, meta, feats)
+    score = (
+        w["colorfulness"] * _robust_z(feats["colorfulness"], valid)
+        + w["contrast"] * _robust_z(feats["contrast"], valid)
+        + w["sharpness"] * _robust_z(feats["sharpness"], valid)
+        - w["motion"] * np.maximum(0, _robust_z(feats["motion"], valid) - 1)  # agitation, combats
+        - w["darkness"] * np.clip((0.18 - feats["brightness"]) / 0.18, 0, 1) * 3  # plans très sombres
+    )
+    min_shot, max_shot = float(a["min_shot"]), float(a["max_shot"])
+    bounds = sorted({0.0, *meta["cuts"], meta["duration"]})
+    out = []
+    for start, end in zip(bounds, bounds[1:]):
+        # On évite les bords du plan (fondus, flous de transition).
+        start, end = start + 0.15, end - 0.15
+        if end - start < min_shot:
+            continue
+        if end - start > max_shot:
+            mid = (start + end) / 2
+            start, end = mid - max_shot / 2, mid + max_shot / 2
+        b0, b1 = int(start / hop), max(int(start / hop) + 1, int(end / hop))
+        if not valid[b0:b1].all():
+            continue
+        length_bonus = 0.3 * min(1.0, (end - start) / max_shot)  # les plans posés font de beaux edits
+        out.append({"start": round(start, 3), "end": round(end, 3),
+                    "score": float(score[b0:b1].mean() + length_bonus),
+                    "peak": round((end - start) / 2, 2)})
+    return out
+
+
+def run_selection(cfg: Config, mode: str = "action") -> Path:
     s = cfg["selection"]
+    if mode == "aesthetic":
+        a = s["aesthetic"]
+        total, per_episode, gap = int(a["clips_total"]), int(a["max_per_episode"]), 4.0
+    elif mode == "action":
+        total, per_episode, gap = int(s["clips_total"]), int(s["max_per_episode"]), 2.0
+    else:
+        raise SystemExit(f"Type de sélection inconnu : {mode!r} (action ou aesthetic)")
     min_s, max_s = float(s["min_seconds"]), float(s["max_seconds"])
     candidates = []
     for ep_idx, ep in enumerate(episodes(cfg), start=1):
         meta, feats = load_analysis(cfg, ep)
-        score, valid = moment_scores(cfg, meta, feats)
-        for c in candidate_windows(meta, score, valid, min_s, max_s, float(s["weights"]["peak"])):
+        if mode == "aesthetic":
+            found = aesthetic_shots(cfg, meta, feats)
+        else:
+            score, valid = moment_scores(cfg, meta, feats)
+            found = candidate_windows(meta, score, valid, min_s, max_s, float(s["weights"]["peak"]))
+        for c in found:
             c.update(episode=ep_idx, file=str(ep))
             candidates.append(c)
 
@@ -102,11 +151,11 @@ def run_selection(cfg: Config) -> Path:
     chosen: list[dict] = []
     per_ep: dict[int, int] = {}
     for c in candidates:
-        if len(chosen) >= int(s["clips_total"]):
+        if len(chosen) >= total:
             break
-        if per_ep.get(c["episode"], 0) >= int(s["max_per_episode"]):
+        if per_ep.get(c["episode"], 0) >= per_episode:
             continue
-        overlap = any(o["episode"] == c["episode"] and c["start"] < o["end"] + 2 and o["start"] < c["end"] + 2
+        overlap = any(o["episode"] == c["episode"] and c["start"] < o["end"] + gap and o["start"] < c["end"] + gap
                       for o in chosen)
         if overlap:
             continue
@@ -118,12 +167,13 @@ def run_selection(cfg: Config) -> Path:
     thumbs.mkdir(parents=True, exist_ok=True)
     rows = []
     for rank, c in enumerate(chosen, start=1):
-        clip_id = f"c{rank:02d}_ep{c['episode']:02d}_{int(c['start']):05d}"
+        prefix = "p" if mode == "aesthetic" else "c"
+        clip_id = f"{prefix}{rank:02d}_ep{c['episode']:02d}_{int(c['start']):05d}"
         img = grab_frame(Path(c["file"]), c["start"] + c["peak"], width=360)
         if img is not None:
             cv2.imwrite(str(thumbs / f"{clip_id}.jpg"), img)
         rows.append({
-            "id": clip_id, "keep": 1, "episode": c["episode"], "file": c["file"],
+            "id": clip_id, "keep": 1, "kind": mode, "episode": c["episode"], "file": c["file"],
             "start": c["start"], "end": c["end"], "duration": round(c["end"] - c["start"], 2),
             "score": round(c["score"], 3), "peak": c["peak"],
         })
@@ -134,7 +184,8 @@ def run_selection(cfg: Config) -> Path:
         writer.writeheader()
         writer.writerows(rows)
     _write_review_page(out / "review.html", rows)
-    print(f"{len(rows)} extraits proposés → {csv_path}")
+    label = "beaux plans" if mode == "aesthetic" else "extraits"
+    print(f"{len(rows)} {label} proposés → {csv_path}")
     print(f"Aperçu : {out / 'review.html'}  (mettez keep=0 dans le CSV pour écarter un extrait)")
     return csv_path
 

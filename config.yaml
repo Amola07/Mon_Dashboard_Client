@@ -32,11 +32,22 @@ selection:
     motion: 1.2              # quantité de mouvement à l'image
     cut_rate: 0.8            # montage rapide (plans courts = action)
     peak: 0.6                # bonus pour le point culminant de l'extrait
+  aesthetic:                 # sélection « beaux plans » (style aesthetic)
+    clips_total: 40
+    max_per_episode: 10
+    min_shot: 1.6            # durée minimale d'un plan utilisable (s)
+    max_shot: 4.0            # les plans plus longs sont recentrés sur leur milieu
+    weights:
+      colorfulness: 1.2      # couleurs vives
+      contrast: 0.6
+      sharpness: 0.5         # image nette et détaillée
+      motion: 0.8            # pénalité pour les plans très agités
+      darkness: 1.0          # pénalité pour les plans très sombres
 
 render:
-  width: 2160                # 2160x3840 = 4K vertical (9:16)
-  height: 3840
-  fps: 120                   # 120 ou 240
+  width: 1080                # 1080x1920 = ce que TikTok diffuse ; 2160x3840 = 4K vertical
+  height: 1920
+  fps: 60                    # 60 = maximum diffusé par TikTok ; 120 ou 240 possibles
   dedupe: true               # retire les images dupliquées de l'animé avant interpolation (mouvement bien plus fluide)
   interpolation: auto        # auto | rife | ffmpeg | none
   upscaler: auto             # auto | torch | ncnn | lanczos
@@ -74,6 +85,18 @@ styles:
     punch_zoom: 0.12         # zoom "coup de poing" au début de chaque coupe (0 = désactivé)
     flash: true
     original_audio: 0.0      # volume du son de l'animé sous la musique (0 à 1)
+  aesthetic:                 # beaux plans calmes, un plan par temps, couleurs vives (à lancer après « Beaux plans »)
+    reframe: crop
+    layout: beats
+    clips_per_video: 16
+    video_seconds: 18
+    cut_seconds: 1.1         # durée visée d'un plan : on coupe tous les N temps pour s'en approcher
+    punch_zoom: 0
+    drift_zoom: 0.06         # zoom lent continu sur chaque plan
+    grade: vivid             # couleurs saturées et contrastées
+    no_repeat: true          # chaque plan n'apparaît qu'une fois
+    flash: false
+    original_audio: 0.0
   cinematique:
     reframe: blur
     layout: single

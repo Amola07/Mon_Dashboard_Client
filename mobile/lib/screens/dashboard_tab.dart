@@ -58,6 +58,33 @@ class _DashboardTabState extends State<DashboardTab> {
     await state.refresh();
   }
 
+  Future<void> _chooseSelection() async {
+    final mode = await showModalBottomSheet<String>(
+      context: context,
+      showDragHandle: true,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.local_fire_department_outlined),
+              title: const Text('Moments forts'),
+              subtitle: const Text('Combats, cris, action : extraits de 12 à 45 s (styles brut, hype)'),
+              onTap: () => Navigator.pop(ctx, 'action'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.landscape_outlined),
+              title: const Text('Beaux plans'),
+              subtitle: const Text('Plans calmes, colorés et nets de quelques secondes (style aesthetic)'),
+              onTap: () => Navigator.pop(ctx, 'aesthetic'),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (mode != null && mounted) await _start('select', extra: {'mode': mode});
+  }
+
   Future<void> _addEpisode() async {
     final choice = await showModalBottomSheet<String>(
       context: context,
@@ -193,9 +220,7 @@ class _DashboardTabState extends State<DashboardTab> {
             title: 'Proposer les extraits',
             subtitle: 'Les meilleurs moments, à valider ensuite',
             enabled: !running && (st?['analyzed'] ?? 0) > 0,
-            onTap: () async {
-              await _start('select');
-            },
+            onTap: _chooseSelection,
             trailing: (st?['clips'] ?? 0) > 0
                 ? TextButton(onPressed: () => widget.onOpenTab(1), child: const Text('Voir'))
                 : null,

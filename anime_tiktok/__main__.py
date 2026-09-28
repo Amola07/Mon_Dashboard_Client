@@ -27,6 +27,8 @@ def main() -> None:
     parser.add_argument("--style", default="brut", help="style de montage défini dans config.yaml")
     parser.add_argument("--music", help="musique à utiliser pour les styles rythmés")
     parser.add_argument("--only", nargs="*", help="ids d'extraits à traiter (par défaut : tous ceux avec keep=1)")
+    parser.add_argument("--mode", default="action", choices=["action", "aesthetic"],
+                        help="select : moments forts (action) ou beaux plans (aesthetic)")
     parser.add_argument("--force", action="store_true", help="refait l'analyse même si elle existe déjà")
     parser.add_argument("--port", type=int, default=8000, help="serve : port HTTP")
     parser.add_argument("--token", help="serve : mot de passe de l'application (sinon ANIME_TIKTOK_TOKEN ou aléatoire)")
@@ -50,7 +52,7 @@ def main() -> None:
         run_analysis(cfg, force=args.force)
     if args.command in ("select", "run"):
         from .select import run_selection
-        run_selection(cfg)
+        run_selection(cfg, args.mode)
     if args.command in ("make", "run"):
         from .montage import run_montage
         run_montage(cfg, args.style, music=args.music, only=args.only)

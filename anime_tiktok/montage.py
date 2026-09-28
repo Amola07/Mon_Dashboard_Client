@@ -59,13 +59,27 @@ def detect_beats(path: Path) -> tuple[float, list[float]]:
 
 # --------------------------------------------------------------------------- briques de filtres
 
+GRADES = {
+    # Couleurs saturées et contrastées, léger piqué : le rendu des edits « aesthetic ».
+    "vivid": "eq=contrast=1.08:saturation=1.35:gamma=0.97,unsharp=5:5:0.4",
+}
+
+
 def _segment(label_in: str, label_out: str, start: float, dur: float, fps: float, size: tuple[int, int],
-             punch: float = 0.0, flash: bool = False, fade_in: float = 0.0, fade_out: float = 0.0) -> str:
+             punch: float = 0.0, flash: bool = False, fade_in: float = 0.0, fade_out: float = 0.0,
+             drift: float = 0.0, grade: str | None = None) -> str:
     w, h = size
-    chain = [f"trim=start={start:.4f}:duration={dur:.4f}", "setpts=PTS-STARTPTS"]
-    if punch > 0:
-        chain += [f"scale=w='trunc({w}*(1+{punch}*max(0\\,1-t/0.25))/2)*2':h=-2:eval=frame:flags=bicubic",
-                  f"crop={w}:{h}"]
+    chain = [f"trim=start={start:.4f}:duration={dur:.4f}", "setpts=PTS-STARTPTS",
+             # plan trop court pour sa place sur le temps : on prolonge la dernière image
+             f"tpad=stop_mode=clone:stop_duration={dur:.4f}", f"trim=duration={dur:.4f}"]
+    if punch > 0 or drift > 0:
+        # zoom « coup de poing » au début du plan et/ou zoom lent continu
+        zoom = f"1+{punch}*max(0\\,1-t/0.25)+{drift}*t/{dur:.4f}"
+        chain += [f"scale=w='trunc({w}*({zoom})/2)*2':h=-2:eval=frame:flags=bicubic", f"crop={w}:{h}"]
+    if grade:
+        if grade not in GRADES:
+            raise SystemExit(f"Étalonnage inconnu : {grade!r} ({', '.join(GRADES)})")
+        chain.append(GRADES[grade])
     if flash:
         chain.append("fade=t=in:st=0:d=0.12:color=white")
     if fade_in > 0:
@@ -128,15 +142,21 @@ def montage_beats(cfg: Config, style: dict, clips: list[dict], srcs: list[Path],
     r = cfg["render"]
     fps, size = float(r["fps"]), (int(r["width"]), int(r["height"]))
     target = float(style.get("video_seconds", 30))
-    per_cut = int(style.get("beats_per_cut", 2))
     tempo, beats = detect_beats(music)
+    if style.get("cut_seconds"):
+        # un plan tous les N temps, N choisi pour approcher la durée de plan visée
+        per_cut = max(1, round(float(style["cut_seconds"]) / (60 / tempo)))
+    else:
+        per_cut = int(style.get("beats_per_cut", 2))
     beats = [b for b in beats if b <= target + 2]
     cut_times = beats[::per_cut] if len(beats) > per_cut else [i * 1.0 for i in range(int(target) + 1)]
     music_start = cut_times[0]
     bounds = [t - music_start for t in cut_times if t - music_start <= target]
     if bounds[-1] < target - 0.5:
         bounds.append(target)
-    print(f"    musique {music.name} : {tempo:.0f} BPM, {len(bounds) - 1} coupes")
+    if style.get("no_repeat") and len(bounds) - 1 > len(clips):
+        bounds = bounds[:len(clips) + 1]  # jamais deux fois le même plan : vidéo plus courte
+    print(f"    musique {music.name} : {tempo:.0f} BPM, {len(bounds) - 1} coupes (1 tous les {per_cut} temps)")
 
     durations = [probe(s).duration for s in srcs]
     uses = [0] * len(clips)
@@ -149,6 +169,8 @@ def montage_beats(cfg: Config, style: dict, clips: list[dict], srcs: list[Path],
         if n:
             graph.append(f"[{i}:v]split={n}" + "".join(f"[s{i}_{j}]" for j in range(n)))
     punch = float(style.get("punch_zoom", 0) or 0)
+    drift = float(style.get("drift_zoom", 0) or 0)
+    grade = style.get("grade")
     flash = bool(style.get("flash"))
     for k in range(n_cuts):
         i = k % len(clips)
@@ -156,7 +178,8 @@ def montage_beats(cfg: Config, style: dict, clips: list[dict], srcs: list[Path],
         # Utilisations successives d'un même extrait : on avance autour de son moment fort.
         start = clips[i]["peak"] - seg / 2 + uses[i] * seg
         start = float(np.clip(start, 0, max(0.0, durations[i] - seg)))
-        graph.append(_segment(f"s{i}_{uses[i]}", f"c{k}", start, seg, fps, size, punch=punch, flash=flash and k > 0))
+        graph.append(_segment(f"s{i}_{uses[i]}", f"c{k}", start, seg, fps, size, punch=punch, flash=flash and k > 0,
+                              drift=drift, grade=grade))
         uses[i] += 1
         labels.append(f"c{k}")
     graph.append("".join(f"[{l}]" for l in labels) + f"concat=n={n_cuts}:v=1:a=0[cat]")
@@ -198,7 +221,7 @@ def run_montage(cfg: Config, style_name: str, music: str | None = None, only: li
     r = cfg["render"]
     print(f"Style « {style_name} » : {len(clips)} extrait(s), rendu {r['width']}x{r['height']} @ {r['fps']} fps")
     print(f"  interpolation : {backends[0]} · agrandissement : {backends[1]} · encodeur : {pick_encoder(r['encoder'])}")
-    if not pick_encoder(r["encoder"]).endswith("nvenc") and (err := nvenc_error()):
+    if r["encoder"] == "auto" and not pick_encoder(r["encoder"]).endswith("nvenc") and (err := nvenc_error()):
         print(f"  (NVENC indisponible : {err})")
 
     out_dir = cfg.path("output") / f"{dt.datetime.now():%Y-%m-%d_%H%M}_{style_name}"

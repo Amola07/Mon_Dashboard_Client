@@ -11,6 +11,7 @@ import numpy as np
 from .config import Config
 from .media import VIDEO_EXTS, iter_frames, list_media, probe, read_audio
 
+ANALYSIS_VERSION = 2  # 2 : ajoute les mesures visuelles (couleurs, lumière, netteté) du style aesthetic
 AUDIO_RATE = 16000
 N_FFT = 1024
 FFT_HOP = 256
@@ -76,11 +77,25 @@ def audio_features(samples: np.ndarray, n_bins: int, hop: float) -> dict[str, np
     return {"loudness": loud, "onset": onset, "bands": bands}
 
 
+VISUAL_KEYS = ("colorfulness", "brightness", "contrast", "sharpness")
+
+
+def visual_measures(frame: np.ndarray, gray: np.ndarray) -> tuple[float, float, float, float]:
+    """Couleurs (Hasler-Süsstrunk), luminosité, contraste et netteté d'une image basse résolution."""
+    b, g, r = (frame[..., i].astype(np.float32) for i in range(3))
+    rg, yb = r - g, 0.5 * (r + g) - b
+    colorfulness = float(np.hypot(rg.std(), yb.std()) + 0.3 * np.hypot(rg.mean(), yb.mean())) / 255
+    sharpness = float(cv2.Laplacian(gray, cv2.CV_32F).var()) / 255 ** 2
+    return colorfulness, float(gray.mean()) / 255, float(gray.std()) / 255, sharpness
+
+
 def video_features(path: Path, n_bins: int, hop: float, sample_fps: float,
-                   threshold: float, min_scene: float) -> tuple[np.ndarray, list[float]]:
-    """Mouvement moyen par pas de temps et instants des changements de plan."""
+                   threshold: float, min_scene: float) -> tuple[np.ndarray, list[float], dict[str, np.ndarray]]:
+    """Mouvement moyen par pas de temps, instants des changements de plan et mesures visuelles."""
     motion_sum = np.zeros(n_bins, dtype=np.float32)
     motion_cnt = np.zeros(n_bins, dtype=np.float32)
+    vis_sum = np.zeros((len(VISUAL_KEYS), n_bins), dtype=np.float32)
+    vis_cnt = np.zeros(n_bins, dtype=np.float32)
     cuts: list[float] = []
     prev_hist = prev_gray = None
     for i, frame in enumerate(iter_frames(path, sample_fps, 160, 90)):
@@ -89,6 +104,10 @@ def video_features(path: Path, n_bins: int, hop: float, sample_fps: float,
         hist = cv2.calcHist([hsv], [0, 1, 2], None, [16, 4, 4], [0, 180, 0, 256, 0, 256])
         cv2.normalize(hist, hist)
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY).astype(np.float32)
+        vb = int(t / hop)
+        if vb < n_bins:
+            vis_sum[:, vb] += visual_measures(frame, gray)
+            vis_cnt[vb] += 1
         if prev_hist is not None:
             change = 1 - cv2.compareHist(prev_hist, hist, cv2.HISTCMP_CORREL)
             diff = float(np.mean(np.abs(gray - prev_gray))) / 255
@@ -102,7 +121,9 @@ def video_features(path: Path, n_bins: int, hop: float, sample_fps: float,
                     motion_cnt[b] += 1
         prev_hist, prev_gray = hist, gray
     motion = np.divide(motion_sum, motion_cnt, out=np.zeros_like(motion_sum), where=motion_cnt > 0)
-    return motion, cuts
+    visual = {k: np.divide(vis_sum[i], vis_cnt, out=np.zeros(n_bins, dtype=np.float32), where=vis_cnt > 0)
+              for i, k in enumerate(VISUAL_KEYS)}
+    return motion, cuts, visual
 
 
 def analyze_episode(cfg: Config, path: Path, force: bool = False) -> Path:
@@ -110,8 +131,11 @@ def analyze_episode(cfg: Config, path: Path, force: bool = False) -> Path:
     out_dir.mkdir(parents=True, exist_ok=True)
     meta_path = out_dir / f"{path.stem}.json"
     if meta_path.exists() and not force:
-        print(f"  ✓ {path.name} (déjà analysé)")
-        return meta_path
+        version = json.loads(meta_path.read_text(encoding="utf-8")).get("version", 1)
+        if version >= ANALYSIS_VERSION:
+            print(f"  ✓ {path.name} (déjà analysé)")
+            return meta_path
+        print(f"  … {path.name} : analyse mise à jour (nouvelles mesures visuelles)")
 
     a = cfg["analysis"]
     hop = float(a["hop_seconds"])
@@ -121,15 +145,16 @@ def analyze_episode(cfg: Config, path: Path, force: bool = False) -> Path:
 
     samples = read_audio(path, AUDIO_RATE) if info.has_audio else np.zeros(0, dtype=np.float32)
     feats = audio_features(samples, n_bins, hop)
-    motion, cuts = video_features(path, n_bins, hop, float(a["sample_fps"]),
+    motion, cuts, visual = video_features(path, n_bins, hop, float(a["sample_fps"]),
                                   float(a["scene_threshold"]), float(a["min_scene_seconds"]))
     cut_bins = np.zeros(n_bins, dtype=np.float32)
     for c in cuts:
         if int(c / hop) < n_bins:
             cut_bins[int(c / hop)] += 1
 
-    np.savez_compressed(out_dir / f"{path.stem}.npz", motion=motion, cuts=cut_bins, **feats)
+    np.savez_compressed(out_dir / f"{path.stem}.npz", motion=motion, cuts=cut_bins, **feats, **visual)
     meta = {
+        "version": ANALYSIS_VERSION,
         "file": str(path),
         "name": path.name,
         "duration": info.duration,

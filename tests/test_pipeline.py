@@ -24,6 +24,7 @@ SETS = [
     "analysis.op_ed_min_seconds=30", "selection.min_seconds=4", "selection.max_seconds=10",
     "selection.clips_total=3", "selection.max_per_episode=1", "render.width=180", "render.height=320",
     "render.fps=48", "render.encoder=libx264", "styles.hype.video_seconds=8",
+    "styles.aesthetic.video_seconds=8", "selection.aesthetic.clips_total=6",
 ]
 
 
@@ -76,10 +77,22 @@ def test_pipeline() -> None:
         _cli(work, "make", "--style", "cinematique")
         assert len(list((work / "output").glob("*_cinematique/*.mp4"))) == 3
 
+        _cli(work, "select", "--mode", "aesthetic")
+        with open(work / "work/selection/clips.csv", encoding="utf-8") as f:
+            shots = list(csv.DictReader(f))
+        assert shots and all(r["kind"] == "aesthetic" for r in shots)
+        assert all(1.6 <= float(r["duration"]) <= 4.0 and float(r["start"]) > OP_SECONDS for r in shots), shots
+        _cli(work, "make", "--style", "aesthetic")
+        (aes_video,) = (work / "output").glob("*_aesthetic/*.mp4")
+        v = _probe(aes_video)["video"]
+        # 120 BPM, plan visé de 1,1 s -> une coupe toutes les 1,0 s ; chaque plan une seule fois
+        expected = min(8.0, len(shots) * 1.0)
+        assert (v["width"], v["height"]) == (180, 320) and abs(float(v["duration"]) - expected) < 0.6, v["duration"]
+
         tempo, beats = detect_beats(work / "input/music/beat120.mp3")
         assert abs(tempo - 120) < 1, tempo
         assert abs((beats[-1] - beats[0]) / (len(beats) - 1) - 0.5) < 0.005
-    print("OK : analyse, sélection, rendu et 3 styles de montage")
+    print("OK : analyse, sélection (moments forts + beaux plans), rendu et 4 styles de montage")
 
 
 if __name__ == "__main__":

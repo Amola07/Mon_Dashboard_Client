@@ -145,7 +145,10 @@ def nvenc_error() -> str | None:
                          capture_output=True, text=True)
     if res.returncode == 0:
         return None
-    return (res.stderr.strip().splitlines() or ["erreur inconnue"])[-1]
+    lines = res.stderr.strip().splitlines() or ["erreur inconnue"]
+    # la ligne utile (pilote trop ancien, pas de GPU…) précède souvent un message générique
+    useful = [l for l in lines if any(k in l.lower() for k in ("nvenc", "driver", "cuda", "cannot load", "no capable"))]
+    return (useful or lines)[0].strip()
 
 
 def encoder_args(name: str, quality: int, fps: float, fast: bool = False) -> list[str]:

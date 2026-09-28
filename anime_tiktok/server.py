@@ -300,7 +300,10 @@ def create_app(config_path: Path, base_sets: list[str], token: str, notifier: No
             if body.get("force"):
                 extra.append("--force")
         elif command == "select":
-            pass
+            mode = body.get("mode", "action")
+            if mode not in ("action", "aesthetic"):
+                raise HTTPException(400, "Type de sélection inconnu (action ou aesthetic)")
+            extra += ["--mode", mode]
         elif command == "make":
             style = body.get("style", "brut")
             if style not in c["styles"]:
@@ -361,6 +364,7 @@ def create_app(config_path: Path, base_sets: list[str], token: str, notifier: No
                 r[k] = float(r[k])
             r["episode"] = int(r["episode"])
             r["file"] = Path(r["file"]).name
+            r["kind"] = r.get("kind") or "action"
         return rows
 
     @app.put("/api/clips/keep", dependencies=[Depends(auth)])

@@ -8,6 +8,7 @@ import '../upload.dart';
 const _styleInfo = {
   'brut': ('Brut', 'Une vidéo par extrait, moment fort en accroche'),
   'hype': ('Hype', 'Edit rythmé sur une musique, zooms et flashs'),
+  'aesthetic': ('Aesthetic', 'Beaux plans sur les temps de la musique, couleurs vives (après « Beaux plans »)'),
   'cinematique': ('Cinématique', 'Image entière sur fond flou, fondus'),
 };
 
