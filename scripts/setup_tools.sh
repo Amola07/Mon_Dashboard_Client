@@ -27,9 +27,25 @@ if command -v apt-get >/dev/null 2>&1; then
 fi
 
 echo "ffmpeg…"
-if [ ! -x ffmpeg/bin/ffmpeg ]; then
-  fetch https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linux64-gpl.tar.xz ffmpeg.tar.xz
-  mkdir -p ffmpeg && tar -xJf ffmpeg.tar.xz -C ffmpeg --strip-components=1 && rm ffmpeg.tar.xz
+# Les builds récents de ffmpeg exigent un pilote NVIDIA récent pour NVENC (encodage GPU).
+# On essaie du plus récent au plus ancien et on garde le premier dont NVENC marche sur ce GPU.
+BTBN=https://github.com/BtbN/FFmpeg-Builds/releases/download/latest
+nvenc_ok() {
+  "$1" -hide_banner -loglevel error -f lavfi -i color=c=black:s=256x256:d=0.2 -c:v hevc_nvenc -f null - 2>/dev/null
+}
+if [ ! -x ffmpeg/bin/ffmpeg ] || { command -v nvidia-smi >/dev/null && ! nvenc_ok ffmpeg/bin/ffmpeg; }; then
+  for build in ffmpeg-master-latest-linux64-gpl ffmpeg-n7.1-latest-linux64-gpl-7.1 \
+               ffmpeg-n7.0-latest-linux64-gpl-7.0 ffmpeg-n6.1-latest-linux64-gpl-6.1; do
+    rm -rf ffmpeg.try && mkdir ffmpeg.try
+    if curl -fsSL --retry 3 "$BTBN/$build.tar.xz" | tar -xJ -C ffmpeg.try --strip-components=1 2>/dev/null; then
+      if ! command -v nvidia-smi >/dev/null || nvenc_ok ffmpeg.try/bin/ffmpeg; then
+        rm -rf ffmpeg && mv ffmpeg.try ffmpeg && echo "  $build (NVENC ok)" && break
+      fi
+      echo "  $build : NVENC indisponible avec ce pilote, essai d'une version plus ancienne"
+      [ -x ffmpeg/bin/ffmpeg ] || { rm -rf ffmpeg && mv ffmpeg.try ffmpeg; }  # garde au moins un ffmpeg
+    fi
+  done
+  rm -rf ffmpeg.try
 fi
 
 echo "RIFE (ncnn-vulkan)…"

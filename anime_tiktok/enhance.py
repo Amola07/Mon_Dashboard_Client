@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import json
 import math
+import os
 import shutil
 import subprocess
 from functools import lru_cache
@@ -144,6 +145,15 @@ def interp_ffmpeg(files: list[Path], n_out: int, duration: float, fps: float, si
         yield last
 
 
+def _link_or_copy(src: Path, dst: Path) -> None:
+    """Lien physique (gratuit en espace disque) ou copie. Pas de lien symbolique : rife-ncnn-vulkan
+    ignore les liens symboliques en listant le dossier, puis plante (SIGSEGV) faute d'images."""
+    try:
+        os.link(src, dst)
+    except OSError:
+        shutil.copyfile(src, dst)
+
+
 class RifeError(RuntimeError):
     """RIFE a planté (pilote Vulkan, plusieurs GPU…) : le rendu bascule sur ffmpeg."""
 
@@ -193,7 +203,7 @@ def interp_rife(files: list[Path], n_out: int, binary: Path, model: Path, scratc
             d.mkdir(parents=True)
         src = files[i0:min(n_in, i1 + 1)]  # + l'image suivante pour interpoler jusqu'à elle
         for k, f in enumerate(src):
-            (chunk_in / f"{k + 1:08d}.png").symlink_to(f.resolve())
+            _link_or_copy(f, chunk_in / f"{k + 1:08d}.png")
         n_req = max(keep, round(len(src) * ratio))  # même espacement temporel que le rendu global
         _run_rife(binary, model, chunk_in, chunk_out, n_req)
         outs = sorted(chunk_out.glob("*.png"))
@@ -278,7 +288,7 @@ class FrameEncoder:
             "ffmpeg", "-hide_banner", "-nostdin", "-y", "-loglevel", "error",
             "-f", "rawvideo", "-pix_fmt", "bgr24", "-s", f"{w}x{h}", "-framerate", str(fps), "-i", "-",
             "-i", str(audio), "-map", "0:v", "-map", "1:a",
-            *encoder_args(codec, quality, fps), "-c:a", "aac", "-b:a", abr, "-shortest", str(out),
+            *encoder_args(codec, quality, fps, fast=True), "-c:a", "aac", "-b:a", abr, "-shortest", str(out),
         ]
         self.size = size
         self.proc = subprocess.Popen(cmd, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -353,6 +363,8 @@ def render_clip(cfg: Config, clip: dict, mode: str, backends: tuple[str, str]) -
     except RifeError as exc:
         print(f"      RIFE a planté ({exc}) : {clip['id']} est interpolé avec ffmpeg")
         _interpolate_and_encode(cfg, clip, files, duration, canvas, "ffmpeg", up, audio, out, tmp)
+        interp = "ffmpeg"
+    settings["backends"] = [interp, up]  # un rendu de repli sera refait quand RIFE marchera
     shutil.rmtree(tmp, ignore_errors=True)
     stamp.write_text(json.dumps(settings))
     return out
@@ -373,7 +385,7 @@ def _interpolate_and_encode(cfg: Config, clip: dict, files: list[Path], duration
         stream = interp_none(files, n_out)
 
     upscaler = make_upscaler(cfg, up, size[1] / canvas[1])
-    codec = pick_encoder(r["encoder"])
+    codec = pick_encoder(r["encoder"], intermediate=True)
     enc = FrameEncoder(out, size, fps, audio, codec, int(r["intermediate_quality"]), r["audio_bitrate"])
     batch_size = int(r["torch_batch"]) if up == "torch" else int(r["ncnn_chunk"]) if up == "ncnn" else 16
     batch: list[np.ndarray] = []

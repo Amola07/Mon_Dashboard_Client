@@ -56,9 +56,11 @@ def main() -> None:
         run_montage(cfg, args.style, music=args.music, only=args.only)
     if args.command == "backends":
         from .enhance import resolve_backends
-        from .media import pick_encoder
+        from .media import nvenc_error, pick_encoder
         interp, up = resolve_backends(cfg)
         print(f"interpolation : {interp}\nagrandissement : {up}\nencodeur : {pick_encoder(cfg['render']['encoder'])}")
+        if err := nvenc_error():
+            print(f"NVENC indisponible : {err}")
 
 
 if __name__ == "__main__":

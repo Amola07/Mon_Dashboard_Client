@@ -11,7 +11,7 @@ import numpy as np
 
 from .config import Config
 from .enhance import render_clip, resolve_backends
-from .media import AUDIO_EXTS, encoder_args, ffmpeg, list_media, pick_encoder, probe, read_audio
+from .media import AUDIO_EXTS, encoder_args, ffmpeg, list_media, nvenc_error, pick_encoder, probe, read_audio
 from .select import load_selection
 
 BEAT_RATE = 22050
@@ -198,6 +198,8 @@ def run_montage(cfg: Config, style_name: str, music: str | None = None, only: li
     r = cfg["render"]
     print(f"Style « {style_name} » : {len(clips)} extrait(s), rendu {r['width']}x{r['height']} @ {r['fps']} fps")
     print(f"  interpolation : {backends[0]} · agrandissement : {backends[1]} · encodeur : {pick_encoder(r['encoder'])}")
+    if not pick_encoder(r["encoder"]).endswith("nvenc") and (err := nvenc_error()):
+        print(f"  (NVENC indisponible : {err})")
 
     out_dir = cfg.path("output") / f"{dt.datetime.now():%Y-%m-%d_%H%M}_{style_name}"
     out_dir.mkdir(parents=True, exist_ok=True)

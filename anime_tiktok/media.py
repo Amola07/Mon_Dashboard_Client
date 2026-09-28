@@ -126,25 +126,39 @@ def encoder_works(name: str) -> bool:
         return False
 
 
-def pick_encoder(choice: str) -> str:
+def pick_encoder(choice: str, intermediate: bool = False) -> str:
+    """Encodeur GPU (NVENC) si possible. Sans GPU : H.264 rapide pour les extraits intermédiaires
+    (x265 est ~10 fois plus lent en 4K à 120 fps), HEVC pour les vidéos finales."""
     if choice != "auto":
         return choice
-    for name in ("hevc_nvenc", "libx265", "libx264"):
+    cpu = ("libx264", "libx265") if intermediate else ("libx265", "libx264")
+    for name in ("hevc_nvenc", "h264_nvenc", *cpu):
         if encoder_works(name):
             return name
     raise SystemExit("Aucun encodeur vidéo utilisable trouvé dans ffmpeg.")
 
 
-def encoder_args(name: str, quality: int, fps: float) -> list[str]:
-    """Paramètres d'encodage vidéo compatibles TikTok (mp4, yuv420p, faststart)."""
+def nvenc_error() -> str | None:
+    """Pourquoi NVENC ne marche pas (pilote trop ancien pour ce ffmpeg, pas de GPU…), ou None."""
+    res = subprocess.run(["ffmpeg", "-hide_banner", "-nostdin", "-loglevel", "error", "-f", "lavfi", "-i",
+                          "color=c=black:s=256x256:d=0.2", "-c:v", "hevc_nvenc", "-f", "null", "-"],
+                         capture_output=True, text=True)
+    if res.returncode == 0:
+        return None
+    return (res.stderr.strip().splitlines() or ["erreur inconnue"])[-1]
+
+
+def encoder_args(name: str, quality: int, fps: float, fast: bool = False) -> list[str]:
+    """Paramètres d'encodage vidéo compatibles TikTok (mp4, yuv420p, faststart).
+    fast=True : réglages rapides pour les fichiers intermédiaires."""
     gop = str(int(round(fps * 2)))
     if name == "hevc_nvenc":
         args = ["-c:v", name, "-preset", "p5", "-rc", "vbr", "-cq", str(quality), "-b:v", "0", "-tag:v", "hvc1"]
     elif name == "h264_nvenc":
         args = ["-c:v", name, "-preset", "p5", "-rc", "vbr", "-cq", str(quality), "-b:v", "0"]
     elif name == "libx265":
-        args = ["-c:v", name, "-preset", "medium", "-crf", str(quality), "-tag:v", "hvc1",
+        args = ["-c:v", name, "-preset", "fast" if fast else "medium", "-crf", str(quality), "-tag:v", "hvc1",
                 "-x265-params", "log-level=error"]
     else:
-        args = ["-c:v", name, "-preset", "medium", "-crf", str(quality)]
+        args = ["-c:v", name, "-preset", "veryfast" if fast else "medium", "-crf", str(quality)]
     return args + ["-g", gop, "-pix_fmt", "yuv420p", "-movflags", "+faststart"]
