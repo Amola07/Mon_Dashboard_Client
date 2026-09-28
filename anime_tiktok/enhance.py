@@ -144,6 +144,33 @@ def interp_ffmpeg(files: list[Path], n_out: int, duration: float, fps: float, si
         yield last
 
 
+class RifeError(RuntimeError):
+    """RIFE a planté (pilote Vulkan, plusieurs GPU…) : le rendu bascule sur ffmpeg."""
+
+
+# Options essayées dans l'ordre ; sur Kaggle (2 GPU T4), RIFE peut planter sans « -g 0 ».
+RIFE_ARG_SETS = [[], ["-g", "0", "-j", "1:1:1"]]
+_rife_args: list[str] | None = None  # options qui ont fonctionné (réutilisées ensuite)
+_rife_broken = False                  # RIFE a échoué avec toutes les options : ffmpeg pour la suite
+
+
+def _run_rife(binary: Path, model: Path, chunk_in: Path, chunk_out: Path, n_req: int) -> None:
+    global _rife_args, _rife_broken
+    candidates = [_rife_args] if _rife_args is not None else RIFE_ARG_SETS
+    error = ""
+    for extra in candidates:
+        shutil.rmtree(chunk_out, ignore_errors=True)
+        chunk_out.mkdir(parents=True)
+        res = subprocess.run([str(binary), "-i", str(chunk_in), "-o", str(chunk_out), "-n", str(n_req),
+                              "-m", str(model), *extra], capture_output=True, text=True)
+        if res.returncode == 0 and any(chunk_out.glob("*.png")):
+            _rife_args = extra
+            return
+        error = (res.stderr.strip().splitlines() or [f"code de sortie {res.returncode}"])[-1]
+    _rife_broken = True
+    raise RifeError(error)
+
+
 def interp_rife(files: list[Path], n_out: int, binary: Path, model: Path, scratch: Path) -> Iterator[np.ndarray]:
     """RIFE par lots d'images (avec une image de recouvrement) pour limiter l'espace disque."""
     n_in = len(files)
@@ -168,8 +195,7 @@ def interp_rife(files: list[Path], n_out: int, binary: Path, model: Path, scratc
         for k, f in enumerate(src):
             (chunk_in / f"{k + 1:08d}.png").symlink_to(f.resolve())
         n_req = max(keep, round(len(src) * ratio))  # même espacement temporel que le rendu global
-        subprocess.run([str(binary), "-i", str(chunk_in), "-o", str(chunk_out), "-n", str(n_req), "-m", str(model)],
-                       check=True, capture_output=True)
+        _run_rife(binary, model, chunk_in, chunk_out, n_req)
         outs = sorted(chunk_out.glob("*.png"))
         if not outs:
             raise RuntimeError("RIFE n'a produit aucune image")
@@ -264,6 +290,10 @@ class FrameEncoder:
             frame = cv2.resize(frame, (w, h), interpolation=interp)
         self.proc.stdin.write(np.ascontiguousarray(frame).tobytes())
 
+    def abort(self) -> None:
+        self.proc.kill()
+        self.proc.wait()
+
     def close(self) -> None:
         self.proc.stdin.close()
         err = self.proc.stderr.read().decode(errors="replace")
@@ -315,7 +345,24 @@ def render_clip(cfg: Config, clip: dict, mode: str, backends: tuple[str, str]) -
     if not files:
         raise RuntimeError(f"Aucune image extraite pour {clip['id']}")
 
-    # 2. Interpolation vers le fps cible
+    # 2 + 3. Interpolation, agrandissement, encodage (repli sur ffmpeg si RIFE plante)
+    if interp == "rife" and _rife_broken:
+        interp = "ffmpeg"
+    try:
+        _interpolate_and_encode(cfg, clip, files, duration, canvas, interp, up, audio, out, tmp)
+    except RifeError as exc:
+        print(f"      RIFE a planté ({exc}) : {clip['id']} est interpolé avec ffmpeg")
+        _interpolate_and_encode(cfg, clip, files, duration, canvas, "ffmpeg", up, audio, out, tmp)
+    shutil.rmtree(tmp, ignore_errors=True)
+    stamp.write_text(json.dumps(settings))
+    return out
+
+
+def _interpolate_and_encode(cfg: Config, clip: dict, files: list[Path], duration: float, canvas: tuple[int, int],
+                            interp: str, up: str, audio: Path, out: Path, tmp: Path) -> None:
+    r = cfg["render"]
+    size = (int(r["width"]), int(r["height"]))
+    fps = float(r["fps"])
     n_out = max(1, round(duration * fps))
     if interp == "rife" and len(files) >= 2:
         rife_bin = cfg.tool("rife_ncnn")
@@ -325,7 +372,6 @@ def render_clip(cfg: Config, clip: dict, mode: str, backends: tuple[str, str]) -
     else:
         stream = interp_none(files, n_out)
 
-    # 3. Agrandissement + encodage
     upscaler = make_upscaler(cfg, up, size[1] / canvas[1])
     codec = pick_encoder(r["encoder"])
     enc = FrameEncoder(out, size, fps, audio, codec, int(r["intermediate_quality"]), r["audio_bitrate"])
@@ -350,8 +396,7 @@ def render_clip(cfg: Config, clip: dict, mode: str, backends: tuple[str, str]) -
                 flush()
         if batch:
             flush()
-    finally:
-        enc.close()
-    shutil.rmtree(tmp, ignore_errors=True)
-    stamp.write_text(json.dumps(settings))
-    return out
+    except BaseException:
+        enc.abort()
+        raise
+    enc.close()
