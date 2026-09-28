@@ -21,21 +21,18 @@ const jobLabels = {
   'download': 'Téléchargement',
 };
 
-const statusLabels = {
-  'running': 'En cours',
-  'done': 'Terminé',
-  'failed': 'Échec',
-  'cancelled': 'Annulé',
-};
+const statusLabels = {'running': 'En cours', 'done': 'Terminé', 'failed': 'Échec', 'cancelled': 'Annulé'};
 
 void showMessage(BuildContext context, Object message, {bool error = false}) {
   ScaffoldMessenger.of(context)
     ..hideCurrentSnackBar()
-    ..showSnackBar(SnackBar(
-      content: Text('$message'),
-      backgroundColor: error ? Colors.red.shade700 : null,
-      behavior: SnackBarBehavior.floating,
-    ));
+    ..showSnackBar(
+      SnackBar(
+        content: Text('$message'),
+        backgroundColor: error ? Colors.red.shade700 : null,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
 }
 
 /// Exécute une action réseau et affiche l'erreur éventuelle.
@@ -63,16 +60,23 @@ class EmptyState extends StatelessWidget {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Icon(icon, size: 56, color: muted),
-          const SizedBox(height: 12),
-          Text(title, style: Theme.of(context).textTheme.titleMedium, textAlign: TextAlign.center),
-          if (subtitle != null) ...[
-            const SizedBox(height: 6),
-            Text(subtitle!, style: TextStyle(color: muted), textAlign: TextAlign.center),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 56, color: muted),
+            const SizedBox(height: 12),
+            Text(title, style: Theme.of(context).textTheme.titleMedium, textAlign: TextAlign.center),
+            if (subtitle != null) ...[
+              const SizedBox(height: 6),
+              Text(
+                subtitle!,
+                style: TextStyle(color: muted),
+                textAlign: TextAlign.center,
+              ),
+            ],
+            if (action != null) ...[const SizedBox(height: 16), action!],
           ],
-          if (action != null) ...[const SizedBox(height: 16), action!],
-        ]),
+        ),
       ),
     );
   }

@@ -44,11 +44,10 @@ void main() {
     expect(outputs, isNotEmpty);
     final out = outputs.first as Map;
     final video = (out['videos'] as List).first as Map;
-    final dest = File('${Directory.systemTemp.path}/live_test.mp4');
     var progress = 0.0;
-    await api.download(api.outputUri(out['folder'] as String, video['name'] as String), dest,
+    final bytes = await api.downloadBytes(api.outputUri(out['folder'] as String, video['name'] as String),
         onProgress: (p) => progress = p);
-    expect(await dest.length(), video['size']);
+    expect(bytes.length, video['size']);
     expect(progress, 1.0);
 
     await expectLater(api.startJob({'command': 'inconnue'}), throwsA(isA<ApiException>()));

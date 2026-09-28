@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../api.dart';
@@ -22,7 +23,10 @@ class _ConnectScreenState extends State<ConnectScreen> {
   void initState() {
     super.initState();
     final s = AppScope.read(context);
-    _url = TextEditingController(text: s.serverUrl);
+    // Web app ouverte depuis le serveur lui-même (adresse du tunnel) : l'adresse est déjà connue.
+    final here = Uri.base;
+    final servedByServer = kIsWeb && here.host.endsWith('.trycloudflare.com');
+    _url = TextEditingController(text: s.serverUrl.isEmpty && servedByServer ? here.origin : s.serverUrl);
     _token = TextEditingController(text: s.token);
     _topic = TextEditingController(text: s.ntfyTopic);
   }

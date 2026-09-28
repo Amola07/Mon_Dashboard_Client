@@ -27,6 +27,7 @@ from pathlib import Path
 from fastapi import Depends, FastAPI, File, Header, HTTPException, Query, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from .config import Config, load_config
 from .media import AUDIO_EXTS, VIDEO_EXTS, list_media
@@ -176,7 +177,8 @@ def _parse_progress(job: Job, line: str) -> None:
 
 # --------------------------------------------------------------------------- application FastAPI
 
-def create_app(config_path: Path, base_sets: list[str], token: str, notifier: Notifier):
+def create_app(config_path: Path, base_sets: list[str], token: str, notifier: Notifier,
+               web_dir: Path | None = None):
     app = FastAPI(title="Anime TikTok Studio", version=str(API_VERSION))
     app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
     runner = Runner(config_path, base_sets, notifier)
@@ -457,7 +459,27 @@ def create_app(config_path: Path, base_sets: list[str], token: str, notifier: No
         return {"name": name, "size": dest.stat().st_size}
 
     app.state.runner = runner
+    if web_dir and (web_dir / "index.html").exists():
+        # Web app (version Safari / iPhone) servie à la racine : utilisable sans hébergeur.
+        app.mount("/", NoCacheStaticFiles(directory=web_dir, html=True), name="webapp")
     return app
+
+
+class NoCacheStaticFiles(StaticFiles):
+    """Fichiers de la web app, revalidés à chaque visite (sinon Safari garde une ancienne version)."""
+
+    async def get_response(self, path, scope):
+        response = await super().get_response(path, scope)
+        response.headers["Cache-Control"] = "no-cache"
+        return response
+
+
+def find_web_dir() -> Path | None:
+    """Build de la web app : branche web-build clonée par le notebook, ou build local de Flutter."""
+    for candidate in (ROOT / "webapp", ROOT / "mobile" / "build" / "web"):
+        if (candidate / "index.html").exists():
+            return candidate
+    return None
 
 
 # --------------------------------------------------------------------------- tunnel Cloudflare
@@ -500,7 +522,8 @@ def serve(config_path: str, base_sets: list[str], port: int, token: str | None, 
     token = token or os.environ.get("ANIME_TIKTOK_TOKEN") or secrets.token_urlsafe(9)
     notifier = Notifier(ntfy_topic)
     cfg = load_config(config_path, base_sets)
-    app = create_app(Path(config_path).resolve(), base_sets, token, notifier)
+    web_dir = find_web_dir()
+    app = create_app(Path(config_path).resolve(), base_sets, token, notifier, web_dir)
     url = f"http://127.0.0.1:{port}"
     if tunnel:
         # Le tunnel ne répond qu'une fois le serveur démarré : on le lance juste avant uvicorn.
@@ -508,6 +531,8 @@ def serve(config_path: str, base_sets: list[str], port: int, token: str | None, 
     print("=" * 60)
     print(f"Serveur de contrôle sur le port {port}")
     print(f"Mot de passe : {token}")
+    if web_dir:
+        print(f"Web app (iPhone) servie depuis {web_dir}")
     if ntfy_topic:
         print(f"Sujet ntfy  : {ntfy_topic}  (l'application trouvera l'adresse toute seule)")
     print("=" * 60, flush=True)

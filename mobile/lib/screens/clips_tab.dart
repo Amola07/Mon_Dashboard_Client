@@ -62,13 +62,15 @@ class _ClipsTabState extends State<ClipsTab> {
 
   void _preview(Map<String, dynamic> clip) {
     final state = AppScope.read(context);
-    Navigator.of(context).push(MaterialPageRoute(
-      builder: (_) => PlayerScreen(
-        title: 'Épisode ${clip['episode']} · ${fmtTime(clip['start'])}',
-        uri: state.api!.previewUri(clip['id']),
-        headers: state.api!.authHeaders,
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => PlayerScreen(
+          title: 'Épisode ${clip['episode']} · ${fmtTime(clip['start'])}',
+          uri: state.api!.previewUri(clip['id']),
+          headers: state.api!.authHeaders,
+        ),
       ),
-    ));
+    );
   }
 
   @override
@@ -78,67 +80,73 @@ class _ClipsTabState extends State<ClipsTab> {
     if (_clips.isEmpty) {
       return RefreshIndicator(
         onRefresh: _load,
-        child: ListView(children: [
-          SizedBox(
-            height: 500,
-            child: _loading
-                ? const Center(child: CircularProgressIndicator())
-                : const EmptyState(
-                    icon: Icons.auto_awesome_motion_outlined,
-                    title: 'Aucun extrait proposé',
-                    subtitle: 'Depuis l\'accueil : analysez les épisodes puis lancez « Proposer les extraits ».',
-                  ),
-          ),
-        ]),
+        child: ListView(
+          children: [
+            SizedBox(
+              height: 500,
+              child: _loading
+                  ? const Center(child: CircularProgressIndicator())
+                  : const EmptyState(
+                      icon: Icons.auto_awesome_motion_outlined,
+                      title: 'Aucun extrait proposé',
+                      subtitle: 'Depuis l\'accueil : analysez les épisodes puis lancez « Proposer les extraits ».',
+                    ),
+            ),
+          ],
+        ),
       );
     }
-    return Column(children: [
-      Padding(
-        padding: const EdgeInsets.fromLTRB(16, 12, 8, 4),
-        child: Row(children: [
-          Expanded(child: Text('$kept / ${_clips.length} retenus', style: Theme.of(context).textTheme.titleMedium)),
-          PopupMenuButton<bool>(
-            icon: const Icon(Icons.checklist),
-            onSelected: _setAll,
-            itemBuilder: (_) => const [
-              PopupMenuItem(value: true, child: Text('Tout garder')),
-              PopupMenuItem(value: false, child: Text('Tout écarter')),
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 8, 4),
+          child: Row(
+            children: [
+              Expanded(child: Text('$kept / ${_clips.length} retenus', style: Theme.of(context).textTheme.titleMedium)),
+              PopupMenuButton<bool>(
+                icon: const Icon(Icons.checklist),
+                onSelected: _setAll,
+                itemBuilder: (_) => const [
+                  PopupMenuItem(value: true, child: Text('Tout garder')),
+                  PopupMenuItem(value: false, child: Text('Tout écarter')),
+                ],
+              ),
             ],
           ),
-        ]),
-      ),
-      Expanded(
-        child: RefreshIndicator(
-          onRefresh: _load,
-          child: GridView.builder(
-            padding: const EdgeInsets.fromLTRB(12, 4, 12, 90),
-            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-              maxCrossAxisExtent: 260,
-              mainAxisSpacing: 10,
-              crossAxisSpacing: 10,
-              childAspectRatio: 0.92,
-            ),
-            itemCount: _clips.length,
-            itemBuilder: (_, i) => _ClipCard(
-              clip: _clips[i],
-              thumbUrl: state.api!.thumbUrl(_clips[i]['id']),
-              headers: state.api!.authHeaders,
-              onToggle: (v) => _toggle(_clips[i], v),
-              onPreview: () => _preview(_clips[i]),
+        ),
+        Expanded(
+          child: RefreshIndicator(
+            onRefresh: _load,
+            child: GridView.builder(
+              padding: const EdgeInsets.fromLTRB(12, 4, 12, 90),
+              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                maxCrossAxisExtent: 260,
+                mainAxisSpacing: 10,
+                crossAxisSpacing: 10,
+                childAspectRatio: 0.92,
+              ),
+              itemCount: _clips.length,
+              itemBuilder: (_, i) => _ClipCard(
+                clip: _clips[i],
+                thumbUrl: state.api!.thumbUrl(_clips[i]['id']),
+                headers: state.api!.authHeaders,
+                onToggle: (v) => _toggle(_clips[i], v),
+                onPreview: () => _preview(_clips[i]),
+              ),
             ),
           ),
         ),
-      ),
-      Padding(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-        child: FilledButton.icon(
-          onPressed: kept == 0 || state.jobRunning ? null : () => showMakeSheet(context),
-          icon: const Icon(Icons.movie_creation_outlined),
-          label: Text('Générer $kept vidéo(s)'),
-          style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(50)),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+          child: FilledButton.icon(
+            onPressed: kept == 0 || state.jobRunning ? null : () => showMakeSheet(context),
+            icon: const Icon(Icons.movie_creation_outlined),
+            label: Text('Générer $kept vidéo(s)'),
+            style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(50)),
+          ),
         ),
-      ),
-    ]);
+      ],
+    );
   }
 }
 
@@ -167,43 +175,63 @@ class _ClipCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           side: BorderSide(color: keep ? accent : Colors.transparent, width: 1.5),
         ),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          AspectRatio(
-            aspectRatio: 16 / 9,
-            child: InkWell(
-              onTap: onPreview,
-              child: Stack(fit: StackFit.expand, children: [
-                Image.network(thumbUrl, headers: headers, fit: BoxFit.cover,
-                    errorBuilder: (_, _, _) => Container(color: Colors.black26, child: const Icon(Icons.image_not_supported))),
-                const Center(child: Icon(Icons.play_circle_fill, size: 40, color: Colors.white70)),
-                Positioned(
-                  right: 6,
-                  bottom: 6,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(color: Colors.black87, borderRadius: BorderRadius.circular(4)),
-                    child: Text('${(clip['duration'] as num).round()} s', style: const TextStyle(fontSize: 11)),
-                  ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            AspectRatio(
+              aspectRatio: 16 / 9,
+              child: InkWell(
+                onTap: onPreview,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Image.network(
+                      thumbUrl,
+                      headers: headers,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, _, _) =>
+                          Container(color: Colors.black26, child: const Icon(Icons.image_not_supported)),
+                    ),
+                    const Center(child: Icon(Icons.play_circle_fill, size: 40, color: Colors.white70)),
+                    Positioned(
+                      right: 6,
+                      bottom: 6,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(color: Colors.black87, borderRadius: BorderRadius.circular(4)),
+                        child: Text('${(clip['duration'] as num).round()} s', style: const TextStyle(fontSize: 11)),
+                      ),
+                    ),
+                  ],
                 ),
-              ]),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(10, 8, 4, 0),
-            child: Row(children: [
-              Expanded(
-                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text('Épisode ${clip['episode']}', style: const TextStyle(fontWeight: FontWeight.w600)),
-                  Text('${fmtTime(clip['start'])} → ${fmtTime(clip['end'])}',
-                      style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant)),
-                  Text('score ${(clip['score'] as num).toStringAsFixed(2)}',
-                      style: TextStyle(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant)),
-                ]),
               ),
-              Switch(value: keep, onChanged: onToggle),
-            ]),
-          ),
-        ]),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(10, 8, 4, 0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Épisode ${clip['episode']}', style: const TextStyle(fontWeight: FontWeight.w600)),
+                        Text(
+                          '${fmtTime(clip['start'])} – ${fmtTime(clip['end'])}',
+                          style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                        ),
+                        Text(
+                          'score ${(clip['score'] as num).toStringAsFixed(2)}',
+                          style: TextStyle(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Switch(value: keep, onChanged: onToggle),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

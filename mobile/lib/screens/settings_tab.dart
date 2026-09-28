@@ -101,8 +101,10 @@ class _SettingsTabState extends State<SettingsTab> {
     final state = AppScope.of(context);
     final v = _values;
     final resKey = _resolutions.entries
-        .firstWhere((e) => v != null && e.value[0] == v['render.width'] && e.value[1] == v['render.height'],
-            orElse: () => const MapEntry('', []))
+        .firstWhere(
+          (e) => v != null && e.value[0] == v['render.width'] && e.value[1] == v['render.height'],
+          orElse: () => const MapEntry('', []),
+        )
         .key;
     return ListView(
       padding: const EdgeInsets.all(16),
@@ -110,7 +112,10 @@ class _SettingsTabState extends State<SettingsTab> {
         Text('Rendu', style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),
         if (v == null)
-          const Padding(padding: EdgeInsets.all(24), child: Center(child: CircularProgressIndicator()))
+          const Padding(
+            padding: EdgeInsets.all(24),
+            child: Center(child: CircularProgressIndicator()),
+          )
         else ...[
           DropdownButtonFormField<String>(
             initialValue: resKey.isEmpty ? null : resKey,
@@ -158,9 +163,8 @@ class _SettingsTabState extends State<SettingsTab> {
             title: Text(state.serverUrl, overflow: TextOverflow.ellipsis),
             subtitle: Text(state.ntfyTopic.isEmpty ? 'Adresse fixe' : 'Sujet ntfy : ${state.ntfyTopic}'),
             trailing: const Icon(Icons.edit),
-            onTap: () => Navigator.of(context).push(MaterialPageRoute(
-              builder: (_) => const ConnectScreen(canPop: true),
-            )),
+            onTap: () =>
+                Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ConnectScreen(canPop: true))),
           ),
         ),
         const SizedBox(height: 12),

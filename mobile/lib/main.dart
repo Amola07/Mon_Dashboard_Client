@@ -36,6 +36,12 @@ class AnimeTikTokStudio extends StatelessWidget {
           useMaterial3: true,
           scaffoldBackgroundColor: const Color(0xFF0B0B0B),
           cardTheme: const CardThemeData(color: Color(0xFF1A1A1A), margin: EdgeInsets.zero),
+          filledButtonTheme: FilledButtonThemeData(
+            style: FilledButton.styleFrom(
+              foregroundColor: Colors.white,
+              textStyle: const TextStyle(fontWeight: FontWeight.w600),
+            ),
+          ),
         ),
         home: Builder(
           builder: (context) => AppScope.of(context).configured ? const HomeScreen() : const ConnectScreen(),

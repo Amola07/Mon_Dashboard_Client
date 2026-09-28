@@ -1,11 +1,9 @@
-import 'dart:io';
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:share_plus/share_plus.dart';
 
 import '../app_state.dart';
+import '../platform/video_store.dart';
 import '../ui.dart';
 import 'player_screen.dart';
 
@@ -22,6 +20,7 @@ class _VideosTabState extends State<VideosTab> {
   bool _loading = false;
   String? _signature;
   final Map<String, double> _downloads = {};
+  final VideoStore _store = VideoStore();
 
   Future<void> _load() async {
     final api = AppScope.read(context).api;
@@ -48,33 +47,52 @@ class _VideosTabState extends State<VideosTab> {
     }
   }
 
-  Future<File?> _download(String folder, Map<String, dynamic> video) async {
+  String _key(String folder, Map<String, dynamic> video) => '$folder/${video['name']}';
+
+  /// Télécharge la vidéo (sur le téléphone, ou en mémoire pour la web app). Renvoie true si prête.
+  Future<bool> _prepare(String folder, Map<String, dynamic> video) async {
     final api = AppScope.read(context).api!;
-    final dir = await getApplicationDocumentsDirectory();
-    final dest = File('${dir.path}/$folder/${video['name']}');
-    if (await dest.exists() && await dest.length() == video['size']) return dest;
-    await dest.parent.create(recursive: true);
-    final key = '$folder/${video['name']}';
+    final key = _key(folder, video);
+    if (_store.isReady(key)) return true;
     setState(() => _downloads[key] = 0);
     try {
-      return await api.download(api.outputUri(folder, video['name']), dest,
-          onProgress: (p) => mounted ? setState(() => _downloads[key] = p) : null);
+      await _store.prepare(
+        api,
+        api.outputUri(folder, video['name']),
+        key,
+        video['size'] as int,
+        (p) => mounted ? setState(() => _downloads[key] = p) : null,
+      );
+      return true;
     } catch (e) {
-      if (await dest.exists()) await dest.delete();
       if (mounted) showMessage(context, e, error: true);
-      return null;
+      return false;
     } finally {
       if (mounted) setState(() => _downloads.remove(key));
     }
   }
 
   Future<void> _share(String folder, Map<String, dynamic> video) async {
-    final file = await _download(folder, video);
-    if (file == null || !mounted) return;
+    final key = _key(folder, video);
     final caption = video['caption'] as String? ?? '';
-    if (caption.isNotEmpty) await Clipboard.setData(ClipboardData(text: caption));
-    if (mounted && caption.isNotEmpty) showMessage(context, 'Légende copiée : collez-la dans TikTok');
-    await SharePlus.instance.share(ShareParams(files: [XFile(file.path, mimeType: 'video/mp4')], text: caption));
+    if (!_store.isReady(key)) {
+      final ok = await _prepare(folder, video);
+      if (!ok || !mounted) return;
+      if (shareNeedsSecondTap) {
+        // Safari exige un nouveau toucher pour ouvrir la feuille de partage.
+        setState(() {});
+        showMessage(context, 'Vidéo prête : touchez « Partager » pour l\'envoyer vers TikTok');
+        return;
+      }
+    }
+    // Presse-papiers et partage lancés dans le même toucher (exigence de Safari).
+    if (caption.isNotEmpty) Clipboard.setData(ClipboardData(text: caption));
+    try {
+      await _store.share(key, video['name'], caption);
+      if (mounted && caption.isNotEmpty) showMessage(context, 'Légende copiée : collez-la dans TikTok');
+    } catch (e) {
+      if (mounted) showMessage(context, 'Partage impossible : $e', error: true);
+    }
   }
 
   Future<void> _delete(String folder) async {
@@ -96,14 +114,16 @@ class _VideosTabState extends State<VideosTab> {
 
   void _play(String folder, Map<String, dynamic> video) {
     final api = AppScope.read(context).api!;
-    Navigator.of(context).push(MaterialPageRoute(
-      builder: (_) => PlayerScreen(
-        title: video['name'],
-        uri: api.outputUri(folder, video['name']),
-        headers: api.authHeaders,
-        actions: [IconButton(icon: const Icon(Icons.share), onPressed: () => _share(folder, video))],
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => PlayerScreen(
+          title: video['name'],
+          uri: api.outputUri(folder, video['name']),
+          headers: api.authHeaders,
+          actions: [IconButton(icon: const Icon(Icons.share), onPressed: () => _share(folder, video))],
+        ),
       ),
-    ));
+    );
   }
 
   @override
@@ -111,18 +131,20 @@ class _VideosTabState extends State<VideosTab> {
     if (_outputs.isEmpty) {
       return RefreshIndicator(
         onRefresh: _load,
-        child: ListView(children: [
-          SizedBox(
-            height: 500,
-            child: _loading
-                ? const Center(child: CircularProgressIndicator())
-                : const EmptyState(
-                    icon: Icons.video_library_outlined,
-                    title: 'Pas encore de vidéos',
-                    subtitle: 'Validez des extraits puis lancez « Générer les vidéos ».',
-                  ),
-          ),
-        ]),
+        child: ListView(
+          children: [
+            SizedBox(
+              height: 500,
+              child: _loading
+                  ? const Center(child: CircularProgressIndicator())
+                  : const EmptyState(
+                      icon: Icons.video_library_outlined,
+                      title: 'Pas encore de vidéos',
+                      subtitle: 'Validez des extraits puis lancez « Générer les vidéos ».',
+                    ),
+            ),
+          ],
+        ),
       );
     }
     return RefreshIndicator(
@@ -133,17 +155,19 @@ class _VideosTabState extends State<VideosTab> {
           for (final out in _outputs) ...[
             Padding(
               padding: const EdgeInsets.fromLTRB(4, 12, 0, 4),
-              child: Row(children: [
-                Chip(label: Text(out['style']), visualDensity: VisualDensity.compact),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    _date(out['created']),
-                    style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+              child: Row(
+                children: [
+                  Chip(label: Text(out['style']), visualDensity: VisualDensity.compact),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _date(out['created']),
+                      style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+                    ),
                   ),
-                ),
-                IconButton(icon: const Icon(Icons.delete_outline), onPressed: () => _delete(out['folder'])),
-              ]),
+                  IconButton(icon: const Icon(Icons.delete_outline), onPressed: () => _delete(out['folder'])),
+                ],
+              ),
             ),
             for (final v in out['videos']) _videoTile(out['folder'], Map<String, dynamic>.from(v)),
           ],
@@ -158,41 +182,64 @@ class _VideosTabState extends State<VideosTab> {
       margin: const EdgeInsets.only(bottom: 8),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(4, 4, 4, 8),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          ListTile(
-            leading: const CircleAvatar(backgroundColor: accent, foregroundColor: Colors.white, child: Icon(Icons.play_arrow)),
-            title: Text(v['name'], overflow: TextOverflow.ellipsis),
-            subtitle: Text(fmtSize(v['size'])),
-            onTap: () => _play(folder, v),
-          ),
-          if ((v['caption'] as String).isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Text(v['caption'], maxLines: 3, overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ListTile(
+              leading: const CircleAvatar(
+                backgroundColor: accent,
+                foregroundColor: Colors.white,
+                child: Icon(Icons.play_arrow),
+              ),
+              title: Text(v['name'], overflow: TextOverflow.ellipsis),
+              subtitle: Text(fmtSize(v['size'])),
+              onTap: () => _play(folder, v),
             ),
-          if (progress != null)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-              child: LinearProgressIndicator(value: progress > 0 ? progress : null),
+            if ((v['caption'] as String).isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Text(
+                  v['caption'],
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                ),
+              ),
+            if (progress != null)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                child: LinearProgressIndicator(value: progress > 0 ? progress : null),
+              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton.icon(
+                  onPressed: () async {
+                    await Clipboard.setData(ClipboardData(text: v['caption'] ?? ''));
+                    if (mounted) showMessage(context, 'Légende copiée');
+                  },
+                  icon: const Icon(Icons.copy, size: 18),
+                  label: const Text('Légende'),
+                ),
+                if (kIsWeb)
+                  IconButton(
+                    tooltip: 'Ouvrir dans Safari',
+                    onPressed: () => openInBrowser(AppScope.read(context).api!.outputUri(folder, v['name'])),
+                    icon: const Icon(Icons.open_in_new, size: 20),
+                  ),
+                FilledButton.tonalIcon(
+                  onPressed: progress != null ? null : () => _share(folder, v),
+                  icon: Icon(
+                    shareNeedsSecondTap && !_store.isReady(_key(folder, v)) ? Icons.download : Icons.ios_share,
+                    size: 18,
+                  ),
+                  label: Text(shareNeedsSecondTap && !_store.isReady(_key(folder, v)) ? 'Préparer' : 'Partager'),
+                ),
+                const SizedBox(width: 8),
+              ],
             ),
-          Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-            TextButton.icon(
-              onPressed: () async {
-                await Clipboard.setData(ClipboardData(text: v['caption'] ?? ''));
-                if (mounted) showMessage(context, 'Légende copiée');
-              },
-              icon: const Icon(Icons.copy, size: 18),
-              label: const Text('Légende'),
-            ),
-            FilledButton.tonalIcon(
-              onPressed: progress != null ? null : () => _share(folder, v),
-              icon: const Icon(Icons.ios_share, size: 18),
-              label: const Text('Partager'),
-            ),
-            const SizedBox(width: 8),
-          ]),
-        ]),
+          ],
+        ),
       ),
     );
   }

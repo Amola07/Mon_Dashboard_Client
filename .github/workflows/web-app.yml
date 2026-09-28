@@ -1,0 +1,55 @@
+# Compile la web app (version iPhone / Safari) et la publie sur la branche `web-build`.
+# Cette branche ne contient que le site compilé, prêt à servir :
+#   - par un hébergeur gratuit relié au dépôt (Cloudflare Pages ou Netlify, branche `web-build`,
+#     sans commande de build) -> adresse fixe à ajouter à l'écran d'accueil de l'iPhone ;
+#   - ou directement par le serveur du notebook (cloné dans `webapp/`).
+name: Web app (iPhone)
+
+on:
+  push:
+    branches-ignore:
+      - web-build
+    paths:
+      - "mobile/**"
+      - ".github/workflows/web-app.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: web-build
+  cancel-in-progress: true
+
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.47.5
+          cache: true
+
+      - run: flutter pub get
+      - run: flutter analyze
+      - run: flutter test
+
+      - name: Compilation web
+        run: |
+          flutter build web --release --no-web-resources-cdn
+          echo "${{ github.sha }}" > build/web/commit.txt
+
+      - name: Publication sur la branche web-build
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: web-build
+          publish_dir: mobile/build/web
+          force_orphan: true
+          commit_message: "Web app compilée depuis ${{ github.sha }}"

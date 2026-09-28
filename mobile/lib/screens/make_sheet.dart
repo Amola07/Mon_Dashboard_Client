@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../app_state.dart';
 import '../ui.dart';
+import '../upload.dart';
 
 const _styleInfo = {
   'brut': ('Brut', 'Une vidéo par extrait, moment fort en accroche'),
@@ -52,16 +53,14 @@ class _MakeSheetState extends State<_MakeSheet> {
   }
 
   Future<void> _uploadMusic() async {
-    final files = await FilePicker.pickFiles(type: FileType.audio);
-    if (files.isEmpty || files.first.path == null || !mounted) return;
     final api = AppScope.read(context).api!;
     setState(() => _busy = true);
-    await guard(context, () => api.upload('music', files.first.path!), success: 'Musique envoyée');
+    final name = await pickAndUpload(context, api, 'music', FileType.audio);
     await _loadMusic();
     if (mounted) {
       setState(() {
         _busy = false;
-        _music = files.first.name;
+        if (name != null) _music = name;
       });
     }
   }
@@ -89,62 +88,80 @@ class _MakeSheetState extends State<_MakeSheet> {
     return Padding(
       padding: EdgeInsets.fromLTRB(20, 0, 20, 20 + MediaQuery.of(context).viewInsets.bottom),
       child: SingleChildScrollView(
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
-          Text('Générer les vidéos', style: Theme.of(context).textTheme.titleLarge),
-          const SizedBox(height: 4),
-          Text('$kept extrait(s) retenu(s) · ${render?['width']}×${render?['height']}',
-              style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
-          const SizedBox(height: 16),
-          const Text('Style du jour'),
-          const SizedBox(height: 8),
-          for (final s in styles)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: _StyleTile(
-                name: _styleInfo[s]?.$1 ?? s,
-                description: _styleInfo[s]?.$2 ?? 'Style personnalisé (config.yaml)',
-                selected: _style == s,
-                onTap: () => setState(() => _style = s),
-              ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('Générer les vidéos', style: Theme.of(context).textTheme.titleLarge),
+            const SizedBox(height: 4),
+            Text(
+              '$kept extrait(s) retenu(s) · ${render?['width']}×${render?['height']}',
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
             ),
-          const SizedBox(height: 8),
-          const Text('Images par seconde'),
-          const SizedBox(height: 8),
-          SegmentedButton<int>(
-            segments: const [
-              ButtonSegment(value: 60, label: Text('60')),
-              ButtonSegment(value: 120, label: Text('120')),
-              ButtonSegment(value: 240, label: Text('240')),
-            ],
-            selected: {_fps},
-            onSelectionChanged: (v) => setState(() => _fps = v.first),
-          ),
-          const SizedBox(height: 16),
-          Row(children: [
-            const Expanded(child: Text('Musique')),
-            TextButton.icon(onPressed: _busy ? null : _uploadMusic, icon: const Icon(Icons.upload), label: const Text('Envoyer')),
-          ]),
-          DropdownButtonFormField<String?>(
-            initialValue: _tracks.contains(_music) ? _music : null,
-            isExpanded: true,
-            decoration: const InputDecoration(border: OutlineInputBorder(), isDense: true),
-            items: [
-              const DropdownMenuItem(value: null, child: Text('Au hasard parmi les musiques du serveur')),
-              for (final t in _tracks) DropdownMenuItem(value: t, child: Text(t, overflow: TextOverflow.ellipsis)),
-            ],
-            onChanged: (v) => setState(() => _music = v),
-          ),
-          const SizedBox(height: 4),
-          Text('Utilisée par les styles rythmés (hype).',
-              style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant)),
-          const SizedBox(height: 20),
-          FilledButton.icon(
-            onPressed: _busy || kept == 0 || state.jobRunning ? null : _start,
-            icon: const Icon(Icons.auto_awesome),
-            label: Text(state.jobRunning ? 'Une tâche est déjà en cours' : 'Lancer le rendu'),
-            style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(52)),
-          ),
-        ]),
+            const SizedBox(height: 16),
+            const Text('Style du jour'),
+            const SizedBox(height: 8),
+            for (final s in styles)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: _StyleTile(
+                  name: _styleInfo[s]?.$1 ?? s,
+                  description: _styleInfo[s]?.$2 ?? 'Style personnalisé (config.yaml)',
+                  selected: _style == s,
+                  onTap: () => setState(() => _style = s),
+                ),
+              ),
+            const SizedBox(height: 8),
+            const Text('Images par seconde'),
+            const SizedBox(height: 8),
+            SegmentedButton<int>(
+              segments: const [
+                ButtonSegment(value: 60, label: Text('60')),
+                ButtonSegment(value: 120, label: Text('120')),
+                ButtonSegment(value: 240, label: Text('240')),
+              ],
+              selected: {_fps},
+              onSelectionChanged: (v) => setState(() => _fps = v.first),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                const Expanded(child: Text('Musique')),
+                TextButton.icon(
+                  onPressed: _busy ? null : _uploadMusic,
+                  icon: const Icon(Icons.upload),
+                  label: const Text('Envoyer'),
+                ),
+              ],
+            ),
+            DropdownButtonFormField<String?>(
+              initialValue: _tracks.contains(_music) ? _music : null,
+              isExpanded: true,
+              decoration: const InputDecoration(border: OutlineInputBorder(), isDense: true),
+              items: [
+                const DropdownMenuItem(value: null, child: Text('Au hasard (musiques du serveur)')),
+                for (final t in _tracks)
+                  DropdownMenuItem(
+                    value: t,
+                    child: Text(t, overflow: TextOverflow.ellipsis),
+                  ),
+              ],
+              onChanged: (v) => setState(() => _music = v),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Utilisée par les styles rythmés (hype).',
+              style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
+            ),
+            const SizedBox(height: 20),
+            FilledButton.icon(
+              onPressed: _busy || kept == 0 || state.jobRunning ? null : _start,
+              icon: const Icon(Icons.auto_awesome),
+              label: Text(state.jobRunning ? 'Une tâche est déjà en cours' : 'Lancer le rendu'),
+              style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(52)),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -169,16 +186,24 @@ class _StyleTile extends StatelessWidget {
         onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.all(12),
-          child: Row(children: [
-            Icon(selected ? Icons.radio_button_checked : Icons.radio_button_off, color: selected ? accent : null),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(name, style: const TextStyle(fontWeight: FontWeight.w600)),
-                Text(description, style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant)),
-              ]),
-            ),
-          ]),
+          child: Row(
+            children: [
+              Icon(selected ? Icons.radio_button_checked : Icons.radio_button_off, color: selected ? accent : null),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(name, style: const TextStyle(fontWeight: FontWeight.w600)),
+                    Text(
+                      description,
+                      style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

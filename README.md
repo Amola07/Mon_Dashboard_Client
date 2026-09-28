@@ -35,7 +35,24 @@ L'application Android **Anime TikTok Studio** (`mobile/`, Flutter) sert de tél�
 Au moment de générer, on choisit le style du jour, le fps (60/120/240) et la musique (on peut en envoyer
 depuis le téléphone).
 
-### Installer l'application
+### iPhone : web app sur l'écran d'accueil (gratuit)
+La même application existe en version web. Chaque modification de `mobile/` la compile (workflow
+« Web app (iPhone) ») et la publie sur la branche `web-build`. Deux façons de l'ouvrir :
+
+- **Adresse fixe (recommandé, une seule fois)** : créez un compte gratuit sur
+  [Cloudflare Pages](https://pages.cloudflare.com) → *Create a project → Connect to Git* → choisissez ce
+  dépôt → branche de production **`web-build`**, *Framework preset* : None, **commande de build vide**,
+  dossier de sortie **`/`**. Vous obtenez une adresse `https://<nom>.pages.dev`, mise à jour automatiquement.
+  Netlify fonctionne pareil (branche `web-build`, pas de commande de build, dossier `.`).
+- **Sans compte** : la télécommande du notebook sert aussi la web app, à l'adresse publique affichée par la
+  cellule (`https://xxxx.trycloudflare.com`). Cette adresse change à chaque session.
+
+Sur l'iPhone : ouvrez l'adresse dans **Safari** → bouton Partager → **Sur l'écran d'accueil**. L'app s'ouvre
+ensuite en plein écran. Pour partager une vidéo vers TikTok : « Préparer » (téléchargement), puis
+« Partager » (Safari exige ce second toucher). L'icône ↗ ouvre la vidéo dans Safari (lecture, enregistrement
+dans Photos).
+
+### Android : installer l'APK
 Chaque modification de `mobile/` poussée sur GitHub déclenche le workflow « Application Android », qui
 compile l'APK et le publie dans une Release. Sur le téléphone, ouvrez :
 

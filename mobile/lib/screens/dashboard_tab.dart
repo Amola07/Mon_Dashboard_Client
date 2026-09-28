@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../app_state.dart';
 import '../ui.dart';
+import '../upload.dart';
 import 'make_sheet.dart';
 
 /// Accueil : état du serveur, tâche en cours, et les 3 grandes actions du pipeline.
@@ -49,8 +50,11 @@ class _DashboardTabState extends State<DashboardTab> {
 
   Future<void> _start(String command, {Map<String, dynamic> extra = const {}}) async {
     final state = AppScope.read(context);
-    await guard(context, () => state.api!.startJob({'command': command, ...extra}),
-        success: '${jobLabels[command]} lancée');
+    await guard(
+      context,
+      () => state.api!.startJob({'command': command, ...extra}),
+      success: '${jobLabels[command]} lancée',
+    );
     await state.refresh();
   }
 
@@ -59,20 +63,23 @@ class _DashboardTabState extends State<DashboardTab> {
       context: context,
       showDragHandle: true,
       builder: (ctx) => SafeArea(
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-          ListTile(
-            leading: const Icon(Icons.link),
-            title: const Text('Depuis un lien direct'),
-            subtitle: const Text('Le serveur télécharge lui-même (rapide)'),
-            onTap: () => Navigator.pop(ctx, 'url'),
-          ),
-          ListTile(
-            leading: const Icon(Icons.phone_android),
-            title: const Text('Depuis le téléphone'),
-            subtitle: const Text('Envoi par votre connexion (lent pour de gros fichiers)'),
-            onTap: () => Navigator.pop(ctx, 'file'),
-          ),
-        ]),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.link),
+              title: const Text('Depuis un lien direct'),
+              subtitle: const Text('Le serveur télécharge lui-même (rapide)'),
+              onTap: () => Navigator.pop(ctx, 'url'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.phone_android),
+              title: const Text('Depuis le téléphone'),
+              subtitle: const Text('Envoi par votre connexion (lent pour de gros fichiers)'),
+              onTap: () => Navigator.pop(ctx, 'file'),
+            ),
+          ],
+        ),
       ),
     );
     if (!mounted || choice == null) return;
@@ -96,11 +103,8 @@ class _DashboardTabState extends State<DashboardTab> {
       );
       if (url != null && url.isNotEmpty) await _start('download', extra: {'url': url});
     } else {
-      final files = await FilePicker.pickFiles(type: FileType.video);
-      if (files.isEmpty || files.first.path == null || !mounted) return;
-      showMessage(context, 'Envoi de ${files.first.name}…');
-      await guard(context, () => api.upload('episodes', files.first.path!), success: 'Épisode envoyé');
-      _loadDetails();
+      await pickAndUpload(context, api, 'episodes', FileType.video);
+      if (mounted) _loadDetails();
     }
   }
 
@@ -119,15 +123,20 @@ class _DashboardTabState extends State<DashboardTab> {
       child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Row(children: [
-            const Icon(Icons.movie_filter_rounded, color: accent),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(st?['anime']?.toString().isNotEmpty == true ? st!['anime'] : 'Anime TikTok Studio',
-                  style: Theme.of(context).textTheme.titleLarge, overflow: TextOverflow.ellipsis),
-            ),
-            _ConnectionDot(ok: state.error == null && st != null),
-          ]),
+          Row(
+            children: [
+              const Icon(Icons.movie_filter_rounded, color: accent),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  st?['anime']?.toString().isNotEmpty == true ? st!['anime'] : 'Anime TikTok Studio',
+                  style: Theme.of(context).textTheme.titleLarge,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              _ConnectionDot(ok: state.error == null && st != null),
+            ],
+          ),
           if (state.error != null) ...[
             const SizedBox(height: 12),
             Card(
@@ -141,24 +150,34 @@ class _DashboardTabState extends State<DashboardTab> {
           ],
           const SizedBox(height: 16),
           if (st != null)
-            Row(children: [
-              _Stat(label: 'Épisodes analysés', value: '${st['analyzed']}/${st['episodes']}'),
-              const SizedBox(width: 8),
-              _Stat(label: 'Extraits retenus', value: '${st['kept']}/${st['clips']}'),
-              const SizedBox(width: 8),
-              _Stat(label: 'Sortie', value: '${st['render']['height'] >= 3840 ? '4K' : '${st['render']['height']}p'} ${st['render']['fps']}'),
-            ]),
+            IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _Stat(label: 'Épisodes prêts', value: '${st['analyzed']}/${st['episodes']}'),
+                  const SizedBox(width: 8),
+                  _Stat(label: 'Extraits retenus', value: '${st['kept']}/${st['clips']}'),
+                  const SizedBox(width: 8),
+                  _Stat(
+                    label: 'Sortie',
+                    value:
+                        '${st['render']['height'] >= 3840 ? '4K' : '${st['render']['height']}p'} ${st['render']['fps']}',
+                  ),
+                ],
+              ),
+            ),
           const SizedBox(height: 16),
-          if (job != null) _JobCard(
-            job: job,
-            showLog: _showLog,
-            log: _log,
-            onToggleLog: () {
-              setState(() => _showLog = !_showLog);
-              _loadDetails();
-            },
-            onCancel: () => guard(context, () => state.api!.cancelJob(), success: 'Annulation demandée'),
-          ),
+          if (job != null)
+            _JobCard(
+              job: job,
+              showLog: _showLog,
+              log: _log,
+              onToggleLog: () {
+                setState(() => _showLog = !_showLog);
+                _loadDetails();
+              },
+              onCancel: () => guard(context, () => state.api!.cancelJob(), success: 'Annulation demandée'),
+            ),
           const SizedBox(height: 16),
           _ActionTile(
             step: 1,
@@ -191,15 +210,17 @@ class _DashboardTabState extends State<DashboardTab> {
             trailing: TextButton(onPressed: () => widget.onOpenTab(2), child: const Text('Vidéos')),
           ),
           const SizedBox(height: 20),
-          Row(children: [
-            Text('Épisodes', style: Theme.of(context).textTheme.titleMedium),
-            const Spacer(),
-            TextButton.icon(
-              onPressed: running ? null : _addEpisode,
-              icon: const Icon(Icons.add),
-              label: const Text('Ajouter'),
-            ),
-          ]),
+          Row(
+            children: [
+              Text('Épisodes', style: Theme.of(context).textTheme.titleMedium),
+              const Spacer(),
+              TextButton.icon(
+                onPressed: running ? null : _addEpisode,
+                icon: const Icon(Icons.add),
+                label: const Text('Ajouter'),
+              ),
+            ],
+          ),
           if (_episodes.isEmpty)
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 12),
@@ -208,15 +229,19 @@ class _DashboardTabState extends State<DashboardTab> {
           for (final e in _episodes)
             ListTile(
               contentPadding: EdgeInsets.zero,
-              leading: Icon(e['analyzed'] == true ? Icons.check_circle : Icons.radio_button_unchecked,
-                  color: e['analyzed'] == true ? accent2 : null),
+              leading: Icon(
+                e['analyzed'] == true ? Icons.check_circle : Icons.radio_button_unchecked,
+                color: e['analyzed'] == true ? accent2 : null,
+              ),
               title: Text(e['name'], overflow: TextOverflow.ellipsis),
-              subtitle: Text([
-                fmtSize(e['size']),
-                if (e['duration'] != null) fmtTime(e['duration']),
-                if ((e['excluded'] as List).isNotEmpty)
-                  'ignoré : ${(e['excluded'] as List).map((r) => '${fmtTime(r[0])}–${fmtTime(r[1])}').join(', ')}',
-              ].join(' · ')),
+              subtitle: Text(
+                [
+                  fmtSize(e['size']),
+                  if (e['duration'] != null) fmtTime(e['duration']),
+                  if ((e['excluded'] as List).isNotEmpty)
+                    'ignoré : ${(e['excluded'] as List).map((r) => '${fmtTime(r[0])}–${fmtTime(r[1])}').join(', ')}',
+                ].join(' · '),
+              ),
             ),
         ],
       ),
@@ -229,11 +254,17 @@ class _ConnectionDot extends StatelessWidget {
   final bool ok;
 
   @override
-  Widget build(BuildContext context) => Row(children: [
-        Container(width: 10, height: 10, decoration: BoxDecoration(shape: BoxShape.circle, color: ok ? Colors.greenAccent : Colors.redAccent)),
-        const SizedBox(width: 6),
-        Text(ok ? 'Connecté' : 'Hors ligne', style: const TextStyle(fontSize: 12)),
-      ]);
+  Widget build(BuildContext context) => Row(
+    children: [
+      Container(
+        width: 10,
+        height: 10,
+        decoration: BoxDecoration(shape: BoxShape.circle, color: ok ? Colors.greenAccent : Colors.redAccent),
+      ),
+      const SizedBox(width: 6),
+      Text(ok ? 'Connecté' : 'Hors ligne', style: const TextStyle(fontSize: 12)),
+    ],
+  );
 }
 
 class _Stat extends StatelessWidget {
@@ -242,17 +273,20 @@ class _Stat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Expanded(
-        child: Card(
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(value, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 2),
-              Text(label, style: TextStyle(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant)),
-            ]),
-          ),
+    child: Card(
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(value, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 2),
+            Text(label, style: TextStyle(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+          ],
         ),
-      );
+      ),
+    ),
+  );
 }
 
 class _JobCard extends StatelessWidget {
@@ -287,42 +321,59 @@ class _JobCard extends StatelessWidget {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(14),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Row(children: [
-            Expanded(child: Text(jobLabels[job['command']] ?? job['command'], style: const TextStyle(fontWeight: FontWeight.w600))),
-            Text('${statusLabels[status] ?? status} · $minutes min', style: TextStyle(color: color, fontSize: 12)),
-          ]),
-          const SizedBox(height: 10),
-          LinearProgressIndicator(
-            value: running ? progress : 1,
-            color: color,
-            minHeight: 6,
-            borderRadius: BorderRadius.circular(3),
-          ),
-          const SizedBox(height: 8),
-          Text(job['step'] ?? '', maxLines: 2, overflow: TextOverflow.ellipsis,
-              style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant)),
-          Row(children: [
-            TextButton.icon(
-              onPressed: onToggleLog,
-              icon: Icon(showLog ? Icons.expand_less : Icons.terminal),
-              label: Text(showLog ? 'Masquer le journal' : 'Journal'),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    jobLabels[job['command']] ?? job['command'],
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                ),
+                Text('${statusLabels[status] ?? status} · $minutes min', style: TextStyle(color: color, fontSize: 12)),
+              ],
             ),
-            const Spacer(),
-            if (running) TextButton.icon(onPressed: onCancel, icon: const Icon(Icons.stop), label: const Text('Arrêter')),
-          ]),
-          if (showLog)
-            Container(
-              width: double.infinity,
-              constraints: const BoxConstraints(maxHeight: 260),
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(8)),
-              child: SingleChildScrollView(
-                reverse: true,
-                child: Text(log.join('\n'), style: const TextStyle(fontFamily: 'monospace', fontSize: 11)),
+            const SizedBox(height: 10),
+            LinearProgressIndicator(
+              value: running ? progress : 1,
+              color: color,
+              minHeight: 6,
+              borderRadius: BorderRadius.circular(3),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              job['step'] ?? '',
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
+            ),
+            Row(
+              children: [
+                TextButton.icon(
+                  onPressed: onToggleLog,
+                  icon: Icon(showLog ? Icons.expand_less : Icons.terminal),
+                  label: Text(showLog ? 'Masquer le journal' : 'Journal'),
+                ),
+                const Spacer(),
+                if (running)
+                  TextButton.icon(onPressed: onCancel, icon: const Icon(Icons.stop), label: const Text('Arrêter')),
+              ],
+            ),
+            if (showLog)
+              Container(
+                width: double.infinity,
+                constraints: const BoxConstraints(maxHeight: 260),
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(8)),
+                child: SingleChildScrollView(
+                  reverse: true,
+                  child: Text(log.join('\n'), style: const TextStyle(fontFamily: 'monospace', fontSize: 11)),
+                ),
               ),
-            ),
-        ]),
+          ],
+        ),
       ),
     );
   }
