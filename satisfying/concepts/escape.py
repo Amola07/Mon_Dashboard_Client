@@ -72,20 +72,24 @@ def render(ctx):
     rings = [(float(Rk), float(rng.uniform(0, 2 * math.pi)), base_w * (1 if i % 2 else -1) * rng.uniform(0.8, 1.3))
              for i, Rk in enumerate(radii)]
     ball_r, gravity, speed_min = float(rng.uniform(11, 16)), float(rng.uniform(900, 1300)), float(rng.uniform(650, 850))
-    seed = int(rng.integers(1 << 30))
     goal = ctx.seconds - 3.2
     best = None
-    for gap in np.linspace(0.18, 0.9, 30):
-        fr, bo, br = _simulate(rings, gap, cx, cy, ball_r, gravity, speed_min, seed, 90 * FPS)
-        if len(br) < n:
-            if best is None:
-                best = (1e9, gap, fr, bo, br)
-            continue
-        d = br[-1][0]
-        score = abs(d - goal) + (100 if d < goal - 3 else 0)
-        if best is None or score < best[0]:
-            best = (score, gap, fr, bo, br)
+    for attempt in range(6):   # la trajectoire est chaotique : on essaie plusieurs départs et ouvertures
+        seed = int(rng.integers(1 << 30))
+        for gap in np.linspace(0.07, 0.9, 42):
+            fr, bo, br = _simulate(rings, gap, cx, cy, ball_r, gravity, speed_min, seed, 90 * FPS)
+            if len(br) < n:
+                if best is None:
+                    best = (1e9, gap, fr, bo, br)
+                continue
+            d = br[-1][0]
+            score = abs(d - goal) + (100 if d < goal - 3 else 0)
+            if best is None or score < best[0]:
+                best = (score, gap, fr, bo, br)
+        if best[0] < 1.5:
+            break
     _, gap, frames, bounces, breaks = best
+    print(f"  évasion en {breaks[-1][0] if breaks else 0:.1f} s (ouverture {math.degrees(gap):.0f}°)", flush=True)
     n = len(breaks)                       # (cas extrême : la balle n'est pas sortie de tous les anneaux)
     rings = rings[:max(n, 1)]
     width = float(rng.uniform(12, 18))

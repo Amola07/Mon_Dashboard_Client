@@ -13,8 +13,8 @@ SUBSTEPS = 8
 def render(ctx):
     rng, pal, pt, v = ctx.rng, ctx.pal, ctx.painter, ctx.video
     cx, cy, R = W / 2, H / 2 - 60, float(rng.uniform(420, 460))
-    r = float(rng.uniform(13, 19))
-    cap = int(rng.integers(70, 130))
+    r = float(rng.uniform(22, 30))
+    cap = int(R * R / (r * r) * rng.uniform(0.5, 0.62))  # le cercle finit bien rempli
     gravity = float(rng.uniform(1000, 1500))
     speed_min = float(rng.uniform(650, 850))
     start = np.array([cx, cy - R * 0.5])
