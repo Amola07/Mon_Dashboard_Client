@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Données et résultats (lourds, propres à chaque machine)
+input/
+work/
+output/
+tools/

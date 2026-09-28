@@ -1,0 +1,86 @@
+# Configuration du pipeline anime -> TikTok.
+# Toute valeur peut être surchargée en ligne de commande :
+#   python -m anime_tiktok run --set paths.episodes=/kaggle/input/mon-anime --set render.fps=60
+
+paths:
+  episodes: input/episodes   # dossier contenant les épisodes (.mkv, .mp4, .webm…), triés par nom
+  music: input/music         # musiques pour le style "hype" (.mp3, .wav, .m4a…)
+  work: work                 # fichiers intermédiaires (analyse, sélection, extraits rendus)
+  tmp: work/tmp              # images temporaires pendant le rendu (mettre sur un disque local rapide)
+  output: output             # vidéos finales prêtes à publier
+  tools: tools               # binaires et modèles téléchargés par scripts/setup_tools.sh
+
+analysis:
+  sample_fps: 8              # images/s analysées (en basse résolution, c'est rapide)
+  hop_seconds: 0.5           # pas temporel des mesures (son, mouvement)
+  scene_threshold: 0.35      # sensibilité de détection des changements de plan (plus bas = plus de plans)
+  min_scene_seconds: 0.5
+  skip_start: 0              # secondes ignorées au début de chaque épisode
+  skip_end: 0                # secondes ignorées à la fin de chaque épisode
+  detect_op_ed: true         # repère et ignore opening / ending / récap (passages identiques entre épisodes)
+  op_ed_min_seconds: 40      # durée minimale d'un passage répété pour être considéré comme OP/ED
+  op_ed_similarity: 0.7        # ressemblance minimale (0-1) de l'évolution du son
+
+selection:
+  clips_total: 24            # nombre d'extraits proposés au total
+  max_per_episode: 3
+  min_seconds: 12
+  max_seconds: 45
+  weights:                   # importance de chaque critère dans le score "moment intéressant"
+    loudness: 1.0            # volume sonore (cris, explosions, musique qui monte)
+    onset: 1.0               # attaques sonores (impacts, coups, percussions)
+    motion: 1.2              # quantité de mouvement à l'image
+    cut_rate: 0.8            # montage rapide (plans courts = action)
+    peak: 0.6                # bonus pour le point culminant de l'extrait
+
+render:
+  width: 2160                # 2160x3840 = 4K vertical (9:16)
+  height: 3840
+  fps: 120                   # 120 ou 240
+  dedupe: true               # retire les images dupliquées de l'animé avant interpolation (mouvement bien plus fluide)
+  interpolation: auto        # auto | rife | ffmpeg | none
+  upscaler: auto             # auto | torch | ncnn | lanczos
+  torch_batch: 4
+  ncnn_chunk: 48             # images traitées par lot par realesrgan-ncnn (limite l'espace disque)
+  encoder: auto              # auto | hevc_nvenc | libx265 | h264_nvenc | libx264
+  quality: 16                # CRF / CQ : plus bas = meilleure qualité, fichiers plus lourds
+  intermediate_quality: 12   # qualité des extraits rendus avant montage
+  audio_bitrate: 256k
+
+tools:
+  rife_ncnn: rife-ncnn-vulkan/rife-ncnn-vulkan            # relatif à paths.tools
+  rife_model: rife-v4.6
+  realesrgan_ncnn: realesrgan-ncnn-vulkan/realesrgan-ncnn-vulkan
+  realesrgan_model: realesr-animevideov3
+  torch_model: models/realesr-animevideov3.pth
+  anime_face_cascade: models/lbpcascade_animeface.xml
+
+# Styles de montage, choisis au lancement avec --style.
+# reframe : crop (recadrage vertical qui suit l'action) | blur (image entière sur fond flouté)
+# layout  : single (une vidéo par extrait) | beats (plusieurs extraits coupés sur les temps d'une musique)
+styles:
+  brut:
+    reframe: crop
+    layout: single
+    hook_seconds: 1.5        # montre le moment fort en ouverture avant de lancer l'extrait
+    flash: true              # flash blanc aux transitions
+    fade: 0
+  hype:
+    reframe: crop
+    layout: beats
+    clips_per_video: 8
+    video_seconds: 30
+    beats_per_cut: 2         # une coupe tous les N temps
+    punch_zoom: 0.12         # zoom "coup de poing" au début de chaque coupe (0 = désactivé)
+    flash: true
+    original_audio: 0.0      # volume du son de l'animé sous la musique (0 à 1)
+  cinematique:
+    reframe: blur
+    layout: single
+    hook_seconds: 0
+    flash: false
+    fade: 0.6
+
+delivery:
+  anime: "Mon Anime"
+  caption: "{anime} — épisode {episode} 🔥\n#anime #{anime_tag} #animeedit #fyp #pourtoi #4k #{fps}fps"
