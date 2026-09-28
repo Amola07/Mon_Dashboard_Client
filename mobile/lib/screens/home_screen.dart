@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'clips_tab.dart';
 import 'dashboard_tab.dart';
+import 'presentations_tab.dart';
 import 'settings_tab.dart';
 import 'videos_tab.dart';
 
@@ -19,7 +20,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final tabs = [DashboardTab(onOpenTab: _goTo), const ClipsTab(), const VideosTab(), const SettingsTab()];
+    final tabs = [
+      DashboardTab(onOpenTab: _goTo),
+      const ClipsTab(),
+      const PresentationsTab(),
+      const VideosTab(),
+      const SettingsTab(),
+    ];
     return Scaffold(
       body: SafeArea(
         child: IndexedStack(index: _index, children: tabs),
@@ -37,6 +44,11 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: Icon(Icons.grid_view_outlined),
             selectedIcon: Icon(Icons.grid_view_rounded),
             label: 'Extraits',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.record_voice_over_outlined),
+            selectedIcon: Icon(Icons.record_voice_over),
+            label: 'Narration',
           ),
           NavigationDestination(
             icon: Icon(Icons.video_library_outlined),

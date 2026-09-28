@@ -232,7 +232,7 @@ class _DashboardTabState extends State<DashboardTab> {
             subtitle: 'Style du jour, 4K, 120/240 fps',
             enabled: !running && (st?['kept'] ?? 0) > 0,
             onTap: () => showMakeSheet(context),
-            trailing: TextButton(onPressed: () => widget.onOpenTab(2), child: const Text('Vidéos')),
+            trailing: TextButton(onPressed: () => widget.onOpenTab(3), child: const Text('Vidéos')),
           ),
           const SizedBox(height: 20),
           Row(

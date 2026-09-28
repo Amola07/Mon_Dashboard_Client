@@ -20,10 +20,10 @@ fetch() {  # fetch URL DEST
 }
 
 if command -v apt-get >/dev/null 2>&1; then
-  echo "Paquets système (Vulkan, unzip)…"
+  echo "Paquets système (Vulkan, unzip, espeak-ng pour la voix, polices)…"
   SUDO=""; [ "$(id -u)" -ne 0 ] && SUDO="sudo"
   $SUDO apt-get -qq update >/dev/null 2>&1 || true
-  $SUDO apt-get -qq install -y libvulkan1 libgomp1 unzip xz-utils >/dev/null 2>&1 || true
+  $SUDO apt-get -qq install -y libvulkan1 libgomp1 unzip xz-utils espeak-ng fonts-dejavu-core >/dev/null 2>&1 || true
 fi
 
 echo "ffmpeg…"

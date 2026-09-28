@@ -19,6 +19,8 @@ const jobLabels = {
   'select': 'Sélection des extraits',
   'make': 'Rendu et montage',
   'download': 'Téléchargement',
+  'present-plan': 'Préparation de la présentation',
+  'present-render': 'Vidéo de présentation',
 };
 
 const statusLabels = {'running': 'En cours', 'done': 'Terminé', 'failed': 'Échec', 'cancelled': 'Annulé'};

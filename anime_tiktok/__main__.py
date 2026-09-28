@@ -20,7 +20,8 @@ from .media import require_ffmpeg
 def main() -> None:
     parser = argparse.ArgumentParser(prog="anime_tiktok", description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("command", choices=["analyze", "select", "make", "run", "backends", "serve"])
+    parser.add_argument("command", choices=["analyze", "select", "make", "run", "backends", "serve",
+                                            "present-plan", "present-render"])
     parser.add_argument("--config", default="config.yaml")
     parser.add_argument("--set", action="append", default=[], metavar="CLE=VALEUR",
                         help="surcharge une valeur de config, ex. --set render.fps=240")
@@ -30,6 +31,8 @@ def main() -> None:
     parser.add_argument("--mode", default="action", choices=["action", "aesthetic"],
                         help="select : moments forts (action) ou beaux plans (aesthetic)")
     parser.add_argument("--force", action="store_true", help="refait l'analyse même si elle existe déjà")
+    parser.add_argument("--name", help="présentation : identifiant (dossier work/presentations/<name>)")
+    parser.add_argument("--script", help="present-plan : fichier texte du script")
     parser.add_argument("--port", type=int, default=8000, help="serve : port HTTP")
     parser.add_argument("--token", help="serve : mot de passe de l'application (sinon ANIME_TIKTOK_TOKEN ou aléatoire)")
     parser.add_argument("--tunnel", action="store_true", help="serve : adresse publique https via Cloudflare")
@@ -56,6 +59,17 @@ def main() -> None:
     if args.command in ("make", "run"):
         from .montage import run_montage
         run_montage(cfg, args.style, music=args.music, only=args.only)
+    if args.command == "present-plan":
+        from .presentation import make_plan, slugify
+        if not args.script:
+            raise SystemExit("--script fichier.txt requis")
+        text = open(args.script, encoding="utf-8").read()
+        make_plan(cfg, args.name or slugify(text.split("\n", 1)[0]), text, music=args.music)
+    if args.command == "present-render":
+        from .presentation import render_presentation
+        if not args.name:
+            raise SystemExit("--name requis")
+        render_presentation(cfg, args.name)
     if args.command == "backends":
         from .enhance import resolve_backends
         from .media import nvenc_error, pick_encoder

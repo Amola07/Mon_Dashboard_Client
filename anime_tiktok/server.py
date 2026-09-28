@@ -141,7 +141,8 @@ class Runner:
             job.status = "done" if code == 0 else "failed"
         if job.status == "done":
             job.progress = 1.0
-        labels = {"analyze": "Analyse", "select": "Sélection", "make": "Rendu et montage", "download": "Téléchargement"}
+        labels = {"analyze": "Analyse", "select": "Sélection", "make": "Rendu et montage", "download": "Téléchargement",
+                  "present-plan": "Préparation de la présentation", "present-render": "Vidéo de présentation"}
         label = labels.get(job.command, job.command)
         minutes = (job.ended - job.started) / 60
         if job.status == "done":
@@ -152,7 +153,8 @@ class Runner:
 
 _RE_TOTAL_EP = re.compile(r"Analyse de (\d+) épisode")
 _RE_TOTAL_CLIPS = re.compile(r"Style « .+ » : (\d+) extrait")
-_RE_RENDER = re.compile(r"\[(\d+)/(\d+)\] rendu de")
+_RE_RENDER = re.compile(r"\[(\d+)/(\d+)\] rendu d[eu]")
+_RE_STEP = re.compile(r"^\[(\d+)/(\d+)\]")
 _RE_PERCENT = re.compile(r": (\d+) %$")
 
 
@@ -168,7 +170,9 @@ def _parse_progress(job: Job, line: str) -> None:
     elif m := _RE_RENDER.search(text):
         job.current, job.total = int(m.group(1)), int(m.group(2))
         job.progress = 0.9 * (job.current - 1) / job.total
-    elif (m := _RE_PERCENT.search(text)) and job.command == "make" and job.total:
+    elif (m := _RE_STEP.search(text)) and job.command == "present-plan":
+        job.progress = 0.8 * int(m.group(1)) / int(m.group(2))  # voix off, phrase par phrase
+    elif (m := _RE_PERCENT.search(text)) and job.command in ("make", "present-render") and job.total:
         job.progress = 0.9 * (job.current - 1 + int(m.group(1)) / 100) / job.total
     elif text.startswith("montage") and job.command == "make":
         job.progress = max(job.progress or 0, 0.9)
@@ -439,6 +443,100 @@ def create_app(config_path: Path, base_sets: list[str], token: str, notifier: No
         if p.is_dir():
             shutil.rmtree(p)
         return {"deleted": folder}
+
+    # ----------------------------------------------------------------- présentations narrées
+
+    def pres_dir() -> Path:
+        return cfg().work / "presentations"
+
+    def pres_plan(name: str) -> tuple[Path, dict]:
+        p = safe_child(pres_dir(), name, "plan.json")
+        if not p.exists():
+            raise HTTPException(404, "Présentation inconnue")
+        return p, json.loads(p.read_text(encoding="utf-8"))
+
+    @app.get("/api/presentations", dependencies=[Depends(auth)])
+    def list_presentations():
+        out = []
+        base = pres_dir()
+        if base.exists():
+            for d in sorted(base.iterdir(), key=lambda x: x.stat().st_mtime, reverse=True):
+                plan_p = d / "plan.json"
+                if d.is_dir() and plan_p.exists():
+                    plan = json.loads(plan_p.read_text(encoding="utf-8"))
+                    out.append({k: plan.get(k) for k in ("name", "title", "created", "duration", "voice", "matcher")}
+                               | {"slots": len(plan["slots"]), "sentences": len(plan["sentences"])})
+        return out
+
+    @app.post("/api/presentations", dependencies=[Depends(auth)])
+    def create_presentation(body: dict):
+        """{"script": "...", "name": "erased", "music": "son.mp3"} -> tâche de préparation (voix + plans)."""
+        from .presentation import slugify
+        from .script import parse_script
+
+        script = str(body.get("script", "")).strip()
+        if not parse_script(script):
+            raise HTTPException(400, "Le script est vide")
+        name = slugify(str(body.get("name") or "")) or slugify(script.split("\n", 1)[0])
+        incoming = pres_dir() / "_scripts"
+        incoming.mkdir(parents=True, exist_ok=True)
+        path = incoming / f"{name}.txt"
+        path.write_text(script, encoding="utf-8")
+        extra = ["--script", str(path), "--name", name]
+        if body.get("music"):
+            safe_child(cfg().path("music"), body["music"])
+            extra += ["--music", str(body["music"])]
+        try:
+            job = runner.start("present-plan", extra, _settings_sets(cfg_base()))
+        except RuntimeError as exc:
+            raise HTTPException(409, str(exc))
+        return job.to_dict() | {"name": name}
+
+    @app.get("/api/presentations/{name}", dependencies=[Depends(auth)])
+    def get_presentation(name: str):
+        return pres_plan(name)[1]
+
+    @app.put("/api/presentations/{name}/slots/{slot}", dependencies=[Depends(auth)])
+    def choose_shot(name: str, slot: int, body: dict):
+        path, plan = pres_plan(name)
+        if not 0 <= slot < len(plan["slots"]):
+            raise HTTPException(404, "Créneau inconnu")
+        choice = int(body.get("choice", 0))
+        if not 0 <= choice < len(plan["slots"][slot]["candidates"]):
+            raise HTTPException(400, "Choix invalide")
+        plan["slots"][slot]["choice"] = choice
+        path.write_text(json.dumps(plan, ensure_ascii=False, indent=1), encoding="utf-8")
+        return {"slot": slot, "choice": choice}
+
+    @app.post("/api/presentations/{name}/render", dependencies=[Depends(auth)])
+    def render_presentation_job(name: str):
+        pres_plan(name)
+        try:
+            job = runner.start("present-render", ["--name", name], _settings_sets(cfg_base()))
+        except RuntimeError as exc:
+            raise HTTPException(409, str(exc))
+        return job.to_dict()
+
+    @app.get("/api/presentations/{name}/thumbs/{slot}/{cand}", dependencies=[Depends(auth)])
+    def presentation_thumb(name: str, slot: int, cand: int):
+        p = safe_child(pres_dir(), name, "thumbs", f"{slot:03d}_{cand}.jpg")
+        if not p.exists():
+            raise HTTPException(404, "Pas de vignette")
+        return FileResponse(p, media_type="image/jpeg")
+
+    @app.get("/api/presentations/{name}/voice", dependencies=[Depends(auth)])
+    def presentation_voice(name: str):
+        p = safe_child(pres_dir(), name, "voice.wav")
+        if not p.exists():
+            raise HTTPException(404, "Pas de voix")
+        return FileResponse(p, media_type="audio/wav")
+
+    @app.delete("/api/presentations/{name}", dependencies=[Depends(auth)])
+    def delete_presentation(name: str):
+        p = safe_child(pres_dir(), name)
+        if p.is_dir():
+            shutil.rmtree(p)
+        return {"deleted": name}
 
     @app.get("/api/music", dependencies=[Depends(auth)])
     def get_music():

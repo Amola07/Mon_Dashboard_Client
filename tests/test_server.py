@@ -93,8 +93,29 @@ def test_server() -> None:
         bad = client.post("/api/upload/music", headers=h, files={"file": ("x.exe", b"MZ", "application/octet-stream")})
         assert bad.status_code == 400
 
+        # Présentation narrée : préparation (voix + plans), changement d'un plan, rendu
+        script = "[enigme] Il le ramène 18 ans plus tôt. [posé] Cet anime, c'est Erased."
+        r = client.post("/api/presentations", headers=h, json={"script": script, "name": "Erased test"})
+        assert r.status_code == 200 and r.json()["name"] == "erased-test", r.text
+        job = _wait(client, h)
+        assert job["status"] == "done", job["log"][-5:]
+        assert [p["name"] for p in client.get("/api/presentations", headers=h).json()] == ["erased-test"]
+        plan = client.get("/api/presentations/erased-test", headers=h).json()
+        assert plan["title"] == "Erased" and len(plan["sentences"]) == 2 and plan["slots"]
+        assert client.put("/api/presentations/erased-test/slots/0", headers=h, json={"choice": 1}).json()["choice"] == 1
+        assert client.put("/api/presentations/erased-test/slots/0", headers=h, json={"choice": 99}).status_code == 400
+        assert client.get("/api/presentations/erased-test/thumbs/0/1", headers=h).status_code == 200
+        assert client.get("/api/presentations/erased-test/voice?token=secret").status_code == 200
+        assert client.get("/api/presentations/..%2F..%2Fconfig.yaml", headers=h).status_code == 404
+        client.post("/api/presentations/erased-test/render", headers=h)
+        job = _wait(client, h)
+        assert job["status"] == "done", job["log"][-5:]
+        pres = [o for o in client.get("/api/outputs", headers=h).json() if o["style"] == "presentation"]
+        assert pres and pres[0]["videos"][0]["name"] == "erased-test.mp4"
+        assert client.delete("/api/presentations/erased-test", headers=h).status_code == 200
+
         assert client.delete(f"/api/outputs/{outs[0]['folder']}", headers=h).status_code == 200
-        assert client.get("/api/outputs", headers=h).json() == []
+        assert all(o["style"] == "presentation" for o in client.get("/api/outputs", headers=h).json())
     print("OK : serveur de contrôle")
 
 

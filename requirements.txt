@@ -7,3 +7,9 @@ spandrel>=0.4
 fastapi>=0.110
 uvicorn>=0.29
 python-multipart>=0.0.9
+# Présentations narrées : voix off Kokoro (Apache 2.0) et choix des plans par CLIP multilingue
+kokoro>=0.9.4
+soundfile
+transformers
+sentence-transformers>=3.0
+pillow

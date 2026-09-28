@@ -104,6 +104,26 @@ styles:
     flash: false
     fade: 0.6
 
+presentation:               # présentations d'animés narrées (script -> voix off -> plans choisis selon le texte)
+  voice: auto                # auto | kokoro (voix naturelle, GPU conseillé) | espeak (voix robotique de secours)
+  kokoro_voice: ff_siwis     # voix française de Kokoro
+  speed: 1.0                 # vitesse globale de lecture (multipliée par celle de chaque émotion)
+  matcher: auto              # auto | clip (texte <-> image) | simple (ambiance + beauté seulement)
+  slot_seconds: 2.2          # durée visée de chaque plan à l'écran
+  min_shot: 1.0              # plans plus courts ignorés
+  candidates: 5              # plans proposés par créneau (au choix dans l'application)
+  weights:
+    semantic: 1.5            # ressemblance entre la phrase et l'image (CLIP)
+    mood: 0.8                # ambiance de l'émotion (tendu = sombre/agité, posé = calme)
+    beauty: 0.4
+    chronology: 0.8          # suivre l'ordre de l'histoire au fil du script
+  drift_zoom: 0.05           # zoom lent sur chaque plan
+  grade: vivid
+  title_card: true           # nom de l'animé en grand sur la phrase « Cet anime, c'est … »
+  font: auto
+  music_volume: 0.25         # musique de fond (baissée automatiquement quand la voix parle)
+  auto_music: false          # sans musique choisie, prendre la première du dossier music
+
 delivery:
   anime: "Mon Anime"
   caption: "{anime} — épisode {episode} 🔥\n#anime #{anime_tag} #animeedit #fyp #pourtoi #4k #{fps}fps"

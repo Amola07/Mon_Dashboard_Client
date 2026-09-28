@@ -11,6 +11,33 @@ prêtes à publier, avec leur légende.
              OP/ED ignorés
 ```
 
+## Présentations narrées (onglet « Narration »)
+
+Format « présentation d'animé » : vous écrivez un script, une voix off est générée et les plans des
+épisodes sont choisis pour illustrer chaque phrase, puis la vidéo est montée (voix, musique de fond
+baissée sous la voix, titre de l'animé en grand, 1080×1920 à 60 fps).
+
+```
+[enigme] Il le ramène 18 ans plus tôt. À l'époque où il était encore un enfant... {visuel: enfants dans la neige}
+[tendu] Cette fois, ce n'est pas un accident qu'il doit empêcher.
+[posé] Cet anime, c'est Erased.
+[enthousiasme] Si tu veux savoir jusqu'où le temps va le laisser aller... tu sais quoi faire.
+```
+
+- `[émotion]` règle le ton (vitesse, pauses) et l'ambiance des plans : enigme, tendu, déterminé, anxieux,
+  inquiet, triste, posé, enthousiasme, épique…
+- `{visuel: …}` décrit les plans voulus pour la phrase (facultatif, améliore beaucoup le choix).
+- « Cet anime, c'est X » (ou `{titre: X}`) affiche le titre à ce moment.
+- **Voix** : Kokoro-82M (licence Apache 2.0, usage commercial autorisé), voix française `ff_siwis`,
+  sur le GPU de Kaggle ; repli sur espeak-ng si Kokoro n'est pas installé.
+- **Choix des plans** : CLIP multilingue compare chaque phrase (en français) aux images des épisodes,
+  combiné à l'ambiance de l'émotion, à la beauté du plan et à l'ordre de l'histoire. Pour chaque plan,
+  5 candidats sont proposés dans l'application : un toucher pour changer.
+- Visez plus d'une minute (≈ 160 mots) : c'est la durée minimale des vidéos rémunérées sur TikTok.
+
+En ligne de commande : `python -m anime_tiktok present-plan --script script.txt --name erased`, puis
+`python -m anime_tiktok present-render --name erased`.
+
 ## Utilisation rapide (Kaggle ou Colab)
 
 Ouvrez `notebooks/anime_tiktok.ipynb` dans Kaggle (*File → Import Notebook*) ou Colab, activez le GPU,

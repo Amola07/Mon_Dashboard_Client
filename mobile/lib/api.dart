@@ -89,6 +89,39 @@ class ApiClient {
   Uri outputUri(String folder, String name) =>
       uri('/api/outputs/${Uri.encodeComponent(folder)}/${Uri.encodeComponent(name)}', _tokenQuery);
 
+  // ------------------------------------------------------------------- présentations narrées
+
+  Future<List<dynamic>> presentations() async => List<dynamic>.from(await _send('GET', '/api/presentations'));
+
+  /// Lance la préparation (voix off + choix des plans) ; renvoie la tâche, avec le nom retenu.
+  Future<Map<String, dynamic>> createPresentation(String script, {String? name, String? music}) async =>
+      Map<String, dynamic>.from(
+        await _send(
+          'POST',
+          '/api/presentations',
+          body: {
+            'script': script,
+            if (name != null && name.isNotEmpty) 'name': name,
+            'music': ?music,
+          },
+        ),
+      );
+
+  Future<Map<String, dynamic>> presentation(String name) async =>
+      Map<String, dynamic>.from(await _send('GET', '/api/presentations/${Uri.encodeComponent(name)}'));
+
+  Future<void> chooseShot(String name, int slot, int choice) =>
+      _send('PUT', '/api/presentations/${Uri.encodeComponent(name)}/slots/$slot', body: {'choice': choice});
+
+  Future<Map<String, dynamic>> renderPresentation(String name) async =>
+      Map<String, dynamic>.from(await _send('POST', '/api/presentations/${Uri.encodeComponent(name)}/render'));
+
+  Future<void> deletePresentation(String name) => _send('DELETE', '/api/presentations/${Uri.encodeComponent(name)}');
+
+  String presentationThumbUrl(String name, int slot, int cand) =>
+      uri('/api/presentations/${Uri.encodeComponent(name)}/thumbs/$slot/$cand', _tokenQuery).toString();
+  Uri presentationVoiceUri(String name) => uri('/api/presentations/${Uri.encodeComponent(name)}/voice', _tokenQuery);
+
   /// Envoie un fichier (musique ou épisode) au serveur, lu en flux.
   Future<void> upload(String kind, String filename, Stream<List<int>> content, int length) async {
     final req = http.MultipartRequest('POST', uri('/api/upload/$kind'))
