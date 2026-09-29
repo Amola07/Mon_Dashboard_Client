@@ -54,10 +54,14 @@ def right_vec(theta):
     return (math.cos(a), math.sin(a))
 
 
-def ik2(root, target, l1, l2, prefer):
-    """Deux segments de root vers target ; l'articulation se plie du côté de `prefer` (vecteur)."""
+def ik2(root, target, l1, l2, prefer, stretch=1.0):
+    """Deux segments de root vers target ; l'articulation se plie du côté de `prefer` (vecteur).
+    stretch > 1 : le membre peut s'allonger un peu pour atteindre la cible (bras élastiques de cartoon)."""
     d = v_sub(target, root)
     dist = v_len(d)
+    if dist > l1 + l2 and stretch > 1:
+        k = min(stretch, dist / (l1 + l2))
+        l1, l2 = l1 * k, l2 * k
     if dist < 1e-6:
         d, dist = (0.0, 1.0), 1e-6
     reach = min(dist, l1 + l2 - 1e-4)
@@ -161,7 +165,7 @@ def build(p):
             tgt = free_limb(shoulder, p.theta, p.facing, 95 + 20 * i, 60)
         else:
             tgt = v_add(shoulder, v_mul(p.g, 70), v_mul(f, 10 if i else -8))
-        elbow, hand = ik2(shoulder, tgt, UPPER, FORE, back_down)
+        elbow, hand = ik2(shoulder, tgt, UPPER, FORE, back_down, stretch=1.15)
         arms.append([shoulder, elbow, hand])
     return {"pelvis": p.pelvis, "chest": chest, "neck": neck, "shoulder": shoulder, "head": head,
             "head_theta": head_theta, "legs": legs, "arms": arms, "up": u, "fwd": f}
@@ -230,16 +234,19 @@ def draw(c, p, t, cape=None, cape_color="violet", glow=1.0, alpha=255, screen_ro
         c.drawPath(path, _brush(cc, 110 * glow * alpha / 255, glow=10))
         c.drawPath(path, _brush(cc, 225 * alpha / 255))
     path = skia.Path()
-    for chain in J["arms"] + J["legs"]:
-        path.moveTo(*chain[0])
-        for q in chain[1:]:
-            path.lineTo(*q)
-    path.moveTo(*J["pelvis"])
-    ctrl = v_add(J["chest"], v_mul(J["fwd"], p.bend * 0.25))
+    for a, m, b in J["arms"] + J["legs"]:                      # membres souples : une courbe qui passe par le coude/genou
+        cp = v_sub(v_mul(m, 2.0), v_mul(v_add(a, b), 0.5))
+        path.moveTo(*a)
+        path.quadTo(*cp, *b)
+    path.moveTo(*J["pelvis"])                                   # colonne souple
+    mid = v_lerp(J["pelvis"], J["neck"], 0.5)
+    ctrl = v_add(v_sub(v_mul(J["chest"], 2.0), mid), v_mul(J["fwd"], p.bend * 0.25))
     path.quadTo(*ctrl, *J["neck"])
     path.addCircle(*J["head"], HEAD_R)
     c.drawPath(path, _pen(CYAN, LINE_W * 2.3, 75 * glow * alpha / 255, glow=LINE_W * 0.9))
     c.drawPath(path, _pen(CYAN, LINE_W, alpha))
+    for arm in J["arms"]:                                       # mains : petites boules
+        c.drawCircle(*arm[2], LINE_W * 0.85, _brush(CYAN, alpha))
     c.drawCircle(*J["head"], HEAD_R - LINE_W / 2, _brush((0, 0, 0), alpha))
     look = p.look
     if p.gaze is not None:                                     # les yeux visent le point regardé

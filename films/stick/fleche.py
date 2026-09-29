@@ -1300,6 +1300,22 @@ def smooth_motion(show, omega=0.2):
         n0 = np.linalg.norm(rel) or 1.0
         n1 = np.linalg.norm(s_rel) or 1.0
         Y[f][4] = Y[f][2] + s_rel * (n0 / n1)
+    # membres « spaghetti » : le milieu de chaque membre (coude, genou) et le buste suivent avec un retard
+    # élastique ; dans les gestes rapides, bras et jambes se courbent derrière le mouvement.
+    for idx, om, zeta, lim in ((1, 0.28, 0.5, 16.0), (5, 0.34, 0.5, 24.0), (7, 0.34, 0.5, 24.0),
+                               (9, 0.3, 0.45, 28.0), (11, 0.3, 0.45, 28.0)):
+        m = Y[0][idx].copy()
+        mv = np.zeros(2)
+        for f in range(N):
+            tgt = Y[f][idx]
+            mv += om * om * (tgt - m) - 2 * zeta * om * mv
+            m = m + mv
+            d = m - tgt
+            dn = np.linalg.norm(d)
+            if dn > lim:
+                m = tgt + d * (lim / dn)
+                mv *= 0.5
+            Y[f][idx] = m
     for f, fr in enumerate(show.frames):
         P = [tuple(q) for q in Y[f]]
         fr["J"] = points_joint(P, Js[f], math.degrees(B[f]))
