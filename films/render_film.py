@@ -8,6 +8,7 @@ from __future__ import annotations
 import argparse
 import importlib
 import json
+import shutil
 import subprocess
 import tempfile
 import threading
@@ -84,8 +85,8 @@ def main(argv=None):
             raise SystemExit("Blender a échoué")
         if a.still:
             dest = out_dir / f"{a.film}_{a.still}.png"
-            (frames / "still.png").rename(dest)
-            print(dest)
+            shutil.copy(frames / "still.png", dest)   # /tmp et /kaggle/working sont sur des disques différents
+            print(f"{dest} : image calculée en {time.time() - t0:.0f} s", flush=True)
             return dest
 
         # image : agrandissement + halo doux
