@@ -206,11 +206,20 @@ def walk(F, t, t0, t1, u0, u1, n, g, lean=10.0, **kw):
     return p
 
 
-def keyed(t, keys, ease=ease_io):
-    """Interpolation entre poses clés [(instant, pose ou fonction(t) -> pose), …].
+def snap(u, T):
+    """Minutage « pose à pose » : la pose de départ est tenue, puis la transition part vite et arrive en
+    douceur avec un léger dépassement (elle va un peu trop loin et revient)."""
+    hold = min(0.62, max(0.0, (T - 0.12) / T * 0.62))
+    if u <= hold:
+        return 0.0
+    x = min(1.0, (u - hold) / (1 - hold)) - 1
+    s = 1.2
+    return 1 + (s + 1) * x ** 3 + s * x ** 2
 
-    Courbe de Catmull-Rom : le mouvement traverse les poses clés sans s'y arrêter (vitesse continue) ;
-    il ne démarre et ne s'arrête en douceur qu'à la première et à la dernière clé (ou sur une clé répétée)."""
+
+def keyed(t, keys, ease=None):
+    """Interpolation entre poses clés [(instant, pose ou fonction(t) -> pose), …], façon dessin animé :
+    chaque pose est tenue, puis on passe vite à la suivante (arcs pour les mains et les pieds)."""
     def P(x):
         return x(t) if callable(x) else x
     if t <= keys[0][0]:
@@ -218,29 +227,12 @@ def keyed(t, keys, ease=ease_io):
     if t >= keys[-1][0]:
         return P(keys[-1][1])
     k = max(i for i in range(len(keys) - 1) if keys[i][0] <= t)
-    if len(keys) == 2 or ease is not ease_io:
-        (t0, a), (t1, b) = keys[k], keys[k + 1]
-        return lerp_pose(P(a), P(b), ease((t - t0) / (t1 - t0)))
-    poses = [P(x) for _, x in keys]
-    ts = [x for x, _ in keys]
-    V = [K.pose_vec(p) for p in poses]
-    for i in range(1, len(V)):                                  # angles sans saut de 360°
-        V[i][2] = V[i - 1][2] + ((V[i][2] - V[i - 1][2] + 180) % 360 - 180)
-
-    def tangent(i):
-        if i == 0 or i == len(V) - 1:
-            return [0.0] * len(V[i])
-        if V[i] == V[i + 1] or V[i] == V[i - 1]:                # pose tenue : on s'y arrête
-            return [0.0] * len(V[i])
-        return [(b - a) / (ts[i + 1] - ts[i - 1]) for a, b in zip(V[i - 1], V[i + 1])]
-    t0, t1 = ts[k], ts[k + 1]
-    T = t1 - t0
-    u = (t - t0) / T
-    m0, m1 = tangent(k), tangent(k + 1)
-    h00, h10, h01, h11 = 2 * u ** 3 - 3 * u ** 2 + 1, u ** 3 - 2 * u ** 2 + u, -2 * u ** 3 + 3 * u ** 2, u ** 3 - u ** 2
-    v = [h00 * a + h10 * T * ma + h01 * b + h11 * T * mb for a, b, ma, mb in zip(V[k], V[k + 1], m0, m1)]
-    p = K.vec_pose(v, poses[k] if u < 0.5 else poses[k + 1])
-    return arc_limbs(p, poses[k], poses[k + 1], V[k], V[k + 1], u)
+    (t0, a), (t1, b) = keys[k], keys[k + 1]
+    pa, pb = P(a), P(b)
+    u = (t - t0) / (t1 - t0)
+    e = ease(u) if ease is not None else snap(u, t1 - t0)
+    p = lerp_pose(pa, pb, e)
+    return arc_limbs(p, pa, pb, K.pose_vec(pa), K.pose_vec(pb), min(1.0, max(0.0, e)))
 
 
 def arc_limbs(p, pa, pb, va, vb, u):
@@ -867,7 +859,7 @@ def shot_state(k, t, show, f):
     """Cadrage voulu par le plan k à l'instant t (centre, zoom, rotation)."""
     t0, mode, center, z0, z1, r0, r1 = SHOTS[k]
     t1 = SHOTS[k + 1][0] if k + 1 < len(SHOTS) else DURATION
-    zoom = z0 + (z1 - z0) * ease_io((t - t0) / (t1 - t0))
+    zoom = z0                                                   # caméra calme : pas de zoom lent permanent
     rot = r0 + (r1 - r0) * ease_io((t - t0) / 1.2)
     if mode == "suivi":                                        # suit le buste, lissé
         acc, wsum = (0.0, 0.0), 0.0
@@ -881,6 +873,52 @@ def shot_state(k, t, show, f):
 
 
 def camera(t, show, f):
+    """Caméra : chemin précalculé (cadreur avec zone morte) + secousses d'impact."""
+    path = getattr(show, "cam_path", None)
+    if path is None:
+        return camera_raw(t, show, f)
+    x = min(max(t * FPS, 0.0), len(path) - 1.001)
+    i = int(x)
+    a = x - i
+    (c0, z0, r0), (c1, z1, r1) = path[i], path[i + 1]
+    center = v_lerp(c0, c1, a)
+    zoom, rot = z0 + (z1 - z0) * a, r0 + (r1 - r0) * a
+    shake = 0.0
+    for (te, kind, pos, force) in show.events:
+        dt = t - te
+        if kind in ("thud", "boom", "clang") and 0 <= dt < 0.4:
+            shake += (18 if kind == "boom" else 10) * force * math.exp(-dt * 10)
+    return (center[0] + shake * math.sin(t * 57) / zoom, center[1] + shake * math.cos(t * 43) / zoom), zoom, rot
+
+
+def camera_path(show):
+    """Comme un cadreur : en plan de suivi, la caméra reste immobile tant qu'Éclat reste dans une zone centrale
+    du cadre ; elle ne se recale (en douceur) que lorsqu'il en sort. Les plans fixes et les transitions restent tels quels."""
+    out = []
+    cur = None
+    vel = (0.0, 0.0)
+    for f in range(len(show.frames)):
+        t = f / FPS
+        (c, z, r) = camera_raw(t, show, f, shake=False)
+        k = max(i for i, s in enumerate(SHOTS) if s[0] <= t)
+        follow = SHOTS[k][1] == "suivi" and t - SHOTS[k][0] > 1.0
+        if cur is None or not follow:
+            cur, vel = c, (0.0, 0.0)
+        else:
+            d = v_sub(c, cur)
+            dz = 70.0 / z
+            dist = v_len(d)
+            if dist > dz:
+                pull = v_mul(d, (dist - dz) / dist)
+                vel = v_add(v_mul(vel, 0.82), v_mul(pull, 0.08))
+            else:
+                vel = v_mul(vel, 0.7)
+            cur = v_add(cur, vel)
+        out.append((cur, z, r))
+    return out
+
+
+def camera_raw(t, show, f, shake=True):
     """Caméra continue : pas de coupe sèche, elle glisse, zoome et pivote d'un cadrage au suivant."""
     def blended(k):
         center, zoom, rot = shot_state(k, t, show, f)
@@ -896,6 +934,8 @@ def camera(t, show, f):
         return center, zoom, rot
     k = max(i for i, s in enumerate(SHOTS) if s[0] <= t)
     center, zoom, rot = blended(k)
+    if not shake:
+        return center, zoom, rot
     shake = 0.0
     for (te, kind, pos, force) in show.events:
         dt = t - te
@@ -1035,8 +1075,17 @@ def frame_at(show, t):
     }
 
 
-def draw_frame(c, show, i, stars):
-    t = float(F2S[min(i, len(F2S) - 1)])
+OUT_FPS = 24                                    # cadence du dessin animé
+
+
+def story_t(x):
+    """Instant du récit correspondant à l'instant x (secondes) du film."""
+    return float(np.interp(x * FPS, np.arange(len(F2S)), F2S))
+
+
+def draw_frame(c, show, i, stars, t=None):
+    if t is None:
+        t = float(F2S[min(i, len(F2S) - 1)])
     f, fr = frame_at(show, t)
     (cx, cy), zoom, rot = camera(t, show, f)
     c.clear(skia.ColorBLACK)
@@ -1293,7 +1342,7 @@ def points_joint(P, J, head_theta):
     return out
 
 
-def smooth_motion(show, omega=0.2):
+def smooth_motion(show, omega=0.3):
     """Amortisseur d'à-coups (« inertialisation ») : quand une articulation saute d'une image à l'autre,
     le corps garde son élan et rejoint la nouvelle pose en douceur (ressort critique, ~¼ s)."""
     Js = [build(fr["pose"]) for fr in show.frames]
@@ -1369,6 +1418,7 @@ def get_show():
         TEMPO.extend(sorted(((x[0], x[1] * 0.9) for x in SHOW.tempo2 if x[0] > TEMPO[-1][0]), key=lambda x: x[0]))
         F2S = _build_tempo()
         FILM_DUR = (len(F2S) - 1) / FPS
+        SHOW.cam_path = camera_path(SHOW)
     return SHOW
 
 
@@ -1384,10 +1434,10 @@ def render_video(f0, f1, path):
     stars = make_stars()
     surf = skia.Surface(W, H)
     ff = subprocess.Popen(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-f", "rawvideo", "-pix_fmt", "bgra",
-                           "-s", f"{W}x{H}", "-r", str(FPS), "-i", "-", "-c:v", "libx264", "-preset", "medium",
+                           "-s", f"{W}x{H}", "-r", str(OUT_FPS), "-i", "-", "-c:v", "libx264", "-preset", "medium",
                            "-crf", "18", "-pix_fmt", "yuv420p", str(path)], stdin=subprocess.PIPE)
-    for f in range(f0, f1):
-        draw_frame(surf.getCanvas(), show, f, stars)
+    for j in range(f0, f1):
+        draw_frame(surf.getCanvas(), show, 0, stars, t=story_t(j / OUT_FPS))
         ff.stdin.write(surf.makeImageSnapshot().toarray().tobytes())
     ff.stdin.close()
     ff.wait()
@@ -1411,10 +1461,10 @@ def main():
         surf = skia.Surface(W, H)
         stars = make_stars()
         for s in a.images.split(","):
-            draw_frame(surf.getCanvas(), show, min(int(round(float(s) * FPS)), len(F2S) - 1), stars)
+            draw_frame(surf.getCanvas(), show, 0, stars, t=story_t(float(s)))
             surf.makeImageSnapshot().save(str(out / f"t{float(s):06.2f}.png"), skia.kPNG)
         return
-    total = len(F2S)
+    total = int(FILM_DUR * OUT_FPS)
     n = max(1, a.morceaux)
     cuts = [total * i // n for i in range(n + 1)]
     with tempfile.TemporaryDirectory() as tmp:

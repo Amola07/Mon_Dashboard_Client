@@ -184,7 +184,7 @@ class Suite:
             gd = (0.0, -1.0)
             T1 = P["w1"]
             T2 = T1 + 0.35                                      # saisie
-            T3 = T2 + 0.25                                      # se relève avec la pierre
+            T3 = T2 + 0.4                                       # tient la prise, puis se relève avec la pierre
             T4 = T3 + P["w2"]                                   # marche jusqu'à la pile
             T5 = T4 + 0.45                                      # la pose
             T6 = T5 + 0.2
@@ -207,7 +207,7 @@ class Suite:
                 if tau < T2:
                     return F.keyed(tau, [(T1, up_p), (T2, bend)])
                 lift = standing(F.CEIL, P["ua"], P["d2"], expr="decide", gaze=target)
-                u = ease((tau - T2) / 0.25)
+                u = F.snap((tau - T2) / 0.4, 0.4)
                 p = lerp_pose(bend, lift, u)
                 cpos = carried(lift)
                 s.held = True
@@ -378,7 +378,7 @@ class Suite:
             up = standing(Fr, u, fc, expr="joie" if not proud else "fier")
             if proud:
                 self.mark(t, rate=0.6, shot=("suivi", None, 2.2, 2.3, 0, 0)) if tau < DT / 2 else None
-            p = F.keyed(tau, [(0, self.p0 if tau < 0.12 else cr), (0.12, cr), (0.45, up)])
+            p = F.keyed(tau, [(0, self.p0), (0.1, cr), (0.4, cr), (0.58, up)])      # impact, tenue, redressement
             c = hold(show, p, phi, L)
             set_held(show, c, phi, L)
             if proud and tau > 0.5:                            # une main brandie, l'autre tient la flèche
@@ -392,7 +392,7 @@ class Suite:
                     p = replace(p, expr="colere" if t - hit[-1] > 0.3 else "surpris",
                                 emote=("etoiles", t - hit[0]))
             self.u = u
-            st["done"] = tau >= (0.5 if not proud else 2.2)
+            st["done"] = tau >= (0.85 if not proud else 2.2)
             return p
         return ph
 

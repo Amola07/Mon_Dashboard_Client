@@ -147,12 +147,12 @@ def simulate(show, Y, X, room, G):
         mid = (pel + neck) / 2
         tgt_sp = bezier_points(pel, 2 * chest - mid, neck, N_SPINE)
         up = (neck - pel) / max(1e-6, float(np.hypot(*(neck - pel))))
-        breath = 1.4 * math.sin(2 * math.pi * 0.32 * t)
+        breath = 0.0 * math.sin(2 * math.pi * 0.32 * t)            # tenues vraiment immobiles
         tgt_sp[1:] += up * breath * np.linspace(0, 1, N_SPINE)[1:, None]
         for s in range(SUB):
             a = (s + 1) / SUB
             root = prev[0] + (pel - prev[0]) * a
-            sp = spine.step(root, tgt_sp, k_spine, gdir * 0.01 * gm, 0.86)
+            sp = spine.step(root, tgt_sp, k_spine, gdir * 0.01 * gm, 0.8)
         spn = spine.p
         sh_idx = K.SHOULDER / K.SPINE * (N_SPINE - 1)
         i0 = int(sh_idx)
@@ -170,7 +170,7 @@ def simulate(show, Y, X, room, G):
             k = k_pinned if pinned else k_arm + np.linspace(0.0, 0.26, N_LIMB) * effort
             grav = 0.0 if pinned else gdir * 0.035 * gm
             for s in range(SUB):
-                arms[i].step(shoulder, tgt, k, grav, 0.88, pin=hand if pinned else None)
+                arms[i].step(shoulder, tgt, k, grav, 0.82, pin=hand if pinned else None)
             arm_pts.append(arms[i].p.copy())
         leg_pts = []
         for i in range(2):
@@ -180,7 +180,7 @@ def simulate(show, Y, X, room, G):
             k = k_pinned if pinned else k_leg
             grav = 0.0 if pinned else gdir * 0.03 * gm
             for s in range(SUB):
-                legs[i].step(pel, tgt, k, grav, 0.86, pin=foot if pinned else None)
+                legs[i].step(pel, tgt, k, grav, 0.8, pin=foot if pinned else None)
             leg_pts.append(legs[i].p.copy())
         out.append(dict(spine=spn.copy(), shoulder=shoulder.copy(), arms=arm_pts, legs=leg_pts))
     return out
