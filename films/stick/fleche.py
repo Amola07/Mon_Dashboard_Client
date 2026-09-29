@@ -151,7 +151,7 @@ def make_stones():
 
 
 # ---------------------------------------------------------------- poses utiles
-def swing_hands(p, angles, reach=66.0, spread=16.0):
+def swing_hands(p, angles, reach=72.0, spread=10.0):
     """Mains pendantes dans le sens de la gravité, balancées de `angles` (degrés, + = vers l'avant).
     Au repos les bras s'écartent du buste (l'arrière recule, l'avant avance) : ils ne se confondent jamais avec
     le tronc, la silhouette reste lisible."""
@@ -202,11 +202,16 @@ def walk(F, t, t0, t1, u0, u1, n, g, lean=10.0, **kw):
     pu = u0 + (u1 - u0) * s
     speed = abs(ease_io(clamp01((t - t0) / (t1 - t0)) + 0.01) - s) / 0.01
     amt = min(1.0, speed * 1.4)
-    h = K.HIP_H - 2 - 10 * (1 - math.sin(math.pi * v)) * amt
+    # hauteur du bassin (bibliothèque) : contact, descente (le plus bas), passage, montée (le plus haut)
+    hk = (80.0, 74.0, 82.0, 86.0, 80.0)
+    x = v * 4
+    i = min(int(x), 3)
+    h_walk = hk[i] + (hk[i + 1] - hk[i]) * ease_io(x - i)
+    h = (K.HIP_H - 1) + (h_walk - (K.HIP_H - 1)) * amt
     p = Pose(F.w(pu, h), F.alpha + d * (lean + 5 * math.sin(2 * math.pi * v)) * amt, 8 * amt, 3, d, feet,
              [None, None], g=g, **kw)
-    sw = 42 * math.sin(math.pi * phase) * amt
-    p.hands = swing_hands(p, [sw, -sw])
+    sw = 34 * math.sin(math.pi * phase) * amt
+    p.hands = swing_hands(p, [sw, -sw], reach=74.0, spread=6.0)          # bras détendus, presque tendus
     return p
 
 

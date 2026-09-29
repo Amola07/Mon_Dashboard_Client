@@ -252,10 +252,13 @@ def draw(c, p, t, cape=None, cape_color="violet", glow=1.0, alpha=255, screen_ro
     arms = skia.Path()                                          # bras : dessinés PAR-DESSUS la tête, pour qu'un
     if "chains" in J:                                           # geste près du visage reste visible
         C = J["chains"]
-        for pts in list(C["legs"]) + [C["spine"]]:
-            smooth_path(path, pts)
-        for pts in C["arms"]:
-            smooth_path(arms, pts)
+        smooth_path(path, C["spine"])
+        # membres : trait net (presque droit, coude/genou arrondi) ; la chaîne souple ne donne que la position
+        # des articulations, elle ne dessine plus d'ondulations
+        for pts, dst in [(q, path) for q in C["legs"]] + [(q, arms) for q in C["arms"]]:
+            a0, m, b0 = pts[0], pts[len(pts) // 2], pts[-1]
+            dst.moveTo(float(a0[0]), float(a0[1]))
+            dst.quadTo(float(m[0]), float(m[1]), float(b0[0]), float(b0[1]))
     else:
         for (a, m, b), dst in [(x, arms) for x in J["arms"]] + [(x, path) for x in J["legs"]]:
             cp = m                                              # coude arrondi, membre presque droit
@@ -324,7 +327,7 @@ def stand(F, u, facing=1, crouch=0.0, lean=0.0, width=13.0, shift=0.0, hands=Non
     # contrapposto : pied arrière sous le bassin (il porte le poids), pied avant plus loin ; le bassin s'abaisse
     # un peu, le haut du dos s'arrondit et la tête avance (ligne d'action en S, jamais un piquet vertical)
     fu = feet_u or (u - facing * width * 0.7, u + facing * width * 1.5)
-    h = HIP_H * (1 - 0.5 * crouch) - 5
+    h = HIP_H * (1 - 0.5 * crouch) - 1
     pelvis = F.w(u + shift - facing * crouch * 14 - facing * 3, h)
     return Pose(pelvis, F.alpha + (lean - 3) * facing, bend + 14 + 8 * crouch, head + 6, facing,
                 [F.w(fu[0]), F.w(fu[1])], hands or [None, None], **kw)
