@@ -302,8 +302,8 @@ class Suite:
         p.feet = [None, None]
         p.g = (0.0, -1.0)
         J = build(replace(p, hands=[None, None]))
-        up_h = [v_add(J["shoulder"], v_add(v_mul(J["up"], 66), v_mul(J["fwd"], -20))),
-                v_add(J["shoulder"], v_add(v_mul(J["up"], 66), v_mul(J["fwd"], 20)))]
+        up_h = [v_add(J["shoulder"], v_add(v_mul(J["up"], 62), v_mul(J["fwd"], -56))),
+                v_add(J["shoulder"], v_add(v_mul(J["up"], 64), v_mul(J["fwd"], 58)))]
         k = ease((T - (t_apex - 0.15)) / 0.15)
         p.hands = [v_lerp(up_h[0], grip[1], k), v_lerp(up_h[1], grip[0], k)]
         if T >= t_apex:

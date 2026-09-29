@@ -220,6 +220,19 @@ class Cape:
         return left + right[::-1]
 
 
+def smooth_path(path, pts):
+    """Courbe lisse (Catmull-Rom) passant par tous les points."""
+    P = [(float(q[0]), float(q[1])) for q in pts]
+    path.moveTo(*P[0])
+    for i in range(len(P) - 1):
+        p0 = P[i - 1] if i > 0 else P[i]
+        p1, p2 = P[i], P[i + 1]
+        p3 = P[i + 2] if i + 2 < len(P) else P[i + 1]
+        c1 = (p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6)
+        c2 = (p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6)
+        path.cubicTo(*c1, *c2, *p2)
+
+
 def draw(c, p, t, cape=None, cape_color="violet", glow=1.0, alpha=255, screen_rot=0.0, J=None):
     """Dessine Éclat (coordonnées monde). J : articulations déjà calculées (lissées). Renvoie les articulations."""
     J = J or build(p)
@@ -234,14 +247,19 @@ def draw(c, p, t, cape=None, cape_color="violet", glow=1.0, alpha=255, screen_ro
         c.drawPath(path, _brush(cc, 110 * glow * alpha / 255, glow=10))
         c.drawPath(path, _brush(cc, 225 * alpha / 255))
     path = skia.Path()
-    for a, m, b in J["arms"] + J["legs"]:                      # membres souples : une courbe qui passe par le coude/genou
-        cp = v_sub(v_mul(m, 2.0), v_mul(v_add(a, b), 0.5))
-        path.moveTo(*a)
-        path.quadTo(*cp, *b)
-    path.moveTo(*J["pelvis"])                                   # colonne souple
-    mid = v_lerp(J["pelvis"], J["neck"], 0.5)
-    ctrl = v_add(v_sub(v_mul(J["chest"], 2.0), mid), v_mul(J["fwd"], p.bend * 0.25))
-    path.quadTo(*ctrl, *J["neck"])
+    if "chains" in J:                                           # chaînes souples (bras, jambes, colonne)
+        C = J["chains"]
+        for pts in list(C["arms"]) + list(C["legs"]) + [C["spine"]]:
+            smooth_path(path, pts)
+    else:
+        for a, m, b in J["arms"] + J["legs"]:                  # une courbe qui passe par le coude/genou
+            cp = v_sub(v_mul(m, 2.0), v_mul(v_add(a, b), 0.5))
+            path.moveTo(*a)
+            path.quadTo(*cp, *b)
+        path.moveTo(*J["pelvis"])
+        mid = v_lerp(J["pelvis"], J["neck"], 0.5)
+        ctrl = v_add(v_sub(v_mul(J["chest"], 2.0), mid), v_mul(J["fwd"], p.bend * 0.25))
+        path.quadTo(*ctrl, *J["neck"])
     path.addCircle(*J["head"], HEAD_R)
     c.drawPath(path, _pen(CYAN, LINE_W * 2.3, 75 * glow * alpha / 255, glow=LINE_W * 0.9))
     c.drawPath(path, _pen(CYAN, LINE_W, alpha))

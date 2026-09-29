@@ -166,8 +166,10 @@ def sitting(F, u, facing=1, lean=-12, **kw):
     return Pose(pelvis, F.alpha + lean * facing, 6, 6, facing, feet, hands, **kw)
 
 
-def walk(F, t, t0, t1, u0, u1, n, g, lean=6.0, **kw):
-    """Marche de u0 à u1 en n pas : pieds posés (ils ne glissent pas), bassin qui ondule, bras en balancier."""
+def walk(F, t, t0, t1, u0, u1, n, g, lean=10.0, **kw):
+    """Marche de u0 à u1 en n pas, façon cartoon : pieds posés (ils ne glissent pas), bassin qui rebondit
+    (bas au contact, haut au passage), buste qui pousse vers l'avant à chaque pas, bras qui balancent
+    depuis l'épaule (les chaînes souples ajoutent le retard du coude et de la main)."""
     s = ease_io((t - t0) / (t1 - t0))
     d = 1 if u1 > u0 else -1
     w = 10.0
@@ -190,14 +192,16 @@ def walk(F, t, t0, t1, u0, u1, n, g, lean=6.0, **kw):
         if k % 2 == f and k < n and v < 1 and idx < len(plants[f]) - 1:
             nxt = plants[f][idx + 1]
             e = ease_io(v)
-            feet.append(F.w(cur + (nxt - cur) * e, 15 * math.sin(math.pi * v)))
+            feet.append(F.w(cur + (nxt - cur) * e, 24 * math.sin(math.pi * v) ** 0.8))
         else:
             feet.append(F.w(cur, 0))
     pu = u0 + (u1 - u0) * s
     speed = abs(ease_io(clamp01((t - t0) / (t1 - t0)) + 0.01) - s) / 0.01
-    h = K.HIP_H - 3 - 4 * (1 - math.sin(math.pi * v))
-    p = Pose(F.w(pu, h), F.alpha + d * lean * min(1.0, speed), 4, 2, d, feet, [None, None], g=g, **kw)
-    sw = 22 * math.sin(math.pi * phase) * min(1.0, speed * 1.5)
+    amt = min(1.0, speed * 1.4)
+    h = K.HIP_H - 2 - 10 * (1 - math.sin(math.pi * v)) * amt
+    p = Pose(F.w(pu, h), F.alpha + d * (lean + 5 * math.sin(2 * math.pi * v)) * amt, 8 * amt, 3, d, feet,
+             [None, None], g=g, **kw)
+    sw = 42 * math.sin(math.pi * phase) * amt
     p.hands = swing_hands(p, [sw, -sw])
     return p
 
@@ -235,7 +239,32 @@ def keyed(t, keys, ease=ease_io):
     m0, m1 = tangent(k), tangent(k + 1)
     h00, h10, h01, h11 = 2 * u ** 3 - 3 * u ** 2 + 1, u ** 3 - 2 * u ** 2 + u, -2 * u ** 3 + 3 * u ** 2, u ** 3 - u ** 2
     v = [h00 * a + h10 * T * ma + h01 * b + h11 * T * mb for a, b, ma, mb in zip(V[k], V[k + 1], m0, m1)]
-    return K.vec_pose(v, poses[k] if u < 0.5 else poses[k + 1])
+    p = K.vec_pose(v, poses[k] if u < 0.5 else poses[k + 1])
+    return arc_limbs(p, poses[k], poses[k + 1], V[k], V[k + 1], u)
+
+
+def arc_limbs(p, pa, pb, va, vb, u):
+    """Les mains et les pieds qui changent de place décrivent des arcs autour de l'épaule (ou du bassin),
+    au lieu de couper en ligne droite. Un appui qui ne bouge pas reste où il est."""
+    Jp, Ja, Jb = build(p), build(pa), build(pb)
+    hands, feet = list(p.hands), list(p.feet)
+    for lst, idx, root in ((hands, (9, 11), "shoulder"), (feet, (5, 7), "pelvis")):
+        for i in range(2):
+            j = idx[i]
+            A, B = (va[j], va[j + 1]), (vb[j], vb[j + 1])
+            dist = math.hypot(B[0] - A[0], B[1] - A[1])
+            if dist < 8 or lst[i] is None:
+                continue
+            SA, SB, S = Ja[root], Jb[root], Jp[root]
+            r = math.hypot(A[0] - SA[0], A[1] - SA[1]) * (1 - u) + math.hypot(B[0] - SB[0], B[1] - SB[1]) * u
+            d = (lst[i][0] - S[0], lst[i][1] - S[1])
+            n = math.hypot(*d)
+            if n < 1:
+                continue
+            w = min(1.0, dist / 40) * math.sin(math.pi * u)
+            tgt = (S[0] + d[0] / n * r, S[1] + d[1] / n * r)
+            lst[i] = v_lerp(lst[i], tgt, w)
+    return replace(p, hands=hands, feet=feet)
 
 
 # ---------------------------------------------------------------- la chorégraphie
@@ -492,8 +521,8 @@ class Show:
             p.pelvis = v_add(p.pelvis, off)
             J = build(replace(p, hands=[None, None]))
             p.feet = [None, None]
-            p.hands = [v_add(J["shoulder"], v_add(v_mul(J["up"], 66), v_mul(J["fwd"], -34))),
-                       v_add(J["shoulder"], v_add(v_mul(J["up"], 64), v_mul(J["fwd"], 38)))]
+            p.hands = [v_add(J["shoulder"], v_add(v_mul(J["up"], 62), v_mul(J["fwd"], -58))),   # bras en V, bien
+                       v_add(J["shoulder"], v_add(v_mul(J["up"], 64), v_mul(J["fwd"], 60)))]    # visibles
             if tau > 0.5 * (t_down - t_up):                    # redescend : les jambes se tendent vers le sol
                 p.feet = [RWALL.w(u_jump - 10, max(0.0, h - 6)), RWALL.w(u_jump + 10, max(0.0, h - 4))]
             return p
@@ -898,7 +927,7 @@ def draw_arrow(c, center, phi, lw, glow=1.0, screen_rot=0.0, L=2 * A_HALF):
     c.drawPath(head, brush(GOLD))
     font = skia.Font(skia.Typeface("DejaVu Serif", skia.FontStyle.Italic()), 46 * max(0.5, k))
     side = n if n[1] <= 0.01 else v_mul(n, -1)
-    gpos = v_add(v_sub(tip, v_mul(d, 30 * k)), v_mul(side, 44 * max(0.5, k)))   # près de la pointe, hors du corps
+    gpos = v_add(v_sub(tip, v_mul(d, 30 * k)), v_mul(side, 64))                  # près de la pointe, hors du corps
     c.save()                                                   # la lettre reste droite à l'écran
     c.translate(*gpos)
     c.rotate(-screen_rot)
@@ -932,6 +961,12 @@ def lerp_joints(A, B, a):
     out["legs"] = [[v_lerp(p, q, a) for p, q in zip(la, lb)] for la, lb in zip(A["legs"], B["legs"])]
     out["arms"] = [[v_lerp(p, q, a) for p, q in zip(la, lb)] for la, lb in zip(A["arms"], B["arms"])]
     out["head_theta"] = A["head_theta"] + ((B["head_theta"] - A["head_theta"] + 180) % 360 - 180) * a
+    if "chains" in A and "chains" in B:
+        ca, cb = A["chains"], B["chains"]
+        out["chains"] = dict(spine=ca["spine"] + (cb["spine"] - ca["spine"]) * a,
+                             shoulder=ca["shoulder"] + (cb["shoulder"] - ca["shoulder"]) * a,
+                             arms=[x + (y - x) * a for x, y in zip(ca["arms"], cb["arms"])],
+                             legs=[x + (y - x) * a for x, y in zip(ca["legs"], cb["legs"])])
     return out
 
 
@@ -1300,26 +1335,24 @@ def smooth_motion(show, omega=0.2):
         n0 = np.linalg.norm(rel) or 1.0
         n1 = np.linalg.norm(s_rel) or 1.0
         Y[f][4] = Y[f][2] + s_rel * (n0 / n1)
-    # membres « spaghetti » : le milieu de chaque membre (coude, genou) et le buste suivent avec un retard
-    # élastique ; dans les gestes rapides, bras et jambes se courbent derrière le mouvement.
-    for idx, om, zeta, lim in ((1, 0.28, 0.5, 16.0), (5, 0.34, 0.5, 24.0), (7, 0.34, 0.5, 24.0),
-                               (9, 0.3, 0.45, 28.0), (11, 0.3, 0.45, 28.0)):
-        m = Y[0][idx].copy()
-        mv = np.zeros(2)
-        for f in range(N):
-            tgt = Y[f][idx]
-            mv += om * om * (tgt - m) - 2 * zeta * om * mv
-            m = m + mv
-            d = m - tgt
-            dn = np.linalg.norm(d)
-            if dn > lim:
-                m = tgt + d * (lim / dn)
-                mv *= 0.5
-            Y[f][idx] = m
+    # membres souples : colonne, bras et jambes deviennent des chaînes physiques (voir souple.py)
+    from . import souple
+    ch = souple.simulate(show, Y, X, ROOM, G)
     for f, fr in enumerate(show.frames):
-        P = [tuple(q) for q in Y[f]]
-        fr["J"] = points_joint(P, Js[f], math.degrees(B[f]))
-        dn = Y[f][2] - X[f][2]                                  # la cape suit le cou lissé
+        C = ch[f]
+        spn = C["spine"]
+        J = points_joint([tuple(q) for q in Y[f]], Js[f], math.degrees(B[f]))
+        neck = (float(spn[-1][0]), float(spn[-1][1]))
+        off = Y[f][4] - Y[f][2]
+        J["neck"] = neck
+        J["head"] = (neck[0] + float(off[0]), neck[1] + float(off[1]))
+        J["chest"] = tuple(map(float, spn[len(spn) // 2]))
+        J["shoulder"] = tuple(map(float, C["shoulder"]))
+        J["arms"] = [[tuple(map(float, a[0])), tuple(map(float, a[len(a) // 2])), tuple(map(float, a[-1]))] for a in C["arms"]]
+        J["legs"] = [[tuple(map(float, l[0])), tuple(map(float, l[len(l) // 2])), tuple(map(float, l[-1]))] for l in C["legs"]]
+        J["chains"] = C
+        fr["J"] = J
+        dn = np.asarray(neck) - X[f][2]                         # la cape suit le cou
         n = len(fr["cape"])
         fr["cape"] = [(q[0] + dn[0] * (1 - i / n), q[1] + dn[1] * (1 - i / n)) for i, q in enumerate(fr["cape"])]
 
