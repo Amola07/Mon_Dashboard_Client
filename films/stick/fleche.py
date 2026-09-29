@@ -84,6 +84,7 @@ T_ARRIVE = (0.50, 0.75)
 T_POKE = 5.30
 T_GRAB, T_PUSH, T_OFF, T_FACE = 7.45, 7.52, 7.66, 8.00
 T_HIT = 15.55
+T_A2 = 21.2                                    # début de l'acte 2
 SPIN_T, SPIN = 3.0, -450.0                     # après le choc : 1¼ tour (sens antihoraire), s'arrête pointée vers le haut
 
 
@@ -133,6 +134,7 @@ class Stone:
     def __init__(self, pos, vel, r, sides, ang, spin):
         self.p, self.v, self.r, self.sides, self.a, self.w = list(pos), list(vel), r, sides, ang, spin
         self.held = False
+        self.fixed = False                                     # posée dans une pile (acte 2)
         self.drag = 0.0                                        # frottement de l'air (un peu différent pour chacune)
 
 
@@ -265,6 +267,13 @@ class Show:
         self.pick = None
         self.last_pose = None
         self.head_hits = []
+        self.stone_spots = [tuple(s.p) for s in self.stones]
+        self.arrows = None                                     # acte 2 et suite : flèches (centre, direction, longueur)
+        self.suite = None
+        self.carry_pos = None
+        self.sag = 0.0
+        self.finished = False
+        self.shots2, self.tempo2 = [], []
 
     # --- Éclat
     def getup(self, F, u0, t, t0, g_dir, e_sit="surpris", e_up="etourdi"):
@@ -290,6 +299,11 @@ class Show:
         return p
 
     def hero(self, t):
+        if t >= T_A2:
+            if self.suite is None:
+                from .fleche_suite import Suite
+                self.suite = Suite(self, t)
+            return self.suite.step(t)
         g = gravity(t)
         gd = v_mul(g, 1 / G) if v_len(g) > 1 else None
         # ---- 1. dort en apesanteur ; la flèche arrive, la gravité s'allume : il tombe à plat, sans se réveiller
@@ -601,7 +615,11 @@ class Show:
         pose = self.hero(t)
         self.last_pose = pose
         J = build(pose)
-        g = gravity(t)
+        if self.arrows is None:
+            g = gravity(t)
+        else:
+            from .fleche_suite import grav
+            g = grav(self)
         # pierres
         body = [(J["head"], K.HEAD_R), (J["chest"], 16), (J["pelvis"], 16), (J["legs"][0][1], 10),
                 (J["legs"][1][1], 10), (J["legs"][0][2], 10), (J["legs"][1][2], 10), (J["arms"][0][1], 8),
@@ -613,8 +631,11 @@ class Show:
             h = DT / sub
             for s in self.stones:
                 if s.held:
-                    hand = J["arms"][1][2]
+                    hand = self.carry_pos or J["arms"][1][2]
                     s.p = [hand[0], hand[1]]
+                    s.v = [0.0, 0.0]
+                    continue
+                if s.fixed:
                     s.v = [0.0, 0.0]
                     continue
                 s.v[0] = (s.v[0] + g[0] * h) * (1 - s.drag * h)
@@ -643,16 +664,17 @@ class Show:
             for i in range(len(self.stones)):
                 for j in range(i + 1, len(self.stones)):
                     a, b = self.stones[i], self.stones[j]
-                    if a.held or b.held:
+                    if a.held or b.held or (a.fixed and b.fixed):
                         continue
                     d = v_sub(b.p, a.p)
                     L = v_len(d)
                     m = a.r + b.r
                     if 1e-6 < L < m:
                         n = (d[0] / L, d[1] / L)
-                        pen_ = (m - L) / 2
-                        a.p = [a.p[0] - n[0] * pen_, a.p[1] - n[1] * pen_]
-                        b.p = [b.p[0] + n[0] * pen_, b.p[1] + n[1] * pen_]
+                        wa, wb = (0.0, 1.0) if a.fixed else ((1.0, 0.0) if b.fixed else (0.5, 0.5))
+                        pen_ = m - L
+                        a.p = [a.p[0] - n[0] * pen_ * wa, a.p[1] - n[1] * pen_ * wa]
+                        b.p = [b.p[0] + n[0] * pen_ * wb, b.p[1] + n[1] * pen_ * wb]
                         rv = (b.v[0] - a.v[0]) * n[0] + (b.v[1] - a.v[1]) * n[1]
                         if rv < 0:
                             jimp = -(1.2) * rv / 2
@@ -662,7 +684,7 @@ class Show:
                                 self.events.append((t, "clack", tuple(v_lerp(a.p, b.p, 0.5)), min(1.0, -rv / 1400)))
             # pierres contre Éclat (son corps pousse les pierres ; une pierre sur la tête le fait réagir)
             for s in self.stones:
-                if s.held or (s is getattr(self, "thrown", None) and t < T_HIT + 0.3):
+                if s.held or s.fixed or (s is getattr(self, "thrown", None) and t < T_HIT + 0.3):
                     continue
                 for k, (q, r) in enumerate(body):
                     d = v_sub(s.p, q)
@@ -712,14 +734,21 @@ class Show:
         return build(self.ceiling_poses()[1])["head"]
 
     def run(self):
-        for f in range(int(DURATION * FPS)):
+        f = 0
+        while not self.finished and f < 200 * FPS:
             t = f / FPS
             pose = self.step(t)
+            if self.arrows is None:
+                c = arrow_center(t)
+                arrows = [(c, arrow_phi(t), 2 * A_HALF)] if c is not None else []
+            else:
+                arrows = [(tuple(a["c"]), a["phi"], a["L"]) for a in self.arrows]
             self.frames.append({
                 "pose": pose, "cape": list(self.cape.p),
                 "stones": [(tuple(s.p), s.r, s.sides, s.a) for s in self.stones],
-                "arrow": (arrow_center(t), arrow_phi(t)),
+                "arrows": arrows, "sag": self.sag,
             })
+            f += 1
         return self
 
 
@@ -801,7 +830,7 @@ def camera(t, show, f):
     """Caméra continue : pas de coupe sèche, elle glisse, zoome et pivote d'un cadrage au suivant."""
     def blended(k):
         center, zoom, rot = shot_state(k, t, show, f)
-        if k > 0:
+        if k > 0 and t - SHOTS[k][0] < 1.0:
             pc, pz, pr = blended(k - 1)                        # le plan d'avant peut être encore en mouvement
             trans = 0.8 + 0.1 * abs(rot - pr) / 180            # une grande rotation prend un peu plus de temps
             u = (t - SHOTS[k][0]) / trans
@@ -824,24 +853,27 @@ def camera(t, show, f):
 
 
 # ---------------------------------------------------------------- dessin
-def draw_arrow(c, center, phi, lw, glow=1.0, screen_rot=0.0):
+def draw_arrow(c, center, phi, lw, glow=1.0, screen_rot=0.0, L=2 * A_HALF):
+    if L < 4:
+        return
     d = unit(phi)
     n = (-d[1], d[0])
-    tail = v_sub(center, v_mul(d, A_HALF))
-    tip = v_add(center, v_mul(d, A_HALF))
-    neck = v_sub(tip, v_mul(d, 34))
+    k = min(1.0, L / 120)
+    tail = v_sub(center, v_mul(d, L / 2))
+    tip = v_add(center, v_mul(d, L / 2))
+    neck = v_sub(tip, v_mul(d, 34 * k))
     c.drawLine(*tail, *neck, pen(GOLD, 22 * lw, 90 * glow, glow=16 * lw))
     c.drawLine(*tail, *neck, pen(GOLD, 8 * lw))
     head = skia.Path()
     head.moveTo(*v_add(tip, v_mul(d, 4)))
-    head.lineTo(*v_add(neck, v_mul(n, 24)))
-    head.lineTo(*v_add(neck, v_mul(n, -24)))
+    head.lineTo(*v_add(neck, v_mul(n, 24 * k)))
+    head.lineTo(*v_add(neck, v_mul(n, -24 * k)))
     head.close()
     c.drawPath(head, brush(GOLD, 120 * glow, glow=14 * lw))
     c.drawPath(head, brush(GOLD))
-    font = skia.Font(skia.Typeface("DejaVu Serif", skia.FontStyle.Italic()), 58)
+    font = skia.Font(skia.Typeface("DejaVu Serif", skia.FontStyle.Italic()), 58 * max(0.4, k))
     side = n if n[1] <= 0.01 else v_mul(n, -1)
-    gpos = v_add(center, v_mul(side, 46))
+    gpos = v_add(center, v_mul(side, 46 * max(0.4, k)))
     c.save()                                                   # la lettre reste droite à l'écran
     c.translate(*gpos)
     c.rotate(-screen_rot)
@@ -874,7 +906,9 @@ def frame_at(show, t):
         "pose": lerp_pose(A["pose"], B["pose"], a) if a > 1e-6 else A["pose"],
         "cape": [v_lerp(p, q, a) for p, q in zip(A["cape"], B["cape"])],
         "stones": [(v_lerp(p[0], q[0], a), p[1], p[2], p[3] + (q[3] - p[3]) * a) for p, q in zip(A["stones"], B["stones"])],
-        "arrow": (arrow_center(t), arrow_phi(t)),
+        "arrows": [(v_lerp(p[0], q[0], a), p[1] + ((q[1] - p[1] + 180) % 360 - 180) * a, p[2] + (q[2] - p[2]) * a)
+                   for p, q in zip(A["arrows"], B["arrows"])] if len(A["arrows"]) == len(B["arrows"]) else A["arrows"],
+        "sag": A["sag"] + (B["sag"] - A["sag"]) * a,
     }
 
 
@@ -894,9 +928,14 @@ def draw_frame(c, show, i, stars):
     c.translate(-cx, -cy)
     lw = 1 / zoom
     # la pièce : quatre murs, points aux sommets et repères réguliers
-    room = skia.Rect.MakeLTRB(-ROOM, -ROOM, ROOM, ROOM)
-    c.drawRect(room, pen(LINE, 10 * lw, 60, glow=10 * lw))
-    c.drawRect(room, pen(LINE, 3.2 * lw))
+    walls = skia.Path()
+    walls.moveTo(-ROOM, ROOM)
+    walls.lineTo(-ROOM, -ROOM)
+    walls.lineTo(ROOM, -ROOM)
+    walls.lineTo(ROOM, ROOM)
+    walls.quadTo(0, ROOM + 2 * fr["sag"], -ROOM, ROOM)             # le sol plie sous une gravité énorme
+    c.drawPath(walls, pen(LINE, 10 * lw, 60, glow=10 * lw))
+    c.drawPath(walls, pen(LINE, 3.2 * lw))
     for i in range(-2, 3):
         for q in ((i * 240, -ROOM), (i * 240, ROOM), (-ROOM, i * 240), (ROOM, i * 240)):
             c.drawCircle(*q, 4 * lw, brush(LINE, 170))
@@ -904,13 +943,15 @@ def draw_frame(c, show, i, stars):
         c.drawCircle(*q, 9 * lw, brush((0, 0, 0)))
         c.drawCircle(*q, 9 * lw, pen(LINE, 2.6 * lw))
     # flèche (traînée à l'arrivée)
-    center, phi = fr["arrow"]
-    if center is not None:
+    c.save()
+    c.clipRect(skia.Rect.MakeLTRB(-ROOM - 30, -ROOM - 30, ROOM + 30, ROOM + 2 * fr["sag"] + 4))   # jamais à travers le sol
+    for center, phi, L in fr["arrows"]:
         if t < T_ARRIVE[1] + 0.05:
             for k in range(1, 8):
                 q = arrow_center(max(T_ARRIVE[0], t - k * 0.012)) or center
                 c.drawLine(q[0], q[1] - A_HALF, q[0], q[1] + A_HALF, pen(GOLD, 10 * lw, 110 - 12 * k))
-        draw_arrow(c, center, phi, lw, screen_rot=rot)
+        draw_arrow(c, center, phi, lw, screen_rot=rot, L=L)
+    c.restore()
     # effets
     for (te, kind, pos, force) in show.events:
         dt = t - te
@@ -961,9 +1002,9 @@ def soundtrack(show, path):
 
     def env(keys0):
         out = []
+        keys = [(s2f(a) if a < DURATION else D, v) for a, v in keys0]
         for k in range(fr):
             x = k / FPS
-            keys = [(s2f(a) if a < DURATION else D, v) for a, v in keys0]
             v = keys[-1][1]
             for (a, va), (b, vb) in zip(keys, keys[1:]):
                 if a <= x < b:
@@ -979,6 +1020,18 @@ def soundtrack(show, path):
             music.hit(float(t), 0.28)
     for t, st in [(1.35, 4), (3.2, 7), (5.3, 9), (6.8, 11), (13.55, 11), (15.55, 14), (19.4, 11)]:
         music.hit(s2f(t), 0.8, step=st)
+    t_snap = getattr(show.suite, "t_snap", None) if show.suite else None
+    t_end = DURATION - 7.0
+    x = s2f(T_A2 + 1.0)
+    while x < s2f(t_end):                                       # la mélodie reprend, plus dense quand il maîtrise
+        story = float(np.interp(x, np.arange(len(F2S)) / FPS, F2S))
+        if not (t_snap and t_snap < story < t_snap + 1.2):
+            music.hit(x, 0.24 if story < (t_snap or 1e9) else 0.2)
+        x += 0.3 if story < (t_snap or 1e9) else 0.45
+    x = s2f(t_end)
+    while x < FILM_DUR - 0.5:                                   # berceuse de la fin (apesanteur)
+        music.hit(x, 0.18)
+        x += 0.8
     layers.append((music, 0.35))
     fx = Sound(np.random.default_rng(6), key="ré", timbre="cristal", prog=PROGRESSIONS[0])
     last = {}
@@ -995,7 +1048,8 @@ def soundtrack(show, path):
         elif kind == "whoosh":
             fx.hit(te, 0.4, step=4, octave=1)
     fx.bed("vent", env([(0, 0.15), (0.5, 0.2), (0.75, 0.8), (1.3, 0.1), (7.8, 0.1), (8.3, 0.7), (8.9, 0.1),
-                        (15.5, 0.1), (16.0, 1.0), (18.3, 0.8), (18.8, 0.1), (20, 0.1)]), 1.0)
+                        (15.5, 0.1), (16.0, 1.0), (18.3, 0.8), (18.8, 0.1), (DURATION - 8, 0.1), (DURATION - 6, 0.3),
+                        (DURATION, 0.15)]), 1.0)
     layers.append((fx, 0.25))
     for i, (snd, pad) in enumerate(layers):
         wav = Path(path).with_name(f"f{i}.wav")
@@ -1016,11 +1070,16 @@ SHOW = None
 
 
 def get_show():
-    global SHOW
+    global SHOW, DURATION, F2S, FILM_DUR
     if SHOW is None:
         SHOW = Show()
         SHOW.events.append((T_ARRIVE[1], "boom", A, 1.0))
         SHOW.run()
+        DURATION = (len(SHOW.frames) - 1) / FPS                # la durée du récit sort de la simulation
+        SHOTS.extend(sorted((s for s in SHOW.shots2 if s[0] > SHOTS[-1][0]), key=lambda s: s[0]))
+        TEMPO.extend(sorted(((x[0], x[1] * 0.9) for x in SHOW.tempo2 if x[0] > TEMPO[-1][0]), key=lambda x: x[0]))
+        F2S = _build_tempo()
+        FILM_DUR = (len(F2S) - 1) / FPS
     return SHOW
 
 
