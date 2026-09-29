@@ -30,9 +30,9 @@ FPS = 24
 @dataclass
 class P:
     pel: tuple = (-3.0, HIP_H - 1)                              # jambes presque tendues, comme en vrai
-    lean: float = -3.0
-    bend: float = 14.0
-    head: float = 6.0
+    lean: float = 2.0                                           # légèrement voûté, tête en avant (référence)
+    bend: float = 16.0
+    head: float = 9.0
     feet: tuple = ((-9.0, 0.0), (20.0, 0.0))
     hands: tuple = (None, None)
     expr: str = "neutre"
@@ -78,7 +78,7 @@ def _lerp2(a, b, u):
 def _hand_rel(spec, i, F, u0, facing, shoulder):
     """Main → vecteur (avant, haut) depuis l'épaule, dans le repère de la surface."""
     if spec is None:
-        return (-18.0, -72.0) if i == 0 else (22.0, -71.0)         # bras détendu : presque tendu
+        return (-18.0, -80.0) if i == 0 else (22.0, -79.0)         # bras détendu : presque tendu
     kind, a, b = spec
     if kind == "e":
         return (a, b)
@@ -184,7 +184,7 @@ clip("reflechir", "Réfléchir : main au menton", K(
 
 _point_prep = replace(REPOS, lean=-8, head=4, pel=(-6, HIP_H - 7), hands=(None, ("e", -26, -26)), expr="decide")
 _point = replace(REPOS, lean=8, bend=8, head=-2, pel=(4, HIP_H - 6), feet=((-12, 0), (26, 0)),
-                 hands=(("e", -24, -58), ("e", 78, 4)), expr="decide")
+                 hands=(("e", -24, -66), ("e", 85, 4)), expr="decide")
 clip("pointer", "Montrer du doigt", K(
     (0, _repos(), "io"),
     (6, _point_prep, "io"),                                    # anticipation : le bras recule
@@ -382,10 +382,10 @@ def cycle(kind, frame, F, u0=0.0, facing=1, g=(0.0, 1.0), expr="neutre"):
         a = s * (1 if j == front else -1)
         if kind == "marche":
             ang = math.radians(-90 + a * arm)
-            r = 62
+            r = 80
         else:                                                  # course : coudes pliés, bras qui pompent
             ang = math.radians(-60 + a * arm)
-            r = 46
+            r = 52
         hands.append(v_add(sh, v_add(v_mul(fw, r * math.cos(ang)), v_mul(up, r * math.sin(ang)))))
     p.hands = hands
     return p, (pu if facing > 0 else 2 * u0 - pu)

@@ -17,12 +17,13 @@ from .hero import CAPES, CYAN, _brush, _pen, draw_emote, draw_face
 # Proportions : jambes longues (≈ 42 % de la hauteur), buste court, pas de cou visible (la tête pose sur le haut du
 # buste) et bras attachés juste sous la tête. Hauteur totale inchangée (≈ 210) : le décor reste valable.
 THIGH, SHIN = 45.0, 44.0
-UPPER, FORE = 40.0, 38.0
-SPINE = 60.0                     # bassin → haut du buste
-SHOULDER = 53.0                  # bassin → épaules (juste sous la tête)
-NECK = 30.0                      # haut du buste → centre de la tête (< HEAD_R : aucun trait de cou)
-HEAD_R = 34.0
+UPPER, FORE = 44.0, 42.0         # bras longs : la main pendante arrive à mi-cuisse
+SPINE = 68.0                     # bassin → haut du buste
+SHOULDER = 62.0                  # bassin → épaules (juste sous la tête)
+HEAD_R = 28.0                    # tête ≈ un quart de la hauteur (comme la référence), le visage reste lisible
+NECK = HEAD_R - 4                # haut du buste → centre de la tête (< HEAD_R : aucun trait de cou)
 HIP_H = 86.0                     # hauteur du bassin debout (genoux jamais verrouillés)
+TOP = SPINE + NECK + HEAD_R      # bassin → sommet du crâne
 LINE_W = 9.0
 
 
@@ -166,7 +167,7 @@ def build(p):
         elif p.g is None:                                      # apesanteur : bras qui flottent devant
             tgt = free_limb(shoulder, p.theta, p.facing, 95 + 20 * i, 60)
         else:
-            tgt = v_add(shoulder, v_mul(p.g, 64), v_mul(f, 24 if i else -20))
+            tgt = v_add(shoulder, v_mul(p.g, 76), v_mul(f, 24 if i else -20))
         elbow, hand = ik2(shoulder, tgt, UPPER, FORE, back_down, stretch=1.15)
         arms.append([shoulder, elbow, hand])
     return {"pelvis": p.pelvis, "chest": chest, "neck": neck, "shoulder": shoulder, "head": head,
@@ -216,7 +217,7 @@ class Cape:
             d = v_sub(b, a)
             L = v_len(d) or 1.0
             n = (-d[1] / L, d[0] / L)
-            w = 4 + 17 * (i / (len(pts) - 1)) ** 0.8
+            w = 3 + 11 * (i / (len(pts) - 1)) ** 0.8          # cape fine : elle ne mange pas la silhouette
             left.append(v_add(q, v_mul(n, w)))
             right.append(v_add(q, v_mul(n, -w)))
         return left + right[::-1]
@@ -271,7 +272,7 @@ def draw(c, p, t, cape=None, cape_color="violet", glow=1.0, alpha=255, screen_ro
     path.addCircle(*J["head"], HEAD_R)
     glow_all = skia.Path(path)
     glow_all.addPath(arms)
-    c.drawPath(glow_all, _pen(CYAN, LINE_W * 2.3, 75 * glow * alpha / 255, glow=LINE_W * 0.9))
+    c.drawPath(glow_all, _pen(CYAN, LINE_W * 1.8, 38 * glow * alpha / 255, glow=LINE_W * 0.6))   # halo discret : le trait reste net
     c.drawPath(path, _pen(CYAN, LINE_W, alpha))
     c.drawCircle(*J["head"], HEAD_R - LINE_W / 2, _brush((0, 0, 0), alpha))
     look = p.look
@@ -329,7 +330,7 @@ def stand(F, u, facing=1, crouch=0.0, lean=0.0, width=13.0, shift=0.0, hands=Non
     fu = feet_u or (u - facing * width * 0.7, u + facing * width * 1.5)
     h = HIP_H * (1 - 0.5 * crouch) - 1
     pelvis = F.w(u + shift - facing * crouch * 14 - facing * 3, h)
-    return Pose(pelvis, F.alpha + (lean - 3) * facing, bend + 14 + 8 * crouch, head + 6, facing,
+    return Pose(pelvis, F.alpha + (lean + 2) * facing, bend + 16 + 8 * crouch, head + 9, facing,
                 [F.w(fu[0]), F.w(fu[1])], hands or [None, None], **kw)
 
 

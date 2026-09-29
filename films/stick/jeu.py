@@ -116,8 +116,12 @@ def worry(p, a):
 
 
 def dazed(p, a):
-    w = a * 5.0
-    return replace(p, head=p.head + 9 * math.sin(w), theta=p.theta + 3 * math.sin(w + 1.2) * p.facing)
+    """Sonné : la tête tombe d'un côté, tient, puis de l'autre (poses tenues, pas un balancement continu)."""
+    k = int(a / 0.45)
+    u = min(1.0, (a - k * 0.45) / 0.12)
+    s0, s1 = (1 if k % 2 else -1), (-1 if k % 2 else 1)
+    s = s0 + (s1 - s0) * u * u * (3 - 2 * u) if k else s1 * u * u * (3 - 2 * u)
+    return replace(p, head=p.head + 9 * s, theta=p.theta + 3 * s * p.facing)
 
 
 def act(p, t):
@@ -133,7 +137,7 @@ def act(p, t):
     if kind == "etoiles":
         return dazed(p, a)
     if kind == "zzz":
-        return replace(p, bend=p.bend + 4 * math.sin(t * 2.2))
+        return p                                               # le sommeil : immobile (seuls les « z » bougent)
     return p
 
 

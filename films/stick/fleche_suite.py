@@ -71,6 +71,13 @@ def standing(Fr, u, facing, g=None, **kw):
     return stand(Fr, u, facing, g=g or F.unit(down_phi(Fr)), **kw)
 
 
+# temps forts après certaines phases (secondes du récit) : la pose est tenue avant l'action suivante, comme les
+# tenues de l'animation de référence (le spectateur lit la pose, puis ça repart)
+BEATS = {"Suite.stand_up": 0.3, "Suite.look": 0.25, "Suite.carry": 0.25, "Suite.land": 0.3, "Suite.tilt": 0.3,
+         "Suite.flip": 0.2, "Suite.stretch_small": 0.3, "Suite.shrink": 0.35, "Suite.cancel": 0.3,
+         "Suite.merge": 0.4, "Suite.hop": 0.25}
+
+
 # ---------------------------------------------------------------- les phases
 class Suite:
     def __init__(self, show, t):
@@ -97,10 +104,17 @@ class Suite:
         if "init" not in st:
             st["init"] = True
             self.p0 = show.last_pose
+        if t < getattr(self, "beat_until", -1.0):            # temps fort : la pose est tenue, immobile
+            return self.beat_pose
         pose = self.phases[self.i](t, st)
         if st.get("done"):
+            name = getattr(self.phases[self.i], "__qualname__", "")
+            beat = next((b for k, b in BEATS.items() if name.startswith(k)), 0.0)
             self.i += 1
-            self.st = {"t0": t + DT}
+            self.st = {"t0": t + DT + beat}
+            if beat and self.i < len(self.phases):
+                self.beat_until = t + DT + beat
+                self.beat_pose = pose
         return pose
 
     # -- outils

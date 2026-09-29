@@ -156,7 +156,7 @@ def make_stones():
 
 
 # ---------------------------------------------------------------- poses utiles
-def swing_hands(p, angles, reach=72.0, spread=10.0):
+def swing_hands(p, angles, reach=80.0, spread=10.0):
     """Mains pendantes dans le sens de la gravité, balancées de `angles` (degrés, + = vers l'avant).
     Au repos les bras s'écartent du buste (l'arrière recule, l'avant avance) : ils ne se confondent jamais avec
     le tronc, la silhouette reste lisible."""
@@ -216,7 +216,7 @@ def walk(F, t, t0, t1, u0, u1, n, g, lean=10.0, **kw):
     p = Pose(F.w(pu, h), F.alpha + d * (lean + 5 * math.sin(2 * math.pi * v)) * amt, 8 * amt, 3, d, feet,
              [None, None], g=g, **kw)
     sw = 34 * math.sin(math.pi * phase) * amt
-    p.hands = swing_hands(p, [sw, -sw], reach=74.0, spread=6.0)          # bras détendus, presque tendus
+    p.hands = swing_hands(p, [sw, -sw], reach=82.0, spread=6.0)          # bras détendus, presque tendus
     return p
 
 
@@ -478,23 +478,23 @@ class Show:
                 s["v"] += a * DT
                 s["u"] += s["v"] * DT
                 s["t"] = t
-            if s["u"] >= ROOM - 141:
-                s["u"] = ROOM - 141
+            if s["u"] >= ROOM - K.TOP:
+                s["u"] = ROOM - K.TOP
                 self.t_corner = t
                 self.events.append((t, "thud", (ROOM, ROOM - 30), 1.0))
             return self.face_down(s["u"], gd, "peur")
         tc = self.t_corner
         head_u = -(ROOM - 30)                                  # repère du mur de droite : u = -y
-        on_head = Pose(RWALL.w(head_u + 4, 34 + 107), 90, 0, 0, 1,
-                       [RWALL.w(head_u + 40, 141 + 60), RWALL.w(head_u + 70, 141 + 44)],
+        on_head = Pose(RWALL.w(head_u + 4, K.TOP), 90, 0, 0, 1,
+                       [RWALL.w(head_u + 40, K.TOP + 60), RWALL.w(head_u + 70, K.TOP + 44)],
                        [RWALL.w(head_u + 60, 0), RWALL.w(head_u + 90, 0)], g=GRAV_RIGHT, expr="etourdi")
         if t < 9.40:                                           # sur la tête dans le coin, sonné
             if t < tc + 0.14:
-                return lerp_pose(self.face_down(ROOM - 141, gd, "peur"), on_head, ease_io((t - tc) / 0.14))
+                return lerp_pose(self.face_down(ROOM - K.TOP, gd, "peur"), on_head, ease_io((t - tc) / 0.14))
             hit = [h for h in self.head_hits if 0 <= t - h < 0.35]
             return replace(on_head, emote=("etoiles", t - tc), expr="surpris" if hit else "etourdi")
-        head_pt = RWALL.w(head_u, 34)
-        u_lie = head_u + 107
+        head_pt = RWALL.w(head_u, K.HEAD_R)
+        u_lie = head_u + K.SPINE + K.NECK
         lie_r = self.lie(RWALL, u_lie, GRAV_RIGHT, "surpris")
         if t < 9.75:                                           # bascule sur le dos (côté opposé au visage)
             u = ease_in((t - 9.40) / 0.35)
@@ -1125,10 +1125,16 @@ def story_t(x):
     return float(np.interp(x * FPS, np.arange(len(F2S)), F2S))
 
 
-def draw_frame(c, show, i, stars, t=None):
+def draw_frame(c, show, i, stars, t=None, fi=None):
     if t is None:
         t = float(F2S[min(i, len(F2S) - 1)])
     f, fr = frame_at(show, t)
+    if fi is not None and fi in getattr(show, "out_J", {}):   # tenue pose à pose : la cape suit le cou
+        J2 = show.out_J[fi]
+        dn = v_sub(J2["neck"], fr["J"]["neck"])
+        m = len(fr["cape"])
+        fr["cape"] = [(q[0] + dn[0] * (1 - k / m), q[1] + dn[1] * (1 - k / m)) for k, q in enumerate(fr["cape"])]
+        fr["J"] = J2
     (cx, cy), zoom, rot = camera(t, show, f)
     c.clear(skia.ColorBLACK)
     c.save()
@@ -1415,7 +1421,7 @@ def smooth_motion(show, omega=0.3):
     sv = np.zeros(2)
     for f in range(N):
         rel = Y[f][4] - Y[f][2]
-        sv += -2 * 0.35 * 0.32 * sv - 0.32 * 0.32 * (s_rel - rel)
+        sv += -2 * 0.75 * 0.32 * sv - 0.32 * 0.32 * (s_rel - rel)   # un léger retard, sans ballottement
         s_rel = s_rel + sv
         n0 = np.linalg.norm(rel) or 1.0
         n1 = np.linalg.norm(s_rel) or 1.0
@@ -1442,6 +1448,94 @@ def smooth_motion(show, omega=0.3):
         fr["cape"] = [(q[0] + dn[0] * (1 - i / n), q[1] + dn[1] * (1 - i / n)) for i, q in enumerate(fr["cape"])]
 
 
+def _flat(J):
+    parts = [np.asarray(joint_points(J), float).ravel(), [J["head_theta"]]]
+    if "chains" in J:
+        C = J["chains"]
+        parts += [C["spine"].ravel(), np.asarray(C["shoulder"]).ravel()] + [x.ravel() for x in C["arms"]] + \
+                 [x.ravel() for x in C["legs"]]
+    return np.concatenate([np.asarray(p, float).ravel() for p in parts])
+
+
+def _unflat(v, J):
+    out = points_joint([tuple(v[2 * k:2 * k + 2]) for k in range(13)], J, float(v[26]))
+    if "chains" in J:
+        C = J["chains"]
+        i = 27
+        spine = v[i:i + C["spine"].size].reshape(C["spine"].shape); i += C["spine"].size
+        sh = v[i:i + 2]; i += 2
+        arms, legs = [], []
+        for x in C["arms"]:
+            arms.append(v[i:i + x.size].reshape(x.shape)); i += x.size
+        for x in C["legs"]:
+            legs.append(v[i:i + x.size].reshape(x.shape)); i += x.size
+        out["chains"] = dict(spine=spine, shoulder=sh, arms=arms, legs=legs)
+        out["neck"] = (float(spine[-1][0]), float(spine[-1][1]))
+        out["shoulder"] = (float(sh[0]), float(sh[1]))
+    return out
+
+
+def pose_holds(show, thr=6.0, min_len=4, frac=0.7):
+    """Tenues « pose à pose », comme dans l'animation de référence (40 % d'images immobiles) : quand Éclat ne
+    fait que dériver lentement, il ne dérive plus — il TIENT sa pose, puis passe vite à la suivante.
+    Jamais quand ses mains tiennent un objet qui bouge (elles le lâcheraient)."""
+    n = int(FILM_DUR * OUT_FPS)
+    frs = [frame_at(show, story_t(i / OUT_FPS))[1] for i in range(n)]
+    V = np.array([_flat(fr["J"]) for fr in frs])
+    P = V[:, :26].reshape(n, 13, 2)
+    d = np.linalg.norm(np.diff(P, axis=0), axis=2).max(axis=1)
+    ok = np.zeros(n, bool)
+    for i in range(n - 1):
+        if d[i] >= thr:
+            continue
+        hands = [np.asarray(frs[i]["J"]["arms"][k][2]) for k in range(2)]
+        busy = False
+        A0, A1 = frs[i]["arrows"], frs[i + 1]["arrows"]
+        if len(A0) == len(A1):
+            for (c0, p0, L0), (c1, p1, L1) in zip(A0, A1):
+                moved = math.dist(c0, c1) > 0.8 or abs((p1 - p0 + 180) % 360 - 180) > 0.4 or abs(L1 - L0) > 0.5
+                if moved and any(math.dist(h, c0) < L0 / 2 + 30 for h in hands):
+                    busy = True
+        for (q0, r, _, _), (q1, _, _, _) in zip(frs[i]["stones"], frs[i + 1]["stones"]):
+            if math.dist(q0, q1) > 0.8 and any(math.dist(h, q0) < r + 30 for h in hands):
+                busy = True
+        ok[i] = not busy
+    out = {}
+    i = 0
+    while i < n - 1:
+        if not ok[i]:
+            i += 1
+            continue
+        j = i
+        while j < n - 1 and ok[j]:
+            j += 1
+        if j - i >= min_len:                                   # [i, j] : tenue puis passage rapide
+            for k in range(i, j + 1):
+                u = (k - i) / (j - i)
+                e = 0.0 if u <= frac else ease_io((u - frac) / (1 - frac))
+                v = V[i] + (V[j] - V[i]) * e
+                J = _unflat(v, frs[k]["J"])
+                out[k] = J
+        i = j + 1
+    # choc : le corps se fige un instant, écrasé, avant de réagir (tenue d'impact du dessin animé)
+    for te, kind, pos, force in show.events:
+        if kind != "thud" or force < 0.35:
+            continue
+        k0 = int(round(s2f(te) * OUT_FPS)) + 1
+        if not 0 <= k0 < n - 8:
+            continue
+        if math.dist(pos, frs[k0]["J"]["pelvis"]) > 220:
+            continue
+        hold_n, blend = (5, 3) if force > 0.6 else (3, 3)
+        base = V[k0]
+        for k in range(k0, k0 + hold_n + blend):
+            if k in out:
+                continue
+            u = 0.0 if k < k0 + hold_n else ease_io((k - k0 - hold_n + 1) / (blend + 1))
+            out[k] = _unflat(base + (V[k] - base) * u, frs[k]["J"])
+    return out
+
+
 def get_show():
     global SHOW, DURATION, F2S, FILM_DUR
     if SHOW is None:
@@ -1455,6 +1549,7 @@ def get_show():
         F2S = _build_tempo()
         FILM_DUR = (len(F2S) - 1) / FPS
         SHOW.cam_path = camera_path(SHOW)
+        SHOW.out_J = pose_holds(SHOW)
     return SHOW
 
 
@@ -1473,7 +1568,7 @@ def render_video(f0, f1, path):
                            "-s", f"{W}x{H}", "-r", str(OUT_FPS), "-i", "-", "-c:v", "libx264", "-preset", "medium",
                            "-crf", "18", "-pix_fmt", "yuv420p", str(path)], stdin=subprocess.PIPE)
     for j in range(f0, f1):
-        draw_frame(surf.getCanvas(), show, 0, stars, t=story_t(j / OUT_FPS))
+        draw_frame(surf.getCanvas(), show, 0, stars, t=story_t(j / OUT_FPS), fi=j)
         ff.stdin.write(surf.makeImageSnapshot().toarray().tobytes())
     ff.stdin.close()
     ff.wait()
