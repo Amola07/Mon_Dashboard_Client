@@ -114,8 +114,8 @@ def simulate(show, Y, X, room, G):
     arms = [Chain(np.linspace(Y[0][3], Y[0][10 + 2 * i], N_LIMB), ARM_L) for i in range(2)]
     legs = [Chain(np.linspace(Y[0][0], Y[0][6 + 2 * i], N_LIMB), LEG_L) for i in range(2)]
     k_spine = np.linspace(0.48, 0.24, N_SPINE)
-    k_arm = np.linspace(0.42, 0.13, N_LIMB)
-    k_leg = np.linspace(0.50, 0.22, N_LIMB)
+    k_arm = np.linspace(0.42, 0.18, N_LIMB)
+    k_leg = np.linspace(0.50, 0.28, N_LIMB)
     k_pinned = np.linspace(0.45, 0.35, N_LIMB)
     out = []
     for f in range(N):
@@ -145,7 +145,7 @@ def simulate(show, Y, X, room, G):
         pel, chest, neck = Y[f][0], Y[f][1], Y[f][2]
         # colonne : de la pose (courbe par le buste), + respiration
         mid = (pel + neck) / 2
-        tgt_sp = bezier_points(pel, 2 * chest - mid, neck, N_SPINE)
+        tgt_sp = bezier_points(pel, mid + 3.0 * (chest - mid), neck, N_SPINE)   # ligne d'action accentuée
         up = (neck - pel) / max(1e-6, float(np.hypot(*(neck - pel))))
         breath = 0.0 * math.sin(2 * math.pi * 0.32 * t)            # tenues vraiment immobiles
         tgt_sp[1:] += up * breath * np.linspace(0, 1, N_SPINE)[1:, None]

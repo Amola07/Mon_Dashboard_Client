@@ -14,13 +14,15 @@ import skia
 
 from .hero import CAPES, CYAN, _brush, _pen, draw_emote, draw_face
 
-THIGH, SHIN = 38.0, 37.0
+# Proportions : jambes longues (≈ 42 % de la hauteur), buste court, pas de cou visible (la tête pose sur le haut du
+# buste) et bras attachés juste sous la tête. Hauteur totale inchangée (≈ 210) : le décor reste valable.
+THIGH, SHIN = 45.0, 44.0
 UPPER, FORE = 40.0, 38.0
-SPINE = 68.0                     # bassin → cou
-SHOULDER = 56.0                  # bassin → épaules (un peu sous le cou : les bras levés ne passent pas derrière la tête)
-NECK = 39.0                      # cou → centre de la tête
+SPINE = 60.0                     # bassin → haut du buste
+SHOULDER = 53.0                  # bassin → épaules (juste sous la tête)
+NECK = 30.0                      # haut du buste → centre de la tête (< HEAD_R : aucun trait de cou)
 HEAD_R = 34.0
-HIP_H = 72.0                     # hauteur du bassin debout (jambes presque tendues)
+HIP_H = 86.0                     # hauteur du bassin debout (genoux jamais verrouillés)
 LINE_W = 9.0
 
 
@@ -164,7 +166,7 @@ def build(p):
         elif p.g is None:                                      # apesanteur : bras qui flottent devant
             tgt = free_limb(shoulder, p.theta, p.facing, 95 + 20 * i, 60)
         else:
-            tgt = v_add(shoulder, v_mul(p.g, 70), v_mul(f, 10 if i else -8))
+            tgt = v_add(shoulder, v_mul(p.g, 64), v_mul(f, 24 if i else -20))
         elbow, hand = ik2(shoulder, tgt, UPPER, FORE, back_down, stretch=1.15)
         arms.append([shoulder, elbow, hand])
     return {"pelvis": p.pelvis, "chest": chest, "neck": neck, "shoulder": shoulder, "head": head,
@@ -315,11 +317,13 @@ class Frame:
 def stand(F, u, facing=1, crouch=0.0, lean=0.0, width=13.0, shift=0.0, hands=None, bend=0.0, head=0.0,
           feet_u=None, **kw):
     """Debout sur la surface F, bassin au-dessus de u. crouch 0..1 plie les genoux ; lean incline le buste."""
-    fu = feet_u or (u - width, u + width)
-    h = HIP_H * (1 - 0.5 * crouch) - 2
-    pelvis = F.w(u + shift - facing * crouch * 10, h)
-    return Pose(pelvis, F.alpha + lean * facing, bend, head, facing, [F.w(fu[0]), F.w(fu[1])],
-                hands or [None, None], **kw)
+    # contrapposto : pied arrière sous le bassin (il porte le poids), pied avant plus loin ; le bassin s'abaisse
+    # un peu, le haut du dos s'arrondit et la tête avance (ligne d'action en S, jamais un piquet vertical)
+    fu = feet_u or (u - facing * width * 0.7, u + facing * width * 1.5)
+    h = HIP_H * (1 - 0.5 * crouch) - 5
+    pelvis = F.w(u + shift - facing * crouch * 14 - facing * 3, h)
+    return Pose(pelvis, F.alpha + (lean - 3) * facing, bend + 14 + 8 * crouch, head + 6, facing,
+                [F.w(fu[0]), F.w(fu[1])], hands or [None, None], **kw)
 
 
 def lying(F, u, head_first=-1, knees=0.3, **kw):

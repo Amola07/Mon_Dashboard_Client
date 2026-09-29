@@ -150,12 +150,15 @@ def make_stones():
 
 
 # ---------------------------------------------------------------- poses utiles
-def swing_hands(p, angles, reach=70.0):
-    """Mains pendantes dans le sens de la gravité, balancées de `angles` (degrés, + = vers l'avant)."""
+def swing_hands(p, angles, reach=66.0, spread=16.0):
+    """Mains pendantes dans le sens de la gravité, balancées de `angles` (degrés, + = vers l'avant).
+    Au repos les bras s'écartent du buste (l'arrière recule, l'avant avance) : ils ne se confondent jamais avec
+    le tronc, la silhouette reste lisible."""
     J = build(replace(p, hands=[None, None]))
     g = p.g or v_mul(up_vec(p.theta), -1)
     base = math.degrees(math.atan2(g[1], g[0]))
     side = 1 if (J["fwd"][0] * -g[1] + J["fwd"][1] * g[0]) > 0 else -1
+    angles = [angles[0] - spread, angles[1] + spread]
     return [v_add(J["shoulder"], v_mul(unit(base - side * a), reach)) for a in angles]
 
 
