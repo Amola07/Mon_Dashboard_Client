@@ -1,4 +1,4 @@
-"""Rendu d'un court métrage 3D : python -m films.render_film --film goutte [--scale 0.5] [--samples 96].
+"""Rendu d'un court métrage 3D : python -m films.render_film --film goutte --scene film [--scale 0.5] [--samples 96].
 
 Film muet : Blender calcule les images (GPU conseillé : Kaggle), puis on agrandit en 1080×1920, on ajoute un
 halo doux, la musique (accords, notes sur les moments clés) et les bruitages (vent, sifflement de la chute).
@@ -39,9 +39,46 @@ def write_wav(path, st):
         w.writeframes((st * 32767).astype(np.int16).tobytes())
 
 
+def film_music(tl, duration, path):
+    """Musique en sections (ambiance différente par acte), fondues les unes dans les autres."""
+    from satisfying.engine import PROGRESSIONS
+    n = int(duration * SR)
+    mix = np.zeros((n, 2))
+    for i, (t0, t1, key, prog, timbre, pad) in enumerate(tl.MUSIC):
+        snd = Sound(np.random.default_rng(10 + i), key=key, timbre=timbre, prog=PROGRESSIONS[prog])
+        snd.bar = 4.0
+        for t, step, vel in tl.CUES:
+            if t0 <= t < t1:
+                snd.hit(t, vel, step=step)
+        for a0, a1, gap in tl.ARPEGGIO:
+            t = max(a0, t0)
+            while t < min(a1, t1):
+                snd.hit(t, 0.45)
+                t += gap
+        if i == 0:
+            for kind, keys in tl.BEDS:
+                env = [tl.interp(keys, k / 60, ease=lambda u: u) for k in range(int(duration * 60))]
+                snd.bed(kind, env, level=1.0)
+        snd.render(duration, path.with_name(f"part{i}.wav"), pad_level=pad)
+        part = read_wav(path.with_name(f"part{i}.wav"))[:n]
+        tt = np.arange(len(part)) / SR
+        fade = 1.5
+        env = np.clip((tt - (t0 - fade)) / fade, 0, 1) * np.clip(((t1 + fade) - tt) / fade, 0, 1)
+        if i == 0:
+            env = np.clip(((t1 + fade) - tt) / fade, 0, 1)
+        if i == len(tl.MUSIC) - 1:
+            env = np.clip((tt - (t0 - fade)) / fade, 0, 1)
+        mix[:len(part)] += part * env[:, None] / max(1e-9, np.abs(part).max())
+    write_wav(path, mix)
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(prog="python -m films.render_film", description=__doc__)
     ap.add_argument("--film", default="goutte")
+    ap.add_argument("--scene", default="film", choices=["film", "pilote"])
+    ap.add_argument("--step", type=int, default=1, help="n'image qu'une image sur N (brouillon rapide)")
+    ap.add_argument("--no-grains", action="store_true", help="sans grains de sable (brouillon rapide)")
+    ap.add_argument("--frames-dir", default=None, help="dossier des images (permet de reprendre un rendu interrompu)")
     ap.add_argument("--scale", type=float, default=0.5, help="0.5 = 540×960 (agrandi ensuite), 1 = 1080×1920")
     ap.add_argument("--samples", type=int, default=96)
     ap.add_argument("--device", default="auto", choices=["auto", "cpu"])
@@ -50,21 +87,22 @@ def main(argv=None):
     ap.add_argument("--out", default="output/films")
     a = ap.parse_args(argv)
 
-    tl = importlib.import_module(f"films.{a.film}.timeline")
-    scene = FILMS / a.film / "pilote.py"
+    tl = importlib.import_module(f"films.{a.film}.{'film_timeline' if a.scene == 'film' else 'timeline'}")
+    scene = FILMS / a.film / f"{a.scene}.py"
     out_dir = Path(a.out)
     out_dir.mkdir(parents=True, exist_ok=True)
     run = find_blender(a.blender)
     t0 = time.time()
     with tempfile.TemporaryDirectory() as tmp:
         tmp = Path(tmp)
-        frames = tmp / "frames"
-        frames.mkdir()
-        params = {"out": str(frames), "scale": a.scale, "samples": a.samples, "device": a.device}
+        frames = Path(a.frames_dir) if a.frames_dir else tmp / "frames"
+        frames.mkdir(parents=True, exist_ok=True)
+        params = {"out": str(frames), "scale": a.scale, "samples": a.samples, "device": a.device, "step": a.step,
+                  "grains": not a.no_grains}
         if a.still:
             params["still"] = a.still
         (tmp / "p.json").write_text(json.dumps(params), encoding="utf-8")
-        n_total = tl.f(tl.DURATION) - 1
+        n_total = (tl.f(tl.DURATION) - 1 + a.step - 1) // a.step
         proc = subprocess.Popen(run(scene, tmp / "p.json"), stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                                 text=True, bufsize=1)
 
@@ -90,14 +128,23 @@ def main(argv=None):
             return dest
 
         # image : agrandissement + halo doux
-        subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-framerate", str(tl.FPS),
+        subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-framerate", str(tl.FPS / a.step),
                         "-pattern_type", "glob", "-i", str(frames / "*.png"), "-vf",
                         "scale=1080:1920:flags=lanczos,format=gbrp,split[a][b];[b]gblur=sigma=24,eq=brightness=-0.05:contrast=1.25[g];"
                         "[a][g]blend=all_mode=screen:all_opacity=0.35,format=yuv420p",
-                        "-c:v", "libx264", "-preset", "slow", "-crf", "16", "-pix_fmt", "yuv420p", str(tmp / "v.mp4")],
+                        "-r", str(tl.FPS), "-c:v", "libx264", "-preset", "slow", "-crf", "16", "-pix_fmt", "yuv420p",
+                        str(tmp / "v.mp4")],
                        check=True)
-        # son : nappe d'accords, notes aux moments clés, vent du désert, sifflement de la chute
-        duration = n_total / tl.FPS
+        duration = (tl.f(tl.DURATION) - 1) / tl.FPS
+        if hasattr(tl, "MUSIC"):
+            film_music(tl, duration, tmp / "a.wav")
+            out = out_dir / f"{a.film}.mp4"
+            subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-i", str(tmp / "v.mp4"),
+                            "-i", str(tmp / "a.wav"), "-c:v", "copy", "-c:a", "aac", "-b:a", "192k", "-shortest",
+                            "-movflags", "+faststart", str(out)], check=True)
+            print(f"{out} : {duration:.1f} s, rendu en {(time.time() - t0) / 60:.0f} min", flush=True)
+            return out
+        # pilote : nappe d'accords, notes aux moments clés, vent du désert, sifflement de la chute
         snd = Sound(np.random.default_rng(7), key="ré", timbre="cristal")
         for t, step, vel in tl.CUES:
             snd.hit(t, vel, step=step)

@@ -270,6 +270,7 @@ def sprout(location=(0, 0, 0), alive=0.0, size=1.0):
         bp.co = tuple(c * size for c in p)
         bp.handle_left_type = bp.handle_right_type = "AUTO"
     stem = bpy.data.objects.new("tige", curve)
+    handles = {"stem": stem, "points": list(sp.bezier_points), "stem_mat": stem_m, "leaves": []}
     bpy.context.collection.objects.link(stem)
     stem.data.materials.append(stem_m)
     stem.location = location
@@ -284,6 +285,8 @@ def sprout(location=(0, 0, 0), alive=0.0, size=1.0):
         leaf.rotation_euler = (0, droop, side)
         leaf.location = (location[0], location[1], location[2] + 0.36 * size)
         leaf.data.materials.append(leaf_m)
+        handles["leaves"].append(leaf)
+    handles["leaf_mat"] = leaf_m
     if alive > 0.5:
         bpy.ops.mesh.primitive_uv_sphere_add(radius=0.06 * size, location=(location[0], location[1], location[2] + 0.66 * size))
         bud = smooth(bpy.context.object)
@@ -319,7 +322,7 @@ def sprout(location=(0, 0, 0), alive=0.0, size=1.0):
     l.new(b.outputs["BSDF"], mix_out.inputs[2])
     l.new(mix_out.outputs["Shader"], n["Material Output"].inputs["Surface"])
     patch.data.materials.append(cm)
-    return stem
+    return handles
 
 
 # ---------------------------------------------------------------- vapeur
@@ -403,6 +406,7 @@ def cloud(location=(0, 0, 0), size=1.0, frown=0.0, seed=4):
     obj.data.materials.append(m)
     obj.location = location
     obj.scale = (size, size, size)
+    parts, brows = [], []
     black = mat("pupille nuage", (0.01, 0.01, 0.015), rough=0.15, coat=1.0)
     spark = mat("reflet nuage", (1, 1, 1), emit=(1, 1, 1), strength=5)
     brow_m = mat("sourcil", lin(170, 185, 210), rough=0.6)
@@ -410,13 +414,21 @@ def cloud(location=(0, 0, 0), size=1.0, frown=0.0, seed=4):
         ex, ey, ez = location[0] + side * 0.32 * size, location[1] - 0.95 * size, location[2] + 0.12 * size
         bpy.ops.mesh.primitive_uv_sphere_add(radius=0.1 * size, location=(ex, ey, ez))
         smooth(bpy.context.object).data.materials.append(black)
+        parts.append(bpy.context.object)
         bpy.ops.mesh.primitive_uv_sphere_add(radius=0.03 * size, location=(ex - 0.03 * size, ey - 0.09 * size, ez + 0.04 * size))
         bpy.context.object.data.materials.append(spark)
-        if frown:
-            bpy.ops.mesh.primitive_cylinder_add(radius=0.025 * size, depth=0.22 * size,
-                                                location=(ex, ey - 0.02 * size, ez + 0.17 * size),
-                                                rotation=(0, math.pi / 2 + side * 0.35 * frown, 0))
-            smooth(bpy.context.object).data.materials.append(brow_m)
+        parts.append(bpy.context.object)
+        bpy.ops.mesh.primitive_cylinder_add(radius=0.025 * size, depth=0.22 * size,
+                                            location=(ex, ey - 0.02 * size, ez + 0.17 * size),
+                                            rotation=(0, math.pi / 2 + side * 0.35, 0))
+        brow = smooth(bpy.context.object)
+        brow.data.materials.append(brow_m)
+        brow.scale = (frown, frown, frown)
+        brows.append(brow)
+    for p in parts + brows:
+        p.parent = obj
+        p.matrix_parent_inverse = obj.matrix_world.inverted()
+    obj["brows"] = [b.name for b in brows]
     return obj
 
 
@@ -439,15 +451,20 @@ def rain(area=(-4, 4, -2, 14), top=6.0, count=260, seed=5, water=None):
 # ---------------------------------------------------------------- fleur de verre
 def glass_flower(location=(0, 0, 0), size=1.0, petals=6, openness=1.0, seed=0):
     rnd = random.Random(seed)
+    bpy.ops.object.empty_add(location=location)
+    root = bpy.context.object
+    parts = []
     glass = mat("pétale", lin(120, 180, 255), rough=0.05, trans=0.85, ior=1.4, coat=1.0)
     heart = mat("cœur", lin(255, 230, 150), emit=lin(255, 220, 140), strength=2.0)
     stem_m = mat("tige verte", lin(80, 170, 90), rough=0.4)
     h = 0.55 * size
     bpy.ops.mesh.primitive_cylinder_add(radius=0.02 * size, depth=h, location=(location[0], location[1], location[2] + h / 2))
     smooth(bpy.context.object).data.materials.append(stem_m)
+    parts.append(bpy.context.object)
     top = (location[0], location[1], location[2] + h)
     bpy.ops.mesh.primitive_uv_sphere_add(radius=0.06 * size, location=top)
     smooth(bpy.context.object).data.materials.append(heart)
+    parts.append(bpy.context.object)
     tilt = math.radians(80 - 55 * openness)
     for k in range(petals):
         a = 2 * math.pi * k / petals + rnd.uniform(-0.1, 0.1)
@@ -458,6 +475,11 @@ def glass_flower(location=(0, 0, 0), size=1.0, petals=6, openness=1.0, seed=0):
         p.location = (top[0] + math.cos(a) * 0.15 * size * math.cos(tilt), top[1] + math.sin(a) * 0.15 * size * math.cos(tilt),
                       top[2] + 0.15 * size * math.sin(tilt))
         p.data.materials.append(glass)
+        parts.append(p)
+    for p in parts:
+        p.parent = root
+        p.matrix_parent_inverse = root.matrix_world.inverted()
+    return root
 
 
 def ground_patch(height_fn, center=(0, 0), radius=2.5, res=60):
