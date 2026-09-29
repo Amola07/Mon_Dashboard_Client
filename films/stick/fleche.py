@@ -33,6 +33,11 @@ A_HALF = 120.0                                 # demi-longueur de la flèche
 FLOOR = Frame((0.0, ROOM), 0)
 RWALL = Frame((ROOM, 0.0), 270)                # mur de droite (sol quand la gravité pointe à droite) : u = -y
 CEIL = Frame((0.0, -ROOM), 180)
+LWALL = Frame((-ROOM, 0.0), 90)
+
+
+def v_dot(a, b):
+    return a[0] * b[0] + a[1] * b[1]
 
 
 def clamp01(u):
@@ -602,8 +607,7 @@ class Show:
                 self.events.append((t, "thud", tuple(tb.c), min(1.0, tb.contact[2] / 900)))
             if t > 18.2 and tb.contact and tb.contact[0] == 1 and tb.contact[1] == -1:
                 self.t_ceiling = t
-        pel = v_sub(tuple(tb.c), v_mul(up_vec(tb.th), 30))
-        flail = jeu.airborne(pel, tb.th, tuple(tb.v), gd, ROOM, 1, t)   # réflexes : équilibre, puis mains en avant
+        flail = self.tumble_pose(t, tb, g, gd)
         if self.t_ceiling is None:
             self.flail_last = flail
             if t < 15.85:
@@ -623,6 +627,39 @@ class Show:
             dt_h = t - hit[0]
             p = replace(p, expr="colere" if dt_h > 0.35 else "surpris", emote=("!", dt_h) if dt_h < 0.6 else None,
                         head=-16 * math.exp(-dt_h * 6) + 4)
+        return p
+
+    def tumble_pose(self, t, tb, g, gd):
+        """Pendant que la gravité tourne, il n'est pas une roue : plaqué contre une paroi, il y reste à plat ;
+        en l'air, il tourne le corps pour présenter les pieds du côté où il tombe (réflexe), bras écartés pour
+        l'équilibre, puis mains en avant juste avant le choc."""
+        if not hasattr(self, "tb_th"):
+            self.tb_th = tb.th
+        lim = ROOM - Tumble.R
+        gm = v_len(g)
+        gdn = v_mul(g, 1 / max(1e-6, gm))
+        surf = None
+        if self.t_ceiling is None:
+            for Fr, axis, sgn in ((FLOOR, 1, 1), (CEIL, 1, -1), (RWALL, 0, 1), (LWALL, 0, -1)):
+                if tb.c[axis] * sgn >= lim - 1.5 and g[axis] * sgn > 0.45 * gm:
+                    surf = Fr
+        if surf is not None:                                   # plaqué au sol du moment : allongé, à plat
+            tan = (math.cos(math.radians(surf.alpha)), math.sin(math.radians(surf.alpha)))
+            hf = 1 if v_dot(up_vec(self.tb_th), tan) > 0 else -1
+            u = surf.local(tb.c)[0]
+            p = lying(surf, u, head_first=hf, knees=0.35, g=gdn, expr="etourdi")
+            J = build(p)
+            su = surf.local(J["shoulder"])[0]
+            p.hands = [surf.w(su - 26, 0), surf.w(su + 24, 0)]
+            self.tb_th = p.theta
+        else:
+            want = math.degrees(math.atan2(-gdn[0], gdn[1]))
+            d = (want - self.tb_th + 180) % 360 - 180
+            step = 330 * DT
+            self.tb_th += max(-step, min(step, d))
+            pel = v_sub(tuple(tb.c), v_mul(up_vec(self.tb_th), 30))
+            p = jeu.airborne(pel, self.tb_th, tuple(tb.v), gd, ROOM, 1, t)
+        tb.th = self.tb_th
         return p
 
     def face_down(self, u, gd, expr):
@@ -1165,14 +1202,6 @@ def draw_frame(c, show, i, stars, t=None):
     cape = K.Cape((0, 0))
     cape.p = fr["cape"]
     J = fr["J"]
-    if f >= 2:                                                  # traînées de mouvement sur les gestes rapides
-        speed = max(v_len(v_sub(q, p)) for q, p in zip(joint_points(J), joint_points(show.frames[f - 2]["J"]))) * FPS / 2
-        if speed > 700:
-            a = min(1.0, (speed - 700) / 1200)
-            for k, al in ((4, 40), (2, 70)):
-                if f - k >= 0:
-                    K.draw(c, show.frames[f - k]["pose"], t, None, alpha=al * a, glow=0.4, screen_rot=rot,
-                           J=show.frames[f - k]["J"])
     squash = impact_squash(show, t, J, fr["g"])
     if squash:
         c.save()

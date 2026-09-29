@@ -163,10 +163,19 @@ def airborne(pel, theta, vel, g, room, facing=1, t=0.0, expr="peur", R=60.0):
     if brace > 0 and sp > 1:
         dv = v_mul(vel, 1 / sp)
         side = right_vec(theta)
-        reach = [v_add(sh, v_add(v_mul(dv, 70), v_mul(side, -14))), v_add(sh, v_add(v_mul(dv, 70), v_mul(side, 14)))]
-        spread = [v_lerp(spread[i], reach[i], brace) for i in range(2)]
-        tuck = [free_limb(pel, theta, facing, 60, 52), free_limb(pel, theta, facing, 75, 50)]
-        legs = [v_lerp(legs[i], tuck[i], brace * 0.7) for i in range(2)]
+        head_first = (up_vec(theta)[0] * dv[0] + up_vec(theta)[1] * dv[1]) > 0
+        if head_first:                                         # tête la première : les mains protègent
+            reach = [v_add(sh, v_add(v_mul(dv, 70), v_mul(side, -14))),
+                     v_add(sh, v_add(v_mul(dv, 70), v_mul(side, 14)))]
+            spread = [v_lerp(spread[i], reach[i], brace) for i in range(2)]
+            tuck = [free_limb(pel, theta, facing, 60, 52), free_limb(pel, theta, facing, 75, 50)]
+            legs = [v_lerp(legs[i], tuck[i], brace * 0.7) for i in range(2)]
+        else:                                                  # pieds devant : jambes tendues vers la paroi,
+            land = [v_add(pel, v_add(v_mul(dv, 84), v_mul(side, -16))),   # bras écartés pour l'équilibre
+                    v_add(pel, v_add(v_mul(dv, 80), v_mul(side, 18)))]
+            legs = [v_lerp(legs[i], land[i], brace) for i in range(2)]
+            wide = [free_limb(sh, theta, facing, -100, 72), free_limb(sh, theta, facing, 105, 72)]
+            spread = [v_lerp(spread[i], wide[i], brace) for i in range(2)]
         p.expr = "surpris" if brace > 0.5 else expr
     p.hands, p.feet = spread, legs
     p.gaze = v_add(pel, v_mul(vel, 0.4)) if sp > 1 else None     # il regarde où il va
