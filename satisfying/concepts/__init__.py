@@ -1,7 +1,7 @@
 """Un module par concept. Chaque module expose TITLE et render(ctx) -> durée en secondes."""
 from importlib import import_module
 
-NAMES = ["grow", "escape", "pendulum", "spiro", "multiply"]
+NAMES = ["grow", "escape", "pendulum", "spiro", "multiply", "sand", "ocean", "aurora"]
 
 
 def load(name):

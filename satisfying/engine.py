@@ -27,19 +27,21 @@ class Palette:
     dark: bool = False
 
 
-PALETTES = [
-    Palette("pêche lavande", ((250, 243, 236), (238, 231, 247)), (243, 237, 246), (255, 255, 255), (110, 90, 140),
-            [(255, 196, 170), (255, 170, 196), (214, 182, 255), (164, 208, 255), (158, 230, 204)]),
-    Palette("menthe", ((238, 246, 244), (244, 238, 250)), (234, 242, 243), (255, 255, 255), (80, 110, 120),
-            [(158, 230, 204), (164, 208, 255), (196, 182, 255), (255, 176, 206), (255, 214, 160)]),
-    Palette("sorbet", ((252, 240, 240), (240, 240, 252)), (246, 238, 242), (255, 255, 255), (130, 90, 110),
-            [(255, 214, 160), (255, 186, 170), (255, 164, 200), (206, 176, 255), (170, 196, 255)]),
-    Palette("sable", ((246, 240, 230), (236, 228, 216)), (240, 233, 222), (252, 249, 244), (120, 100, 80),
-            [(236, 178, 140), (230, 150, 150), (200, 170, 210), (150, 190, 200), (170, 200, 160)]),
-    Palette("nuit douce", ((34, 32, 58), (18, 18, 34)), (28, 27, 50), (58, 56, 92), (0, 0, 10),
+PALETTES = [  # toutes sur fond noir étoilé, objets pastel
+    Palette("nuit lavande", ((14, 12, 30), (3, 3, 8)), (20, 18, 40), (62, 58, 104), (0, 0, 0),
+            [(255, 196, 170), (255, 170, 196), (214, 182, 255), (164, 208, 255), (158, 230, 204)], dark=True),
+    Palette("nuit menthe", ((6, 18, 22), (2, 4, 6)), (12, 26, 32), (40, 82, 92), (0, 0, 0),
+            [(158, 230, 204), (164, 208, 255), (196, 182, 255), (255, 176, 206), (255, 214, 160)], dark=True),
+    Palette("nuit sorbet", ((22, 10, 20), (4, 2, 6)), (30, 16, 30), (92, 52, 82), (0, 0, 0),
+            [(255, 214, 160), (255, 186, 170), (255, 164, 200), (206, 176, 255), (170, 196, 255)], dark=True),
+    Palette("nuit dorée", ((16, 12, 8), (3, 2, 2)), (26, 20, 16), (92, 76, 56), (0, 0, 0),
+            [(246, 200, 150), (240, 170, 160), (214, 186, 226), (170, 206, 216), (190, 220, 176)], dark=True),
+    Palette("nuit douce", ((34, 32, 58), (8, 8, 18)), (28, 27, 50), (58, 56, 92), (0, 0, 0),
             [(255, 190, 200), (255, 214, 170), (190, 230, 200), (170, 200, 255), (214, 190, 255)], dark=True),
-    Palette("océan nuit", ((16, 36, 52), (8, 16, 28)), (14, 30, 44), (40, 70, 92), (0, 5, 10),
+    Palette("océan nuit", ((16, 36, 52), (4, 10, 18)), (14, 30, 44), (40, 70, 92), (0, 0, 0),
             [(140, 220, 230), (150, 200, 255), (190, 180, 255), (255, 190, 220), (255, 225, 180)], dark=True),
+    Palette("noir absolu", ((8, 8, 12), (0, 0, 0)), (14, 14, 20), (50, 50, 66), (0, 0, 0),
+            [(255, 180, 190), (255, 220, 170), (180, 235, 200), (170, 210, 255), (220, 190, 255)], dark=True),
 ]
 
 
@@ -78,18 +80,40 @@ def smooth(u):
 class Painter:
     """Éléments visuels communs, dans le style de la palette."""
 
-    def __init__(self, pal: Palette):
+    def __init__(self, pal: Palette, seed: int = 0):
         self.pal = pal
+        self.t = 0.0
         self.bg = skia.GradientShader.MakeLinear([(0, 0), (0, H)], [color(pal.bg[0]), color(pal.bg[1])])
+        rng = np.random.default_rng(seed)
+        n = 230
+        self.stars = np.column_stack([rng.uniform(0, W, n), rng.uniform(0, H, n), rng.power(3, n) * 2.2 + 0.5,
+                                      rng.uniform(0, 2 * math.pi, n), rng.uniform(0.3, 1.4, n)])
+        self.nebula = [(rng.uniform(0.15, 0.85) * W, rng.uniform(0.15, 0.85) * H, rng.uniform(500, 900),
+                        pal.accents[int(rng.integers(len(pal.accents)))], rng.uniform(0, 6.28)) for _ in range(2)]
 
-    def background(self, c):
+    def background(self, c, stars=True):
+        """Fond noir étoilé : dégradé, voile de nébuleuse très léger, étoiles qui scintillent et dérivent."""
+        t = self.t
+        self.t += 1 / FPS
         c.drawPaint(paint(shader=self.bg))
+        for x, y, r, col, ph in self.nebula:
+            x += 40 * math.sin(t * 0.05 + ph)
+            sh = skia.GradientShader.MakeRadial((x, y), r, [color(col, 16), color(col, 0)])
+            c.drawCircle(x, y, r, paint(shader=sh))
+        if not stars:
+            return
+        for x, y, r, ph, sp in self.stars:
+            a = 0.35 + 0.65 * (0.5 + 0.5 * math.sin(ph + t * sp * 2.2))
+            yy = (y + t * 4 * sp) % H
+            if r > 2.0:
+                c.drawCircle(x, yy, r * 3, paint(skia.Color(255, 255, 255, int(28 * a)), blur=r * 2))
+            c.drawCircle(x, yy, r, paint(skia.Color(255, 255, 255, int(235 * a))))
 
     def container(self, c, cx, cy, r, rim=22):
         p = self.pal
         c.drawCircle(cx, cy + 18, r + rim, paint(color(p.shadow, 90 if p.dark else 45), blur=34))
         c.drawCircle(cx, cy, r + rim, paint(color(p.rim)))
-        c.drawCircle(cx, cy, r, paint(color(p.surface)))
+        c.drawCircle(cx, cy, r, paint(color(p.surface, 185)))   # les étoiles transparaissent
         c.save()
         c.clipPath(skia.Path.Circle(cx, cy, r), doAntiAlias=True)
         c.drawCircle(cx, cy - 14, r + 20, paint(color(p.shadow, 70 if p.dark else 40), "stroke", 40, blur=16))
@@ -212,6 +236,7 @@ class Sound:
     prog: list = field(default_factory=list)
     bar: float = 4.0
     hits: list = field(default_factory=list)
+    beds: list = field(default_factory=list)
 
     def __post_init__(self):
         self.key = self.key or str(self.rng.choice(list(KEYS)))
@@ -224,6 +249,10 @@ class Sound:
     def hit(self, t, vel=1.0, step=None, octave=0):
         """Un impact. step=None : note suivante de l'accord en cours ; step=k : k-ième degré de la gamme."""
         self.hits.append((t, vel, step, octave))
+
+    def bed(self, kind, env, level=1.0):
+        """Fond sonore continu ("sable", "océan", "vent") ; env : intensité par image (0 à 1)."""
+        self.beds.append((kind, np.asarray(env, dtype=float), level))
 
     def chord_at(self, t):
         return self.prog[int(t / self.bar) % len(self.prog)]
@@ -268,6 +297,11 @@ class Sound:
         dry += pad * pad_level
         left = dry * 0.8 + _reverb(dry, 1) * 0.6
         right = dry * 0.8 + _reverb(dry, 2) * 0.6
+        peak = max(1e-9, np.abs(left).max(), np.abs(right).max())
+        for kind, env, level in self.beds:
+            e = np.interp(np.arange(N) / SR, np.arange(len(env)) / FPS, env, right=0.0)
+            for side, buf in enumerate((left, right)):
+                buf += _noise(kind, N, 10 + side) * e * level * peak * 0.18
         st = np.stack([left, right], axis=1)[: int(duration * SR)]
         fi, fo = int(0.3 * SR), int(0.6 * SR)
         st[:fi] *= np.linspace(0, 1, fi)[:, None]
@@ -278,6 +312,20 @@ class Sound:
             w.setsampwidth(2)
             w.setframerate(SR)
             w.writeframes((st * 32767).astype(np.int16).tobytes())
+
+
+def _noise(kind, n, seed):
+    """Bruit filtré par son spectre : souffle de sable, ressac, vent."""
+    x = np.fft.rfft(np.random.default_rng(seed).standard_normal(n))
+    f = np.fft.rfftfreq(n, 1 / SR) + 1.0
+    if kind == "sable":
+        shape = np.exp(-((np.log2(f) - np.log2(5000)) ** 2) / 2.0)
+    elif kind == "océan":
+        shape = 1 / np.sqrt(f) * np.exp(-f / 2500) + 0.02 * np.exp(-((np.log2(f) - 12.5) ** 2) / 1.5)
+    else:  # vent
+        shape = np.exp(-((np.log2(f) - np.log2(500)) ** 2) / 1.2)
+    y = np.fft.irfft(x * shape, n)
+    return y / max(1e-9, np.sqrt((y ** 2).mean()))
 
 
 def _reverb(x, seed, length=2.2, decay=0.55):

@@ -47,7 +47,7 @@ vidéo de 64 s en 1080×1920 à 60 fps se rend en 5 à 7 minutes sur un processe
 ```bash
 sudo apt-get install -y libegl1 && pip install skia-python numpy
 python -m satisfying                      # concept choisi automatiquement (le moins récemment utilisé)
-python -m satisfying --concept pendulum   # ou grow, escape, spiro, multiply
+python -m satisfying --concept pendulum   # ou grow, escape, spiro, multiply, sand, ocean, aurora
 python -m satisfying --preview 6          # test rapide : 6 premières secondes
 ```
 
@@ -58,8 +58,11 @@ python -m satisfying --preview 6          # test rapide : 6 premières secondes
 | `pendulum` | vague de pendules vue de dessus : motifs, désordre, réalignement | réalignement parfait : boucle exacte |
 | `spiro` | des bras articulés dessinent lentement une rosace | la rosace s'efface |
 | `multiply` | chaque rebond fait naître une balle, le cercle se remplit | toutes se rejoignent en une seule |
+| `sand` | du sable coloré coule dans un cadre de verre et forme des dunes en couches | le sable s'écoule par le fond |
+| `ocean` | houle en couches sous la lune, reflet qui scintille, bruit du ressac | boucle exacte |
+| `aurora` | voiles d'aurore boréale au-dessus des montagnes | boucle exacte |
 
-Chaque vidéo tire au hasard sa palette (pastels clairs ou nuit douce), son timbre (goutte, kalimba, cristal,
+Toutes les vidéos sont sur fond noir étoilé. Chaque vidéo tire au hasard sa palette (7 teintes de nuit, objets pastel), son timbre (goutte, kalimba, cristal,
 piano doux), sa tonalité, sa suite d'accords et tous les paramètres du concept : deux vidéos du même concept
 ne se ressemblent pas. Chaque impact joue une note juste dans l'accord en cours, sur une nappe très discrète.
 `satisfying/history.json` garde la trace des vidéos produites pour alterner les concepts et les palettes.

@@ -75,7 +75,7 @@ def main(argv=None):
     with tempfile.TemporaryDirectory() as tmp:
         tmp = Path(tmp)
         video = Video(tmp / "video.mp4", preview=a.preview is not None)
-        ctx = Ctx(rng=rng, pal=pal, painter=Painter(pal), sound=sound, video=video, seconds=a.seconds,
+        ctx = Ctx(rng=rng, pal=pal, painter=Painter(pal, seed), sound=sound, video=video, seconds=a.seconds,
                   max_frames=int(a.preview * FPS) if a.preview else None)
         module.render(ctx)
         video.close()
