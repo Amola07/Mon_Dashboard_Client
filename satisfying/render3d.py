@@ -11,11 +11,11 @@ import datetime as dt
 import json
 import os
 import random
-import re
 import shutil
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 from pathlib import Path
 
@@ -114,17 +114,19 @@ def main(argv=None):
         (tmp / "params.json").write_text(json.dumps(params), encoding="utf-8")
         proc = subprocess.Popen(run(SCENES / "grow_scene.py", tmp / "params.json"), stdout=subprocess.PIPE,
                                 stderr=subprocess.STDOUT, text=True, bufsize=1)
-        done = 0
-        for line in proc.stdout:
-            if line.startswith("Rendu sur") or "images en" in line or "Error" in line:
-                print(line.rstrip(), flush=True)
-            m = re.search(r"Saved: '.*f_(\d+)\.png'", line)
-            if m:
-                done += 1
-                if done % 30 == 0 or done == len(idx):
+        def progress():  # compte les images écrites (les journaux de Blender varient selon la version)
+            while proc.poll() is None:
+                time.sleep(60)
+                done = len(list((tmp / "frames").glob("f_*.png")))
+                if done:
                     el = time.time() - t0
-                    print(f"  {done}/{len(idx)} images, {el / done:.1f} s/image, reste ~{el / done * (len(idx) - done) / 60:.0f} min",
-                          flush=True)
+                    print(f"  {done}/{len(idx)} images, {el / done:.1f} s/image, "
+                          f"reste ~{el / done * (len(idx) - done) / 60:.0f} min", flush=True)
+
+        threading.Thread(target=progress, daemon=True).start()
+        for line in proc.stdout:
+            if line.startswith("Rendu sur") or "images en" in line or "Traceback" in line or "Error:" in line:
+                print(line.rstrip(), flush=True)
         if proc.wait():
             raise SystemExit("Blender a échoué")
         if a.still is not None:
