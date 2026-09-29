@@ -37,8 +37,8 @@ def _simulate(growth, rng, cx, cy, R, r0, start, gravity, max_frames):
     return frames, events
 
 
-def render(ctx):
-    rng, pal, pt, v = ctx.rng, ctx.pal, ctx.painter, ctx.video
+def plan(rng, sound, seconds):
+    """Simule la scène (positions et rayons à 60 i/s) et note les impacts dans la bande-son."""
     cx, cy, R = W / 2, H / 2 - 60, float(rng.uniform(400, 460))
     r0 = float(rng.uniform(14, 22))
     start = (cx + rng.uniform(-80, 80), cy - rng.uniform(150, 250))
@@ -48,7 +48,7 @@ def render(ctx):
     for g in np.linspace(0.8, 2.6, 40):
         fr, ev = _simulate(g, np.random.default_rng(sim_seed), cx, cy, R, r0, start, gravity, 90 * FPS)
         d = len(fr) / FPS
-        score = abs(d - ctx.seconds + 2.6) + (100 if d < ctx.seconds - 3 else 0)  # jamais sous le seuil d'une minute
+        score = abs(d - seconds + 2.6) + (100 if d < seconds - 3 else 0)  # jamais sous le seuil d'une minute
         if best is None or score < best[0]:
             best = (score, fr, ev)
     _, frames, events = best
@@ -59,12 +59,20 @@ def render(ctx):
         e = (j / n_out) ** 2 * (3 - 2 * j / n_out)
         frames.append(((end_pos[0] * (1 - e) + start[0] * e, end_pos[1] * (1 - e) + start[1] * e),
                        end_r * (1 - e) + r0 * e))
-    by_frame = {}
     for t, p, s in events:
-        by_frame.setdefault(int(round(t * FPS)), []).append((p, s))
-        ctx.sound.hit(t, s)
+        sound.hit(t, s)
     for j, st in enumerate([4, 3, 2, 1, 0]):
-        ctx.sound.hit(fill / FPS + 0.15 + j * 0.4, 0.8, step=st + 5)
+        sound.hit(fill / FPS + 0.15 + j * 0.4, 0.8, step=st + 5)
+    return {"cx": cx, "cy": cy, "R": R, "r0": r0, "frames": frames, "events": events, "fill": fill}
+
+
+def render(ctx):
+    rng, pal, pt, v = ctx.rng, ctx.pal, ctx.painter, ctx.video
+    p = plan(rng, ctx.sound, ctx.seconds)
+    cx, cy, R, r0, frames = p["cx"], p["cy"], p["R"], p["r0"], p["frames"]
+    by_frame = {}
+    for t, pt_, s in p["events"]:
+        by_frame.setdefault(int(round(t * FPS)), []).append((pt_, s))
 
     ripples, trail = Ripples(), []
     for f, (pos, r) in enumerate(frames):

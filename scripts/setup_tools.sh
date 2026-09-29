@@ -63,6 +63,20 @@ if [ ! -x realesrgan-ncnn-vulkan/realesrgan-ncnn-vulkan ]; then
   chmod +x realesrgan-ncnn-vulkan/realesrgan-ncnn-vulkan
 fi
 
+echo "Blender (vidéos satisfying en 3D)…"
+if [ ! -x blender/blender ]; then
+  for v in 5.0.1 5.0.0 4.5.3 4.5.2 4.5.1 4.5.0; do
+    major=${v%.*}
+    if curl -fsSL --retry 3 "https://download.blender.org/release/Blender$major/blender-$v-linux-x64.tar.xz" \
+         | tar -xJ 2>/dev/null; then
+      rm -rf blender && mv "blender-$v-linux-x64" blender && echo "  Blender $v" && break
+    fi
+  done
+fi
+if command -v apt-get >/dev/null 2>&1; then  # bibliothèques dont Blender a besoin sans écran
+  $SUDO apt-get -qq install -y libxi6 libxxf86vm1 libxfixes3 libxrender1 libgl1 libegl1 libsm6 libxkbcommon0 >/dev/null 2>&1 || true
+fi
+
 echo "Modèles…"
 fetch https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.5.0/realesr-animevideov3.pth models/realesr-animevideov3.pth
 fetch https://raw.githubusercontent.com/nagadomi/lbpcascade_animeface/master/lbpcascade_animeface.xml models/lbpcascade_animeface.xml

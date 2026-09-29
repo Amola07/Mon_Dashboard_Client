@@ -68,6 +68,13 @@ ne se ressemblent pas. Chaque impact joue une note juste dans l'accord en cours,
 `satisfying/history.json` garde la trace des vidéos produites pour alterner les concepts et les palettes.
 Sortie : `output/satisfying/<date>_<concept>_<graine>.mp4` et un `.txt` avec la légende et les hashtags.
 
+### Version 3D (Blender) : `python -m satisfying.render3d`
+Même simulation et même musique, mais l'image est calculée par Blender Cycles : anneau de verre avec un cœur lumineux,
+bille laquée, reflets dans un sol miroir, ciel étoilé, flou de profondeur et de mouvement, halo doux. Il faut un GPU :
+notebook **`notebooks/satisfying_3d.ipynb`** sur Kaggle (*Save & Run All*), qui rend des vidéos en boucle pendant ~10 h et
+les livre dans `satisfying3d.zip`. Rendu en 540×960 à 30 i/s, puis agrandi en 1080×1920 et fluidifié à 60 i/s (RIFE).
+Pour tester une seule image : `python -m satisfying.render3d --still 40`. Pour l'instant : concept `grow`.
+
 Ajouter un concept : un module dans `satisfying/concepts/` avec `TITLE` et `render(ctx)`, puis son nom dans
 `concepts.NAMES`.
 
