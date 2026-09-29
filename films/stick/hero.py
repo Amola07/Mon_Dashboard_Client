@@ -8,7 +8,7 @@ import math
 import skia
 
 CYAN = (40, 220, 255)
-CAPES = {"rouge": (255, 80, 70), "or": (255, 196, 70), "violet": (170, 90, 255), "blanc": (235, 240, 255)}
+CAPES = {"violet": (170, 90, 255), "rouge": (255, 80, 70), "or": (255, 196, 70), "violet": (170, 90, 255), "blanc": (235, 240, 255)}
 
 
 def col(c, a=255):
@@ -38,9 +38,13 @@ POSES = {
     "debout":    dict(lean=0, arm_l=(20, 15), arm_r=(-25, -10), leg_l=(12, -5), leg_r=(-12, 5)),
     "salut":     dict(lean=-3, arm_l=(-20, -15), arm_r=(110, 40), leg_l=(12, -5), leg_r=(-12, 5)),
     "course":    dict(lean=14, arm_l=(-60, 70), arm_r=(55, 60), leg_l=(-45, 60), leg_r=(40, -10)),
-    "vol":       dict(lean=80, arm_l=(-60, 10), arm_r=(55, 0), leg_l=(-82, 0), leg_r=(-70, -18)),
     "reflexion": dict(lean=-4, arm_l=(-20, -10), arm_r=(25, 135), leg_l=(10, -5), leg_r=(-12, 5)),
     "saut":      dict(lean=4, arm_l=(-120, 20), arm_r=(120, -20), leg_l=(-50, 80), leg_r=(40, 70)),
+    "marche1":   dict(lean=5, arm_l=(-30, 20), arm_r=(30, 25), leg_l=(28, -15), leg_r=(-25, 30)),
+    "marche2":   dict(lean=5, arm_l=(30, 25), arm_r=(-30, 20), leg_l=(-25, 30), leg_r=(28, -15)),
+    "accroche":  dict(lean=0, arm_l=(-150, -10), arm_r=(150, 10), leg_l=(8, 5), leg_r=(-8, -5)),
+    "atterrit":  dict(lean=8, arm_l=(-70, 30), arm_r=(70, -30), leg_l=(35, -60), leg_r=(-35, 60)),
+    "vol":       dict(lean=80, arm_l=(-60, 10), arm_r=(55, 0), leg_l=(-82, 0), leg_r=(-70, -18)),
 }
 
 
