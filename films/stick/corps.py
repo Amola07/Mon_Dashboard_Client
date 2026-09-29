@@ -258,7 +258,7 @@ def draw(c, p, t, cape=None, cape_color="violet", glow=1.0, alpha=255, screen_ro
             smooth_path(arms, pts)
     else:
         for (a, m, b), dst in [(x, arms) for x in J["arms"]] + [(x, path) for x in J["legs"]]:
-            cp = v_sub(v_mul(m, 2.0), v_mul(v_add(a, b), 0.5))
+            cp = m                                              # coude arrondi, membre presque droit
             dst.moveTo(*a)
             dst.quadTo(*cp, *b)
         path.moveTo(*J["pelvis"])
@@ -280,9 +280,7 @@ def draw(c, p, t, cape=None, cape_color="violet", glow=1.0, alpha=255, screen_ro
         k = min(1.0, n / 120)
         look = ((lx / n) * k, (ly / n) * k)
     draw_face(c, J["head"], HEAD_R, math.radians(J["head_theta"]), p.facing, p.expr, look, t, alpha)
-    c.drawPath(arms, _pen(CYAN, LINE_W, alpha))
-    for arm in J["arms"]:                                       # mains : petites boules
-        c.drawCircle(*arm[2], LINE_W * 0.85, _brush(CYAN, alpha))
+    c.drawPath(arms, _pen(CYAN, LINE_W, alpha))                # pas de boule au bout : le trait arrondi suffit
     if p.emote:                                                # symboles toujours droits à l'écran
         kind, age = p.emote
         c.save()
