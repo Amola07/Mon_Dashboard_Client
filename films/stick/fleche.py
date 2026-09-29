@@ -203,15 +203,39 @@ def walk(F, t, t0, t1, u0, u1, n, g, lean=6.0, **kw):
 
 
 def keyed(t, keys, ease=ease_io):
-    """Interpolation entre poses clés [(instant, pose ou fonction(t) -> pose), …]."""
+    """Interpolation entre poses clés [(instant, pose ou fonction(t) -> pose), …].
+
+    Courbe de Catmull-Rom : le mouvement traverse les poses clés sans s'y arrêter (vitesse continue) ;
+    il ne démarre et ne s'arrête en douceur qu'à la première et à la dernière clé (ou sur une clé répétée)."""
     def P(x):
         return x(t) if callable(x) else x
     if t <= keys[0][0]:
         return P(keys[0][1])
-    for (t0, a), (t1, b) in zip(keys, keys[1:]):
-        if t < t1:
-            return lerp_pose(P(a), P(b), ease((t - t0) / (t1 - t0)))
-    return P(keys[-1][1])
+    if t >= keys[-1][0]:
+        return P(keys[-1][1])
+    k = max(i for i in range(len(keys) - 1) if keys[i][0] <= t)
+    if len(keys) == 2 or ease is not ease_io:
+        (t0, a), (t1, b) = keys[k], keys[k + 1]
+        return lerp_pose(P(a), P(b), ease((t - t0) / (t1 - t0)))
+    poses = [P(x) for _, x in keys]
+    ts = [x for x, _ in keys]
+    V = [K.pose_vec(p) for p in poses]
+    for i in range(1, len(V)):                                  # angles sans saut de 360°
+        V[i][2] = V[i - 1][2] + ((V[i][2] - V[i - 1][2] + 180) % 360 - 180)
+
+    def tangent(i):
+        if i == 0 or i == len(V) - 1:
+            return [0.0] * len(V[i])
+        if V[i] == V[i + 1] or V[i] == V[i - 1]:                # pose tenue : on s'y arrête
+            return [0.0] * len(V[i])
+        return [(b - a) / (ts[i + 1] - ts[i - 1]) for a, b in zip(V[i - 1], V[i + 1])]
+    t0, t1 = ts[k], ts[k + 1]
+    T = t1 - t0
+    u = (t - t0) / T
+    m0, m1 = tangent(k), tangent(k + 1)
+    h00, h10, h01, h11 = 2 * u ** 3 - 3 * u ** 2 + 1, u ** 3 - 2 * u ** 2 + u, -2 * u ** 3 + 3 * u ** 2, u ** 3 - u ** 2
+    v = [h00 * a + h10 * T * ma + h01 * b + h11 * T * mb for a, b, ma, mb in zip(V[k], V[k + 1], m0, m1)]
+    return K.vec_pose(v, poses[k] if u < 0.5 else poses[k + 1])
 
 
 # ---------------------------------------------------------------- la chorégraphie
@@ -896,6 +920,18 @@ def draw_stone(c, pos, r, sides, ang, lw):
         c.drawCircle(*q, 3.2 * lw, pen(LINE, 1.6 * lw))
 
 
+def lerp_joints(A, B, a):
+    if a < 1e-6:
+        return A
+    out = dict(B if a >= 0.5 else A)
+    for k in JOINTS:
+        out[k] = v_lerp(A[k], B[k], a)
+    out["legs"] = [[v_lerp(p, q, a) for p, q in zip(la, lb)] for la, lb in zip(A["legs"], B["legs"])]
+    out["arms"] = [[v_lerp(p, q, a) for p, q in zip(la, lb)] for la, lb in zip(A["arms"], B["arms"])]
+    out["head_theta"] = A["head_theta"] + ((B["head_theta"] - A["head_theta"] + 180) % 360 - 180) * a
+    return out
+
+
 def frame_at(show, t):
     """État interpolé entre deux images de la simulation (le récit peut avancer moins vite que le film)."""
     x = t * FPS
@@ -903,7 +939,8 @@ def frame_at(show, t):
     a = min(max(x - f0, 0.0), 1.0)
     A, B = show.frames[f0], show.frames[f0 + 1]
     return f0, {
-        "pose": lerp_pose(A["pose"], B["pose"], a) if a > 1e-6 else A["pose"],
+        "pose": A["pose"] if a < 0.5 else B["pose"],
+        "J": lerp_joints(A["J"], B["J"], a),
         "cape": [v_lerp(p, q, a) for p, q in zip(A["cape"], B["cape"])],
         "stones": [(v_lerp(p[0], q[0], a), p[1], p[2], p[3] + (q[3] - p[3]) * a) for p, q in zip(A["stones"], B["stones"])],
         "arrows": [(v_lerp(p[0], q[0], a), p[1] + ((q[1] - p[1] + 180) % 360 - 180) * a, p[2] + (q[2] - p[2]) * a)
@@ -986,7 +1023,7 @@ def draw_frame(c, show, i, stars):
     # Éclat et sa cape
     cape = K.Cape((0, 0))
     cape.p = fr["cape"]
-    K.draw(c, fr["pose"], t, cape, screen_rot=rot)
+    K.draw(c, fr["pose"], t, cape, screen_rot=rot, J=fr["J"])
     c.restore()
 
 
@@ -1069,12 +1106,71 @@ def soundtrack(show, path):
 SHOW = None
 
 
+JOINTS = ("pelvis", "chest", "neck", "shoulder", "head")
+
+
+def joint_points(J):
+    return [J[k] for k in JOINTS] + [J["legs"][0][1], J["legs"][0][2], J["legs"][1][1], J["legs"][1][2],
+                                    J["arms"][0][1], J["arms"][0][2], J["arms"][1][1], J["arms"][1][2]]
+
+
+def points_joint(P, J, head_theta):
+    out = dict(J)
+    for k, q in zip(JOINTS, P[:5]):
+        out[k] = q
+    out["legs"] = [[P[0], P[5], P[6]], [P[0], P[7], P[8]]]
+    out["arms"] = [[P[3], P[9], P[10]], [P[3], P[11], P[12]]]
+    out["head_theta"] = head_theta
+    return out
+
+
+def smooth_motion(show, omega=0.2):
+    """Amortisseur d'à-coups (« inertialisation ») : quand une articulation saute d'une image à l'autre,
+    le corps garde son élan et rejoint la nouvelle pose en douceur (ressort critique, ~¼ s)."""
+    Js = [build(fr["pose"]) for fr in show.frames]
+    X = np.array([joint_points(J) for J in Js])               # (N, 13, 2)
+    A = np.array([J["head_theta"] for J in Js], dtype=float)
+    A = np.unwrap(np.radians(A))
+    N = len(X)
+    thr = np.array([22, 9, 8, 9, 8] + [9] * 8, dtype=float)       # bassin : les arrêts nets des atterrissages sont physiques
+    Y = X.copy()
+    o = np.zeros_like(X[0])
+    ov = np.zeros_like(X[0])
+    ao = aov = 0.0
+    B = A.copy()
+    for f in range(N):
+        if f >= 2:
+            acc = np.linalg.norm(X[f] - 2 * X[f - 1] + X[f - 2], axis=1)
+            jump = acc > thr
+            ov = ov + (-2 * omega * ov - omega * omega * o)
+            o = o + ov
+            if jump.any():
+                pred = Y[f - 1] + (Y[f - 1] - Y[f - 2])
+                nxt = (X[f + 1] - X[f]) if f + 1 < N else np.zeros_like(X[f])
+                o[jump] = (pred - X[f])[jump]
+                ov[jump] = ((Y[f - 1] - Y[f - 2]) - nxt)[jump]
+            aov = aov + (-2 * omega * aov - omega * omega * ao)
+            ao = ao + aov
+            if abs(A[f] - 2 * A[f - 1] + A[f - 2]) > math.radians(6):
+                ao = (B[f - 1] + (B[f - 1] - B[f - 2])) - A[f]
+                aov = (B[f - 1] - B[f - 2]) - ((A[f + 1] - A[f]) if f + 1 < N else 0.0)
+        Y[f] = X[f] + o
+        B[f] = A[f] + ao
+    for f, fr in enumerate(show.frames):
+        P = [tuple(q) for q in Y[f]]
+        fr["J"] = points_joint(P, Js[f], math.degrees(B[f]))
+        dn = Y[f][2] - X[f][2]                                  # la cape suit le cou lissé
+        n = len(fr["cape"])
+        fr["cape"] = [(q[0] + dn[0] * (1 - i / n), q[1] + dn[1] * (1 - i / n)) for i, q in enumerate(fr["cape"])]
+
+
 def get_show():
     global SHOW, DURATION, F2S, FILM_DUR
     if SHOW is None:
         SHOW = Show()
         SHOW.events.append((T_ARRIVE[1], "boom", A, 1.0))
         SHOW.run()
+        smooth_motion(SHOW)
         DURATION = (len(SHOW.frames) - 1) / FPS                # la durée du récit sort de la simulation
         SHOTS.extend(sorted((s for s in SHOW.shots2 if s[0] > SHOTS[-1][0]), key=lambda s: s[0]))
         TEMPO.extend(sorted(((x[0], x[1] * 0.9) for x in SHOW.tempo2 if x[0] > TEMPO[-1][0]), key=lambda x: x[0]))

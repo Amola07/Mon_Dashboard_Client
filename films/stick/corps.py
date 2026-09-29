@@ -111,6 +111,20 @@ def lerp_pose(a, b, u):
                    look=v_lerp(a.look, b.look, u))
 
 
+def pose_vec(p):
+    """Pose → liste de nombres (les membres libres prennent leur position calculée)."""
+    J = build(p)
+    feet = [p.feet[i] if p.feet[i] is not None else J["legs"][i][2] for i in range(2)]
+    hands = [p.hands[i] if p.hands[i] is not None else J["arms"][i][2] for i in range(2)]
+    return [p.pelvis[0], p.pelvis[1], p.theta, p.bend, p.head, *feet[0], *feet[1], *hands[0], *hands[1],
+            p.look[0], p.look[1]]
+
+
+def vec_pose(v, base):
+    return replace(base, pelvis=(v[0], v[1]), theta=v[2], bend=v[3], head=v[4], feet=[(v[5], v[6]), (v[7], v[8])],
+                   hands=[(v[9], v[10]), (v[11], v[12])], look=(v[13], v[14]))
+
+
 def free_limb(root, theta, facing, ang, reach):
     """Cible d'un membre libre : angle (degrés) compté depuis « le long du buste vers le bas », + = vers l'avant."""
     down = v_mul(up_vec(theta), -1)
@@ -202,9 +216,9 @@ class Cape:
         return left + right[::-1]
 
 
-def draw(c, p, t, cape=None, cape_color="violet", glow=1.0, alpha=255, screen_rot=0.0):
-    """Dessine Éclat (coordonnées monde). Renvoie les articulations."""
-    J = build(p)
+def draw(c, p, t, cape=None, cape_color="violet", glow=1.0, alpha=255, screen_rot=0.0, J=None):
+    """Dessine Éclat (coordonnées monde). J : articulations déjà calculées (lissées). Renvoie les articulations."""
+    J = J or build(p)
     cc = CAPES.get(cape_color, cape_color) if isinstance(cape_color, str) else cape_color
     if cape is not None:
         poly = cape.shape()
