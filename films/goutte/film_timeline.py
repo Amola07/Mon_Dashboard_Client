@@ -152,6 +152,16 @@ HAND = [(0, 0.0), (29.3, 0.0), (29.7, 1.0), (33.0, 1.0), (33.4, 0.0)]      # bra
 WISPS = [(36.5, 39.0), (39.5, 42.0), (47.0, 50.0), (58.0, 61.0)]            # vapeur au-dessus de la tête
 SOUL = (86.0, 92.5)                                                          # la volute brillante qui monte
 
+
+def soul_pos(t):
+    """Position de la volute brillante (l'« âme » de la goutte) qui monte vers le nuage."""
+    sx, sy = 4.15, -0.62
+    g = ground(sx, sy)
+    if t <= SOUL[0]:
+        return (sx, sy, g + 0.1)
+    u = smooth((t - SOUL[0]) / (SOUL[1] - SOUL[0]))
+    return (sx + (CLOUD[0] - sx) * u, sy + (CLOUD[1] - sy) * u, g + 0.3 + (CLOUD[2] - 1.0 - g) * u)
+
 # ---------------------------------------------------------------- pousse, nuage, pluie, fleurs
 SPROUT_ALIVE = [(0, 0.0), (78.0, 0.0), (84.0, 0.75), (106.0, 0.75), (108.0, 1.0)]
 CLOUD_GROW = [(0, 0.0), (91.5, 0.0), (98.0, 1.0)]

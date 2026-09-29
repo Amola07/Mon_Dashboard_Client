@@ -240,14 +240,14 @@ for i, (t0, t1) in enumerate(T.WISPS):
     w.location = (0.1, 0.05, 1.35)
     w.keyframe_insert("location", frame=F(t1))
 soul = A.wisp(height=0.9, glow=3.0, seed=9, turns=1.6, width=0.04)
-sx, sy = T.PATH[-3][1]
-for t, z, s in [(0, T.ground(sx, sy), 0), (T.SOUL[0], T.ground(sx, sy) + 0.1, 0), (T.SOUL[0] + 1.0, T.ground(sx, sy) + 0.4, 1.0),
-                (T.SOUL[1], T.CLOUD[2] - 1.0, 1.4), (T.SOUL[1] + 0.8, T.CLOUD[2], 0.0)]:
-    x = sx + (T.CLOUD[0] - sx) * max(0, (t - T.SOUL[0]) / (T.SOUL[1] - T.SOUL[0])) if t >= T.SOUL[0] else sx
-    y = sy + (T.CLOUD[1] - sy) * max(0, (t - T.SOUL[0]) / (T.SOUL[1] - T.SOUL[0])) if t >= T.SOUL[0] else sy
-    soul.location, soul.scale = (x, y, z), (s, s, s)
-    soul.keyframe_insert("location", frame=F(t))
-    soul.keyframe_insert("scale", frame=F(t))
+for fr in range(F(T.SOUL[0] - 0.5), F(T.SOUL[1] + 1.2), KEY_STEP):
+    t = (fr - 1) / T.FPS
+    s = T.smooth((t - T.SOUL[0]) / 1.0) * (1 - T.smooth((t - T.SOUL[1]) / 0.8)) * 1.3
+    soul.location, soul.scale = T.soul_pos(t), (s, s, s)
+    soul.keyframe_insert("location", frame=fr)
+    soul.keyframe_insert("scale", frame=fr)
+soul.scale = (0, 0, 0)
+soul.keyframe_insert("scale", frame=1)
 
 # ---------------------------------------------------------------- caillou (bascule quand la goutte s'y abrite)
 rock = A.rock(location=(T.ROCK[0], T.ROCK[1], T.ground(*T.ROCK) + 0.18), size=1.3)
@@ -329,13 +329,14 @@ for i, ((x, y), t0) in enumerate(T.CLOUD_WISPS):
 bpy.ops.mesh.primitive_plane_add(size=1, location=(T.CLOUD[0], T.CLOUD[1] - 1.5, T.CLOUD[2] - 0.6))
 emitter = bpy.context.object
 emitter.scale = (12, 11, 1)
-bpy.ops.mesh.primitive_uv_sphere_add(radius=0.045, segments=12, ring_count=8, location=(0, 0, -60))
+bpy.ops.mesh.primitive_uv_sphere_add(radius=0.03, segments=12, ring_count=8, location=(0, 0, -60))
 rdrop = A.smooth(bpy.context.object)
-rdrop.scale = (1, 1, 4.0)
-rdrop.data.materials.append(water)
+rdrop.scale = (1, 1, 5.0)
+rain_m = A.mat("pluie", A.lin(220, 235, 255), rough=0.0, trans=1.0, ior=1.33, emit=A.lin(220, 235, 255), strength=0.35)
+rdrop.data.materials.append(rain_m)
 mod = emitter.modifiers.new("pluie", "PARTICLE_SYSTEM")
 ps = mod.particle_system.settings
-ps.count = 26000
+ps.count = 15000
 ps.frame_start, ps.frame_end = F(T.RAIN[0]), F(T.RAIN[1] - 1.2)
 ps.lifetime = int(1.6 * T.FPS)
 ps.normal_factor = -6.0
@@ -350,14 +351,14 @@ emitter.show_instancer_for_render = False
 
 rnd = random.Random(7)
 spots = []
-while len(spots) < 70:
-    x, y = rnd.uniform(-1.5, 8.0), rnd.uniform(-3.5, 5.5)
+while len(spots) < 110:
+    x, y = rnd.uniform(0.3, 7.5), rnd.uniform(-2.8, 3.5)
     near_end = math.dist((x, y), T.END) < 1.0 or (abs(x - 3.5) < 0.9 and -4.6 < y < -1.0)   # champ de la dernière caméra
     if math.dist((x, y), T.SPROUT) < 0.8 or math.dist((x, y), T.ROCK) < 0.7 or near_end:
         continue
     spots.append((x, y))
 for i, (x, y) in enumerate(spots):
-    fl = A.glass_flower(location=(x, y, T.ground(x, y)), size=rnd.uniform(0.6, 1.2), petals=rnd.choice([5, 6, 7]), seed=i)
+    fl = A.glass_flower(location=(x, y, T.ground(x, y)), size=rnd.uniform(1.0, 1.8), petals=rnd.choice([5, 6, 7]), seed=i)
     t0 = T.FLOWERS[0] + (T.FLOWERS[1] - T.FLOWERS[0] - 1.5) * rnd.random()
     for t, s in [(0, 0), (t0, 0), (t0 + 1.2, 1.08), (t0 + 1.5, 1.0)]:
         fl.scale = (s, s, s)
@@ -399,10 +400,10 @@ for (t0, name, lens, fstop, cam_spec, aim_spec), (t1, *_) in zip(shots, shots[1:
         cam.location = resolve(cam_spec, min(t, t1 - 0.01), tuple(v * u for v in move))
         cam.keyframe_insert("location", frame=fr)
         aim = resolve(aim_spec, min(t, t1 - 0.01))
-        if name == "adieu":                                     # suit la volute qui monte
-            (_, _, _), _, _ = T.drop_state(t)
-            if t > T.SOUL[0]:
-                aim = (aim[0], aim[1], aim[2] + 2.2 * T.smooth((t - T.SOUL[0]) / 4.0))
+        if name == "adieu" and t > T.SOUL[0]:                   # suit la volute qui monte
+            u = T.smooth((t - T.SOUL[0]) / 1.5)
+            sp = T.soul_pos(t)
+            aim = tuple(a0 + (b0 - a0) * u for a0, b0 in zip(aim, sp))
         tgt.location = aim
         tgt.keyframe_insert("location", frame=fr)
     mk = sc.timeline_markers.new(name, frame=fr0)
