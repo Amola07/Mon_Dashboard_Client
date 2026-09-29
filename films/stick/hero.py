@@ -129,7 +129,7 @@ def draw_face(c, head, r, hup, facing, expr, look, t, alpha=255):
     k = r / 50
     fx = facing * 10 * k + look[0] * 9 * k
     fy = look[1] * 7 * k
-    blink = (t % 3.7) < 0.12 and expr in ("neutre", "decide", "curieux")
+    blink = (t % 3.7) < 0.12 and expr in ("neutre", "decide", "curieux") or expr == "dort"
     for side in (-1, 1):
         ex, ey = fx + side * 15 * k, -6 * k + fy
         if expr in ("joie", "fier") or blink or (expr == "clin" and side == 1):
@@ -184,6 +184,8 @@ def draw_face(c, head, r, hup, facing, expr, look, t, alpha=255):
     elif expr == "triste":
         m.moveTo(mx - 8 * k, my + 3 * k)
         m.quadTo(mx, my - 5 * k, mx + 8 * k, my + 3 * k)
+    elif expr == "dort":
+        m.addCircle(mx, my + 1 * k, 3.5 * k)
     elif expr == "etourdi":
         m.moveTo(mx - 8 * k, my)
         m.quadTo(mx - 3 * k, my + 5 * k, mx, my)
