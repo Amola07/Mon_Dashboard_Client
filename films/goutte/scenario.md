@@ -7,7 +7,8 @@ Ton léger : gags de pantomime, jamais de mot. La dernière image rejoint la pre
 ## Acte 1 — L'arrivée (0:00 – 0:28)
 | # | Temps | Plan | Action | Son |
 |---|---|---|---|---|
-| 1 | 0:00 | large, nuit étoilée | une lueur bleue tombe, la caméra la suit | sifflement qui monte |
+| 1 | 0:00 | très gros plan, ralenti | accroche : la goutte tombe face caméra, yeux écarquillés, joues gonflées | sifflement |
+| 1b | 0:02 | large, nuit étoilée | la caméra recule : une lueur bleue minuscule dans l'immensité du ciel | sifflement qui monte |
 | 2 | 0:06 | proche | « plic » sur la crête, écrasement, grains de sable | plic + note grave |
 | 3 | 0:09 | visage | ouvre les yeux, regarde à gauche, à droite, « o » de surprise | notes de cristal |
 | 4 | 0:16 | large, aube | glisse sur la pente comme sur un toboggan, remonte, recommence | musique joyeuse |
@@ -36,6 +37,14 @@ Ton léger : gags de pantomime, jamais de mot. La dernière image rejoint la pre
 | 15 | 1:38 | large | le nuage grossit, fronce les sourcils de concentration… et il pleut sur tout le désert | pluie, accord final |
 | 16 | 1:46 | large, accéléré | des fleurs de verre bleu poussent partout sur les dunes ; la pousse devient la plus grande fleur | carillon |
 | 17 | 1:54 | proche | une goutte de pluie tombe devant la caméra, s'écrase, ouvre les yeux : c'est elle | « plic » du début → boucle |
+
+## Style (d'après l'analyse des animations virales)
+- **Monde miniature, vue macro** : la goutte fait quelques millimètres ; caméra au ras du sol, grains de sable visibles,
+  flou d'arrière-plan très prononcé (objectif macro). C'est l'esthétique « tiny world » qui marche sur TikTok.
+- **Personnage mignon** : grands yeux avec deux reflets, joues roses, silhouette ronde ; expressions exagérées.
+- **Lumière chaude et contrastée** : heure dorée, contre-jours, couleurs saturées ; jamais d'image délavée.
+- **Accroche dans la première seconde**, un rebondissement toutes les 10 à 15 s, fin qui boucle sur le début.
+- **Côté fait main** plutôt que « rendu 3D lisse » : matières imparfaites (sable, caillou), lumière douce.
 
 ## Décors et éléments à construire
 - dunes (fait), crête (fait), ciel nuit → aube → midi → soir (fait jusqu'à l'aube)

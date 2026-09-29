@@ -53,7 +53,7 @@ def water_material():
     m = mat("eau", lin(215, 235, 255), rough=0.0, trans=1.0, ior=1.33)
     vol = m.node_tree.nodes.new("ShaderNodeVolumePrincipled")
     vol.inputs["Color"].default_value = (*lin(170, 215, 255), 1)
-    vol.inputs["Density"].default_value = 0.35
+    vol.inputs["Density"].default_value = 0.2
     m.node_tree.links.new(vol.outputs["Volume"], m.node_tree.nodes["Material Output"].inputs["Volume"])
     return m
 
@@ -70,10 +70,10 @@ def drop(location=(0, 0, 0), size=1.0, water=None):
         z = v.co.z
         if z > 0:
             u = z / 0.5
-            k = 1 - 0.55 * u ** 1.8
+            k = 1 - 0.5 * u ** 2.2          # sommet plus rond : silhouette plus mignonne
             v.co.x *= k
             v.co.y *= k
-            v.co.z *= 1.0 + 0.5 * u
+            v.co.z *= 1.0 + 0.36 * u
         v.co.z += 0.5
     body.data.materials.append(water)
     smooth(body)
@@ -83,18 +83,20 @@ def drop(location=(0, 0, 0), size=1.0, water=None):
     mouth_m = mat("bouche", lin(15, 25, 45), rough=0.25, coat=1.0)
     eyes, lids = [], []
     for side in (-1, 1):
-        bpy.ops.mesh.primitive_uv_sphere_add(radius=0.055, segments=32, ring_count=16, location=(side * 0.14, -0.43, 0.6))
+        # grands yeux (attrait « mignon ») avec deux reflets
+        bpy.ops.mesh.primitive_uv_sphere_add(radius=0.085, segments=48, ring_count=24, location=(side * 0.16, -0.42, 0.56))
         e = smooth(bpy.context.object)
         e.data.materials.append(black)
-        bpy.ops.mesh.primitive_uv_sphere_add(radius=0.016, segments=12, ring_count=6,
-                                             location=(side * 0.14 - 0.018, -0.478, 0.625))
-        s = bpy.context.object
-        s.data.materials.append(spark)
-        s.parent = e
-        s.matrix_parent_inverse = e.matrix_world.inverted()
+        for r_, dx, dz in ((0.024, -0.03, 0.035), (0.011, 0.028, -0.025)):
+            bpy.ops.mesh.primitive_uv_sphere_add(radius=r_, segments=16, ring_count=8,
+                                                 location=(side * 0.16 + dx, -0.492, 0.56 + dz))
+            s = bpy.context.object
+            s.data.materials.append(spark)
+            s.parent = e
+            s.matrix_parent_inverse = e.matrix_world.inverted()
         e.parent = body
         eyes.append(e)
-        bpy.ops.mesh.primitive_uv_sphere_add(radius=0.064, segments=32, ring_count=16, location=e.location)
+        bpy.ops.mesh.primitive_uv_sphere_add(radius=0.094, segments=32, ring_count=16, location=e.location)
         lid = bpy.context.object
         _delete_verts(lid, lambda co: co.z < -0.001)
         lid.data.materials.append(lid_m)
@@ -102,18 +104,27 @@ def drop(location=(0, 0, 0), size=1.0, water=None):
         lid.parent = body
         lid.rotation_euler = (math.radians(-70), 0, 0)
         lids.append(lid)
-    bpy.ops.mesh.primitive_torus_add(major_radius=0.055, minor_radius=0.013, location=(0, -0.505, 0.47),
+    bpy.ops.mesh.primitive_torus_add(major_radius=0.055, minor_radius=0.013, location=(0, -0.5, 0.43),
                                      rotation=(math.pi / 2, 0, 0))
     smile = bpy.context.object
     _delete_verts(smile, lambda co: co.y > 0.004)
     smile.data.materials.append(mouth_m)
     smooth(smile).parent = body
-    bpy.ops.mesh.primitive_torus_add(major_radius=0.028, minor_radius=0.012, location=(0, -0.505, 0.47),
+    bpy.ops.mesh.primitive_torus_add(major_radius=0.028, minor_radius=0.012, location=(0, -0.5, 0.43),
                                      rotation=(math.pi / 2, 0, 0))
     ooh = smooth(bpy.context.object)
     ooh.data.materials.append(mouth_m)
     ooh.parent = body
     ooh.scale = (0, 0, 0)
+    # joues roses
+    blush = mat("joues", lin(255, 150, 175), rough=0.5, alpha=0.55)
+    for side in (-1, 1):
+        bpy.ops.mesh.primitive_uv_sphere_add(radius=0.05, segments=24, ring_count=12, location=(side * 0.29, -0.42, 0.46))
+        ch = smooth(bpy.context.object)
+        ch.scale = (1.2, 0.35, 0.7)
+        ch.rotation_euler = (0, 0, side * 0.55)
+        ch.data.materials.append(blush)
+        ch.parent = body
     # petite main (excroissance d'eau) : repos le long du corps, levée pour la visière
     arm_c = bpy.data.curves.new("bras", "CURVE")
     arm_c.dimensions = "3D"
@@ -134,9 +145,10 @@ def drop(location=(0, 0, 0), size=1.0, water=None):
     palm.data.materials.append(water)
     palm.parent = hand
     hand.parent = body
+    hand.scale = (0, 0, 0)          # bras rangé : n'apparaît que pour un geste
     bpy.ops.object.light_add(type="POINT", location=(0, 0, 0.42))
     glow = bpy.context.object
-    glow.data.energy, glow.data.color, glow.data.shadow_soft_size = 2.5, lin(160, 205, 255), 0.12
+    glow.data.energy, glow.data.color, glow.data.shadow_soft_size = 1.0, lin(160, 205, 255), 0.12
     glow.parent = body
     for ray in ("visible_camera", "visible_glossy", "visible_transmission"):
         setattr(glow, ray, False)
@@ -150,6 +162,7 @@ def hand_visor(d):
     spl = d["hand"].data.splines[0].bezier_points
     for bp, p in zip(spl, [(0.4, -0.12, 0.42), (0.46, -0.36, 0.7), (0.16, -0.49, 0.8)]):
         bp.co = p
+    d["hand"].scale = (1, 1, 1)
     palm = d["hand"].children[0]
     palm.location = (0.06, -0.5, 0.8)
     palm.scale = (2.4, 1.1, 0.45)
@@ -445,3 +458,37 @@ def glass_flower(location=(0, 0, 0), size=1.0, petals=6, openness=1.0, seed=0):
         p.location = (top[0] + math.cos(a) * 0.15 * size * math.cos(tilt), top[1] + math.sin(a) * 0.15 * size * math.cos(tilt),
                       top[2] + 0.15 * size * math.sin(tilt))
         p.data.materials.append(glass)
+
+
+def ground_patch(height_fn, center=(0, 0), radius=2.5, res=60):
+    """Surface invisible qui épouse le sol autour d'un point : support des grains de sable."""
+    bpy.ops.mesh.primitive_grid_add(x_subdivisions=res, y_subdivisions=res, size=radius * 2,
+                                    location=(center[0], center[1], 0))
+    patch = bpy.context.object
+    for v in patch.data.vertices:
+        v.co.z = height_fn(center[0] + v.co.x, center[1] + v.co.y) + 0.004
+    return patch
+
+
+def sand_grains(obj, count=30000, size=0.02, seed=1):
+    """Grains de sable visibles (monde miniature, vue macro) répartis sur un objet."""
+    bpy.ops.mesh.primitive_ico_sphere_add(radius=1.0, subdivisions=1, location=(0, 0, -50))
+    grain = bpy.context.object
+    grain.data.materials.append(mat("grain", lin(222, 160, 105), rough=0.85))
+    mod = obj.modifiers.new("grains", "PARTICLE_SYSTEM")
+    ps = mod.particle_system.settings
+    ps.type = "HAIR"
+    ps.count = count
+    ps.use_advanced_hair = True
+    ps.render_type = "OBJECT"
+    ps.instance_object = grain
+    ps.particle_size = size
+    ps.size_random = 0.7
+    ps.use_rotations = True
+    ps.rotation_mode = "GLOB_X"
+    ps.phase_factor_random = 2.0
+    ps.use_emit_random = True
+    mod.particle_system.seed = seed
+    obj.show_instancer_for_render = False   # on voit les grains, pas le support
+    grain.hide_render = False
+    return grain

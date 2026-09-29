@@ -120,6 +120,23 @@ def nuage():
     render("nuage")
 
 
-scenes = {"visiere": visiere, "caillou": caillou, "pousse": pousse, "nuage": nuage}
+def heros():
+    """Nouveau style : monde miniature en macro, lumière dorée, nouvelle goutte."""
+    reset()
+    A.sky(9, 150, 0.45)
+    A.sun(9, 150, 4.5, color=(255, 190, 130))
+    bpy.ops.object.light_add(type="AREA", location=(-1.5, -2.5, 1.2))
+    fill = bpy.context.object
+    fill.data.energy, fill.data.size, fill.data.color = 25, 2.5, A.lin(170, 200, 255)
+    fill.rotation_euler = (math.radians(70), 0, math.radians(-30))
+    A.desert()
+    A.sand_grains(A.ground_patch(crest_z, center=(0, -1.6), radius=4.0, res=90), count=110000, size=0.018)
+    d = A.drop()
+    d["body"].rotation_euler = (0, 0, math.radians(-12))
+    camera((0.6, -5.6, 0.3), (0, 0, 0.55), lens=85, fstop=1.4)
+    render("heros")
+
+
+scenes = {"heros": heros, "visiere": visiere, "caillou": caillou, "pousse": pousse, "nuage": nuage}
 for name in (scenes if which == "toutes" else [which]):
     scenes[name]()
