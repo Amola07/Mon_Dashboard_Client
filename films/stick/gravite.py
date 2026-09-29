@@ -153,6 +153,7 @@ LAND2_A = math.radians(55)
 R_ROPE = 900.0                                                  # ligne d'orbite autour du trou noir
 SPIRAL = (86.5, 95.0)
 LANDINGS = [1.2, 9.5, 23.5, 33.0, 38.5, 47.0, 108.8]
+LANDING_R = {1.2: P0["r"], 9.5: P0["r"], 23.5: P1["r"], 33.0: P1["r"], 38.5: MOON_R, 47.0: P2["r"], 108.8: P0["r"]}
 TAKEOFFS = [8.0, 10.5, 28.0, 36.0, 43.6, 80.0, 116.0]
 
 
@@ -605,15 +606,21 @@ def draw_impacts(c, t, lw):
         dt = t - tl
         if not 0 <= dt < 0.8:
             continue
-        pos, rot, *_ = hero_state(tl)
+        pos, rot, *_ = hero_state(t if tl == 38.5 else tl)        # sur la lune, l'impact suit la lune
         e = 1 - (1 - dt / 0.8) ** 3
         fade = 1 - dt / 0.8
         c.save()
         c.translate(*pos)
         c.rotate(rot)
         c.drawCircle(0, 0, 70 + 60 * e, brush(CYAN, 150 * fade * fade, glow=40))
-        c.drawOval(skia.Rect.MakeLTRB(-60 - 260 * e, -10 - 22 * e, 60 + 260 * e, 10 + 22 * e),
-                   pen(LINE, 3 * lw, 210 * fade))
+        pr = LANDING_R[tl]                                         # onde de poussière qui épouse la surface
+        for k, (grow, wd) in enumerate(((0.0, 3.4), (14 + 26 * e, 2.0))):
+            rr = pr + 4 + grow
+            span = min(110.0, math.degrees((30 + 230 * e) / rr))
+            box = skia.Rect.MakeLTRB(-rr, pr - rr, rr, pr + rr)
+            arc = skia.Path()
+            arc.addArc(box, -90 - span, 2 * span)
+            c.drawPath(arc, pen(LINE if k == 0 else CYAN, wd * lw, (220 if k == 0 else 150) * fade))
         for i in range(10):
             a = math.radians(-172 + i * 18 + 5 * math.sin(i * 7.3))
             r0, r1 = 40 + 170 * e, 40 + 170 * e + 50 * fade
