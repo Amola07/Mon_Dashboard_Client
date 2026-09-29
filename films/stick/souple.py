@@ -113,9 +113,9 @@ def simulate(show, Y, X, room, G):
     spine = Chain(np.linspace(Y[0][0], Y[0][2], N_SPINE), K.SPINE)
     arms = [Chain(np.linspace(Y[0][3], Y[0][10 + 2 * i], N_LIMB), ARM_L) for i in range(2)]
     legs = [Chain(np.linspace(Y[0][0], Y[0][6 + 2 * i], N_LIMB), LEG_L) for i in range(2)]
-    k_spine = np.linspace(0.48, 0.24, N_SPINE)
-    k_arm = np.linspace(0.42, 0.18, N_LIMB)
-    k_leg = np.linspace(0.50, 0.28, N_LIMB)
+    k_spine = np.linspace(0.55, 0.35, N_SPINE)
+    k_arm = np.linspace(0.55, 0.30, N_LIMB)
+    k_leg = np.linspace(0.60, 0.38, N_LIMB)
     k_pinned = np.linspace(0.45, 0.35, N_LIMB)
     out = []
     for f in range(N):
@@ -143,6 +143,11 @@ def simulate(show, Y, X, room, G):
                         return True
             return False
         pel, chest, neck = Y[f][0], Y[f][1], Y[f][2]
+        # quand tout le corps tourne vite (roulade, culbute), les muscles se raidissent : sans ça les membres
+        # traîneraient derrière comme des nouilles et la silhouette deviendrait illisible
+        d0, d1 = prev[2] - prev[0], neck - pel
+        spin = abs(math.atan2(d0[0] * d1[1] - d0[1] * d1[0], d0[0] * d1[0] + d0[1] * d1[1]))
+        firm = min(1.0, spin / 0.08) * 0.35
         # colonne : de la pose (courbe par le buste), + respiration
         mid = (pel + neck) / 2
         tgt_sp = bezier_points(pel, mid + 3.0 * (chest - mid), neck, N_SPINE)   # ligne d'action accentuée
@@ -152,7 +157,7 @@ def simulate(show, Y, X, room, G):
         for s in range(SUB):
             a = (s + 1) / SUB
             root = prev[0] + (pel - prev[0]) * a
-            sp = spine.step(root, tgt_sp, k_spine, gdir * 0.01 * gm, 0.8)
+            sp = spine.step(root, tgt_sp, k_spine + firm, gdir * 0.01 * gm, 0.8)
         spn = spine.p
         sh_idx = K.SHOULDER / K.SPINE * (N_SPINE - 1)
         i0 = int(sh_idx)
@@ -167,8 +172,8 @@ def simulate(show, Y, X, room, G):
             reach = hand - shoulder
             rn = max(1e-6, float(np.hypot(*reach)))
             effort = max(0.0, float(np.dot(reach / rn, -gdir))) if gm > 0.05 else min(1.0, rn / ARM_L)
-            k = k_pinned if pinned else k_arm + np.linspace(0.0, 0.26, N_LIMB) * effort
-            grav = 0.0 if pinned else gdir * 0.035 * gm
+            k = k_pinned if pinned else k_arm + np.linspace(0.0, 0.26, N_LIMB) * effort + firm
+            grav = 0.0 if pinned else gdir * 0.015 * gm
             for s in range(SUB):
                 arms[i].step(shoulder, tgt, k, grav, 0.82, pin=hand if pinned else None)
             arm_pts.append(arms[i].p.copy())
@@ -177,8 +182,8 @@ def simulate(show, Y, X, room, G):
             foot, knee = Y[f][6 + 2 * i], Y[f][5 + 2 * i]
             pinned = contact(foot, prev[6 + 2 * i], False)
             tgt = arc_points(pel, foot, LEG_L, knee, N_LIMB)
-            k = k_pinned if pinned else k_leg
-            grav = 0.0 if pinned else gdir * 0.03 * gm
+            k = k_pinned if pinned else k_leg + firm
+            grav = 0.0 if pinned else gdir * 0.012 * gm
             for s in range(SUB):
                 legs[i].step(pel, tgt, k, grav, 0.8, pin=foot if pinned else None)
             leg_pts.append(legs[i].p.copy())

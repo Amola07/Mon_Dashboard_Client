@@ -248,25 +248,28 @@ def draw(c, p, t, cape=None, cape_color="violet", glow=1.0, alpha=255, screen_ro
         path.close()
         c.drawPath(path, _brush(cc, 110 * glow * alpha / 255, glow=10))
         c.drawPath(path, _brush(cc, 225 * alpha / 255))
-    path = skia.Path()
-    if "chains" in J:                                           # chaînes souples (bras, jambes, colonne)
+    path = skia.Path()                                          # corps : colonne et jambes
+    arms = skia.Path()                                          # bras : dessinés PAR-DESSUS la tête, pour qu'un
+    if "chains" in J:                                           # geste près du visage reste visible
         C = J["chains"]
-        for pts in list(C["arms"]) + list(C["legs"]) + [C["spine"]]:
+        for pts in list(C["legs"]) + [C["spine"]]:
             smooth_path(path, pts)
+        for pts in C["arms"]:
+            smooth_path(arms, pts)
     else:
-        for a, m, b in J["arms"] + J["legs"]:                  # une courbe qui passe par le coude/genou
+        for (a, m, b), dst in [(x, arms) for x in J["arms"]] + [(x, path) for x in J["legs"]]:
             cp = v_sub(v_mul(m, 2.0), v_mul(v_add(a, b), 0.5))
-            path.moveTo(*a)
-            path.quadTo(*cp, *b)
+            dst.moveTo(*a)
+            dst.quadTo(*cp, *b)
         path.moveTo(*J["pelvis"])
         mid = v_lerp(J["pelvis"], J["neck"], 0.5)
         ctrl = v_add(v_sub(v_mul(J["chest"], 2.0), mid), v_mul(J["fwd"], p.bend * 0.25))
         path.quadTo(*ctrl, *J["neck"])
     path.addCircle(*J["head"], HEAD_R)
-    c.drawPath(path, _pen(CYAN, LINE_W * 2.3, 75 * glow * alpha / 255, glow=LINE_W * 0.9))
+    glow_all = skia.Path(path)
+    glow_all.addPath(arms)
+    c.drawPath(glow_all, _pen(CYAN, LINE_W * 2.3, 75 * glow * alpha / 255, glow=LINE_W * 0.9))
     c.drawPath(path, _pen(CYAN, LINE_W, alpha))
-    for arm in J["arms"]:                                       # mains : petites boules
-        c.drawCircle(*arm[2], LINE_W * 0.85, _brush(CYAN, alpha))
     c.drawCircle(*J["head"], HEAD_R - LINE_W / 2, _brush((0, 0, 0), alpha))
     look = p.look
     if p.gaze is not None:                                     # les yeux visent le point regardé
@@ -277,6 +280,9 @@ def draw(c, p, t, cape=None, cape_color="violet", glow=1.0, alpha=255, screen_ro
         k = min(1.0, n / 120)
         look = ((lx / n) * k, (ly / n) * k)
     draw_face(c, J["head"], HEAD_R, math.radians(J["head_theta"]), p.facing, p.expr, look, t, alpha)
+    c.drawPath(arms, _pen(CYAN, LINE_W, alpha))
+    for arm in J["arms"]:                                       # mains : petites boules
+        c.drawCircle(*arm[2], LINE_W * 0.85, _brush(CYAN, alpha))
     if p.emote:                                                # symboles toujours droits à l'écran
         kind, age = p.emote
         c.save()

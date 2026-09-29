@@ -17,6 +17,7 @@ import numpy as np
 import skia
 
 from . import corps as K
+from . import jeu
 from .corps import Frame, Pose, build, lerp_pose, lying, stand, up_vec, v_add, v_len, v_lerp, v_mul, v_sub
 
 W, H, FPS = 1080, 1920, 60
@@ -597,12 +598,7 @@ class Show:
             if t > 18.2 and tb.contact and tb.contact[0] == 1 and tb.contact[1] == -1:
                 self.t_ceiling = t
         pel = v_sub(tuple(tb.c), v_mul(up_vec(tb.th), 30))
-        fl = t * 9
-        flail = Pose(pel, tb.th, 10 * math.sin(fl), 0, 1, [None, None], [None, None], g=gd, expr="peur")
-        flail.hands = [v_add(pel, v_mul(unit(tb.th - 90 + 70 * math.sin(fl)), 120)),
-                       v_add(pel, v_mul(unit(tb.th - 90 + 180 + 70 * math.cos(fl * 1.3)), 120))]
-        flail.feet = [v_add(pel, v_mul(unit(tb.th + 90 + 30 * math.sin(fl * 0.8)), 70)),
-                      v_add(pel, v_mul(unit(tb.th + 90 - 30 * math.cos(fl * 0.9)), 66))]
+        flail = jeu.airborne(pel, tb.th, tuple(tb.v), gd, ROOM, 1, t)   # réflexes : équilibre, puis mains en avant
         if self.t_ceiling is None:
             self.flail_last = flail
             if t < 15.85:
@@ -662,6 +658,7 @@ class Show:
     def step(self, t):
         pose = self.hero(t)
         self.last_pose = pose
+        pose = jeu.act(pose, t)                                # le corps joue l'émotion (sursaut, question…)
         J = build(pose)
         if self.arrows is None:
             g = gravity(t)
@@ -1353,7 +1350,9 @@ def smooth_motion(show, omega=0.3):
     A = np.array([J["head_theta"] for J in Js], dtype=float)
     A = np.unwrap(np.radians(A))
     N = len(X)
-    thr = np.array([22, 9, 8, 9, 8] + [9] * 8, dtype=float)       # bassin : les arrêts nets des atterrissages sont physiques
+    # seuils d'accélération (par image) au-delà desquels c'est un raccord à absorber ; en dessous, c'est un geste
+    # voulu : il doit rester vif (un geste d'animateur se fait en 4 images, l'amortir le rend mou)
+    thr = np.array([22, 16, 16, 16, 16] + [24] * 8, dtype=float)
     Y = X.copy()
     o = np.zeros_like(X[0])
     ov = np.zeros_like(X[0])
