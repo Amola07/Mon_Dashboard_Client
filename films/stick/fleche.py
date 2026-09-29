@@ -80,7 +80,7 @@ def brush(c, a=255, glow=0.0):
 
 
 # ---------------------------------------------------------------- la flèche (et donc la gravité)
-T_ARRIVE = (0.50, 0.75)
+T_ARRIVE = (0.05, 0.30)                        # la flèche s'écrase dès la première seconde (accroche)
 T_POKE = 5.30
 T_GRAB, T_PUSH, T_OFF, T_FACE = 7.45, 7.52, 7.66, 8.00
 T_HIT = 15.55
@@ -644,6 +644,7 @@ class Show:
         else:
             from .fleche_suite import grav
             g = grav(self)
+        self.g_now = g
         # pierres
         body = [(J["head"], K.HEAD_R), (J["chest"], 16), (J["pelvis"], 16), (J["legs"][0][1], 10),
                 (J["legs"][1][1], 10), (J["legs"][0][2], 10), (J["legs"][1][2], 10), (J["arms"][0][1], 8),
@@ -770,7 +771,7 @@ class Show:
             self.frames.append({
                 "pose": pose, "cape": list(self.cape.p),
                 "stones": [(tuple(s.p), s.r, s.sides, s.a) for s in self.stones],
-                "arrows": arrows, "sag": self.sag,
+                "arrows": arrows, "sag": self.sag, "g": self.g_now,
             })
             f += 1
         return self
@@ -798,7 +799,7 @@ SHOTS = [
 
 # ---------------------------------------------------------------- tempo : vitesse du récit selon les moments
 # (début dans le récit, vitesse). Les moments de jeu (réveil, surprise, idée) respirent ; chutes et chaos restent vifs.
-TEMPO = [(0.00, 0.60), (0.70, 0.90), (1.35, 0.55), (3.60, 0.75), (5.30, 0.85), (6.30, 0.55), (7.45, 0.85),
+TEMPO = [(0.00, 0.90), (0.70, 0.90), (1.35, 0.55), (3.60, 0.75), (5.30, 0.85), (6.30, 0.55), (7.45, 0.85),
          (8.50, 0.62), (11.05, 0.70), (13.70, 0.68), (15.55, 0.90), (18.30, 0.58)]
 
 
@@ -895,13 +896,15 @@ def draw_arrow(c, center, phi, lw, glow=1.0, screen_rot=0.0, L=2 * A_HALF):
     head.close()
     c.drawPath(head, brush(GOLD, 120 * glow, glow=14 * lw))
     c.drawPath(head, brush(GOLD))
-    font = skia.Font(skia.Typeface("DejaVu Serif", skia.FontStyle.Italic()), 58 * max(0.4, k))
+    font = skia.Font(skia.Typeface("DejaVu Serif", skia.FontStyle.Italic()), 46 * max(0.5, k))
     side = n if n[1] <= 0.01 else v_mul(n, -1)
-    gpos = v_add(center, v_mul(side, 46 * max(0.4, k)))
+    gpos = v_add(v_sub(tip, v_mul(d, 30 * k)), v_mul(side, 44 * max(0.5, k)))   # près de la pointe, hors du corps
     c.save()                                                   # la lettre reste droite à l'écran
     c.translate(*gpos)
     c.rotate(-screen_rot)
-    c.drawString("g", -14, 14, font, brush(GOLD))
+    r = L / 240.0
+    label = "g" if abs(r - 1) < 0.06 else f"{r:.1f}".replace(".", ",") + "g"   # la force, lisible sur la flèche
+    c.drawString(label, -14, 14, font, brush(GOLD))
     c.restore()
 
 
@@ -932,6 +935,53 @@ def lerp_joints(A, B, a):
     return out
 
 
+def draw_field(c, g, t, lw):
+    """Le champ de gravité rendu visible : de petits traits qui coulent dans le sens de la gravité,
+    plus longs et plus rapides quand elle est forte ; de simples points en apesanteur."""
+    gm = v_len(g) / G
+    step = 120.0
+    if gm < 0.03:
+        for i in range(-3, 4):
+            for j in range(-3, 4):
+                c.drawCircle(i * step + 20 * math.sin(t * 0.5 + j), j * step + 20 * math.cos(t * 0.4 + i), 2.2 * lw,
+                             brush(GOLD, 100))
+        return
+    d = (g[0] / v_len(g), g[1] / v_len(g))
+    off = (t * 90 * min(gm, 3.0)) % step
+    L = 10 + 16 * min(gm, 2.5)
+    for i in range(-4, 5):
+        for j in range(-4, 5):
+            base = (i * step + (j % 2) * step / 2, j * step)
+            q = v_add(base, v_mul(d, off - step / 2))
+            if abs(q[0]) > ROOM - 20 or abs(q[1]) > ROOM - 20:
+                continue
+            e = v_add(q, v_mul(d, L))
+            fade = 105 * min(1.0, 0.45 + gm)
+            c.drawLine(*q, *e, pen(GOLD, 2.2 * lw, fade))
+            c.drawCircle(*e, 2.6 * lw, brush(GOLD, fade + 30))
+
+
+def impact_squash(show, t, J, g):
+    """Écrasement élastique du corps (le long de la gravité) juste après un choc qui le concerne."""
+    k = 0.0
+    for te, kind, pos, force in show.events:
+        dt = t - te
+        if kind == "thud" and 0 <= dt < 0.35 and v_len(v_sub(pos, J["pelvis"])) < 190:
+            k += force * math.exp(-dt * 11) * math.cos(dt * 26)
+    if abs(k) < 0.02 or v_len(g) < 1:
+        return None
+    k = max(-0.6, min(1.0, k))
+    feet = v_lerp(J["legs"][0][2], J["legs"][1][2], 0.5)
+    ang = math.degrees(math.atan2(g[1], g[0])) - 90
+    m = skia.Matrix()
+    m.preTranslate(*feet)
+    m.preRotate(ang)
+    m.preScale(1 + 0.14 * k, 1 - 0.2 * k)
+    m.preRotate(-ang)
+    m.preTranslate(-feet[0], -feet[1])
+    return m
+
+
 def frame_at(show, t):
     """État interpolé entre deux images de la simulation (le récit peut avancer moins vite que le film)."""
     x = t * FPS
@@ -946,6 +996,7 @@ def frame_at(show, t):
         "arrows": [(v_lerp(p[0], q[0], a), p[1] + ((q[1] - p[1] + 180) % 360 - 180) * a, p[2] + (q[2] - p[2]) * a)
                    for p, q in zip(A["arrows"], B["arrows"])] if len(A["arrows"]) == len(B["arrows"]) else A["arrows"],
         "sag": A["sag"] + (B["sag"] - A["sag"]) * a,
+        "g": v_lerp(A["g"], B["g"], a),
     }
 
 
@@ -1017,13 +1068,29 @@ def draw_frame(c, show, i, stars):
                 a = i * 45 + 20
                 c.drawLine(*v_add(pos, v_mul(unit(a), 10 + 50 * e)), *v_add(pos, v_mul(unit(a), 24 + 70 * e)),
                            pen((255, 220, 120), 3.5 * lw, 255 * (1 - e)))
+    draw_field(c, fr["g"], t, lw)
     # pierres
     for (pos, r, sides, ang) in fr["stones"]:
         draw_stone(c, pos, r, sides, ang, lw)
     # Éclat et sa cape
     cape = K.Cape((0, 0))
     cape.p = fr["cape"]
-    K.draw(c, fr["pose"], t, cape, screen_rot=rot, J=fr["J"])
+    J = fr["J"]
+    if f >= 2:                                                  # traînées de mouvement sur les gestes rapides
+        speed = max(v_len(v_sub(q, p)) for q, p in zip(joint_points(J), joint_points(show.frames[f - 2]["J"]))) * FPS / 2
+        if speed > 700:
+            a = min(1.0, (speed - 700) / 1200)
+            for k, al in ((4, 40), (2, 70)):
+                if f - k >= 0:
+                    K.draw(c, show.frames[f - k]["pose"], t, None, alpha=al * a, glow=0.4, screen_rot=rot,
+                           J=show.frames[f - k]["J"])
+    squash = impact_squash(show, t, J, fr["g"])
+    if squash:
+        c.save()
+        c.concat(squash)
+    K.draw(c, fr["pose"], t, cape, screen_rot=rot, J=J)
+    if squash:
+        c.restore()
     c.restore()
 
 
@@ -1070,36 +1137,103 @@ def soundtrack(show, path):
         music.hit(x, 0.18)
         x += 0.8
     layers.append((music, 0.35))
-    fx = Sound(np.random.default_rng(6), key="ré", timbre="cristal", prog=PROGRESSIONS[0])
-    last = {}
-    for (te, kind, pos, force) in sorted((s2f(e[0]),) + tuple(e[1:]) for e in show.events):
-        if kind == "clack":
-            if te - last.get(kind, -1) < 0.05:
-                continue
-            last[kind] = te
-            fx.hit(te, 0.25 + 0.5 * force)
-        elif kind in ("thud", "boom"):
-            fx.hit(te, 0.9 * max(force, 0.5), step=0, octave=-1)
-        elif kind in ("clang", "bonk"):
-            fx.hit(te, 0.9, step=9, octave=1)
-        elif kind == "whoosh":
-            fx.hit(te, 0.4, step=4, octave=1)
-    fx.bed("vent", env([(0, 0.15), (0.5, 0.2), (0.75, 0.8), (1.3, 0.1), (7.8, 0.1), (8.3, 0.7), (8.9, 0.1),
-                        (15.5, 0.1), (16.0, 1.0), (18.3, 0.8), (18.8, 0.1), (DURATION - 8, 0.1), (DURATION - 6, 0.3),
-                        (DURATION, 0.15)]), 1.0)
-    layers.append((fx, 0.25))
-    for i, (snd, pad) in enumerate(layers):
-        wav = Path(path).with_name(f"f{i}.wav")
-        snd.render(D, wav, pad_level=pad)
-        with wave.open(str(wav)) as w:
-            part = np.frombuffer(w.readframes(w.getnframes()), np.int16).astype(float).reshape(-1, 2)[:n] / 32767
-        mix[:len(part)] += part / max(1e-9, np.abs(part).max()) * (1.0 if i else 0.8)
-    mix /= max(1e-9, np.abs(mix).max() / 0.9)
+    wav = Path(path).with_name("musique.wav")
+    music.render(D, wav, pad_level=0.35)
+    with wave.open(str(wav)) as w:
+        mus = np.frombuffer(w.readframes(w.getnframes()), np.int16).astype(float).reshape(-1, 2)[:n] / 32767
+    mus = mus / max(1e-9, np.abs(mus).max())
+    foley = make_foley(show, D)
+    duck = foley_duck(show, D, n)
+    mix[:len(mus)] += mus * 0.42 * duck[:len(mus), None]
+    mix += foley[:n]
+    rms = np.sqrt((mix ** 2).mean()) or 1e-9                   # volume moyen visé, puis limiteur doux (pas de saturation)
+    mix = np.tanh(mix * (0.16 / rms)) * 0.95
     with wave.open(str(path), "wb") as w:
         w.setnchannels(2)
         w.setsampwidth(2)
         w.setframerate(SR)
         w.writeframes((mix * 32767).astype(np.int16).tobytes())
+
+
+def _pan(show, te, pos):
+    f = min(int(te * FPS), len(show.frames) - 2)
+    (cx, cy), zoom, rot = camera(te, show, f)
+    dx, dy = pos[0] - cx, pos[1] - cy
+    a = math.radians(rot)
+    sx = (dx * math.cos(a) - dy * math.sin(a)) * zoom
+    return max(-1.0, min(1.0, sx / (W / 2))) * 0.8
+
+
+def foley_duck(show, D, n):
+    """La musique s'efface un instant sous les gros impacts."""
+    SR = 48000
+    d = np.ones(n)
+    for te, kind, pos, force in show.events:
+        if kind in ("boom", "clang") or (kind == "thud" and force > 0.6):
+            i = int(s2f(te) * SR)
+            L = int(0.6 * SR)
+            if i < n:
+                seg = 1 - 0.55 * np.exp(-np.arange(min(L, n - i)) / (0.18 * SR))
+                d[i:i + len(seg)] = np.minimum(d[i:i + len(seg)], seg)
+    return d
+
+
+def make_foley(show, D):
+    from . import foley as FL
+    mx = FL.Mixer(D)
+    cache = {}
+
+    def snd(key, fn):
+        if key not in cache:
+            cache[key] = fn()
+        return cache[key]
+    last = -1.0
+    for te, kind, pos, force in sorted(show.events, key=lambda e: e[0]):
+        tf = s2f(te)
+        p = _pan(show, te, pos)
+        if kind == "clack":
+            if tf - last < 0.03:
+                continue
+            last = tf
+            size = 16 + (int(abs(pos[0]) * 7 + abs(pos[1]) * 3) % 13)
+            mx.add(tf, snd(("c", size // 3), lambda: FL.clack(1.0, size)), p, 0.25 + 0.6 * force)
+        elif kind == "thud":
+            mx.add(tf, snd("thud", lambda: FL.thud(1.0)), p, 0.35 + 0.6 * force)
+        elif kind == "boom":
+            mx.add(tf, snd("boom", lambda: FL.boom(1.0)), p, 1.0)
+            mx.add(tf, snd("snap", lambda: FL.snap(1.0)), p, 0.5)
+        elif kind == "clang":
+            mx.add(tf, snd("clang", lambda: FL.clang(1.0)), p, 0.9 * max(0.5, force))
+        elif kind == "bonk":
+            mx.add(tf, snd("bonk", lambda: FL.bonk(1.0)), p, 0.5 + 0.5 * force)
+        elif kind == "whoosh":
+            mx.add(tf, snd("wh", lambda: FL.whoosh(0.45, 1.0, 1300)), p, 0.6)
+    # pas : un pied qui se pose (il allait vite, il s'arrête, près d'une surface)
+    feet = np.array([[fr["J"]["legs"][0][2], fr["J"]["legs"][1][2]] for fr in show.frames])
+    for k in range(2):
+        v = np.linalg.norm(np.diff(feet[:, k], axis=0), axis=1)
+        lastf = -99
+        for f in range(3, len(v)):
+            q = feet[f + 1, k]
+            near = min(ROOM - abs(q[0]), ROOM - abs(q[1])) < 14
+            if near and v[f - 2] > 1.0 and v[f] < 0.35 and f - lastf > 8:
+                lastf = f
+                tf = s2f(f / FPS)
+                mx.add(tf, snd(("step", k), lambda: FL.step(1.0)), _pan(show, f / FPS, q), 0.28)
+    # souffle qui suit la vitesse, bourdonnement de la flèche qui suit la gravité
+    nf = len(F2S)
+    pel = np.array([fr["J"]["pelvis"] for fr in show.frames])
+    spd = np.r_[0, np.linalg.norm(np.diff(pel, axis=0), axis=1) * FPS]
+    gm = np.array([v_len(fr["g"]) / G for fr in show.frames])
+    has = np.array([1.0 if fr["arrows"] else 0.0 for fr in show.frames])
+    idx = np.clip((F2S * FPS).astype(int), 0, len(show.frames) - 1)
+    level = np.clip((spd[idx] - 250) / 1400, 0, 1) * 0.9 + 0.03
+    level = np.convolve(level, np.ones(9) / 9, mode="same")
+    mx.add_stream(FL.wind_stream(level, D), 0.9)
+    freq = 150 / np.sqrt(np.maximum(gm[idx], 0.25))
+    amp = np.convolve(has[idx] * np.minimum(1.0, 0.3 + 0.5 * gm[idx]), np.ones(15) / 15, mode="same")
+    mx.add_stream(FL.hum_stream(freq, amp, D), 0.8)
+    return mx.out
 
 
 # ---------------------------------------------------------------- rendu
@@ -1156,6 +1290,16 @@ def smooth_motion(show, omega=0.2):
                 aov = (B[f - 1] - B[f - 2]) - ((A[f + 1] - A[f]) if f + 1 < N else 0.0)
         Y[f] = X[f] + o
         B[f] = A[f] + ao
+    # la tête a de l'inertie : elle dépasse un peu puis revient (ressort peu amorti)
+    s_rel = Y[0][4] - Y[0][2]
+    sv = np.zeros(2)
+    for f in range(N):
+        rel = Y[f][4] - Y[f][2]
+        sv += -2 * 0.35 * 0.32 * sv - 0.32 * 0.32 * (s_rel - rel)
+        s_rel = s_rel + sv
+        n0 = np.linalg.norm(rel) or 1.0
+        n1 = np.linalg.norm(s_rel) or 1.0
+        Y[f][4] = Y[f][2] + s_rel * (n0 / n1)
     for f, fr in enumerate(show.frames):
         P = [tuple(q) for q in Y[f]]
         fr["J"] = points_joint(P, Js[f], math.degrees(B[f]))

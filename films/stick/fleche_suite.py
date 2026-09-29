@@ -169,15 +169,15 @@ class Suite:
             s = self.tower[k]
             if "plan" not in st:
                 if k == 0:
-                    self.mark(t, rate=0.9, shot=("suivi", None, 1.7, 1.7, 180, 180))
+                    self.mark(t, rate=1.15, shot=("suivi", None, 1.7, 1.7, 180, 180))
                 su = F.CEIL.local(s.p)[0]
                 uh = self.u
                 d = 1 if su >= uh else -1
                 ua = su - d * (s.r + 30)
-                w1 = max(0.35, abs(ua - uh) / 240)
+                w1 = max(0.3, abs(ua - uh) / 320)
                 d2 = 1 if self.uT >= ua else -1
                 ub = self.uT - d2 * (self.tower[0].r + 40)
-                w2 = max(0.35, abs(ub - ua) / 220)
+                w2 = max(0.3, abs(ub - ua) / 300)
                 st["plan"] = dict(su=su, uh=uh, d=d, ua=ua, w1=w1, d2=d2, ub=ub, w2=w2)
             P = st["plan"]
             tau = t - st["t0"]
