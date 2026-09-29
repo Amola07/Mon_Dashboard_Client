@@ -739,26 +739,43 @@ SHOTS = [
     (14.55, "suivi", None, 2.1, 2.2, 90, 90),
     (15.25, "fixe", (160.0, ROOM - 270), 1.5, 1.6, 90, 90),
     (15.90, "fixe", (0.0, 0.0), 1.05, 1.07, 0, 0),
-    (18.80, "suivi", None, 2.4, 2.5, 180, 180),
+    (18.45, "suivi", None, 2.4, 2.5, 180, 180),
 ]
 
 
-def camera(t, show, f):
-    k = max(i for i, s in enumerate(SHOTS) if s[0] <= t)
+def shot_state(k, t, show, f):
+    """Cadrage voulu par le plan k à l'instant t (centre, zoom, rotation)."""
     t0, mode, center, z0, z1, r0, r1 = SHOTS[k]
     t1 = SHOTS[k + 1][0] if k + 1 < len(SHOTS) else DURATION
-    u = (t - t0) / (t1 - t0)
-    zoom = z0 + (z1 - z0) * ease_io(u)
+    zoom = z0 + (z1 - z0) * ease_io((t - t0) / (t1 - t0))
     rot = r0 + (r1 - r0) * ease_io((t - t0) / 1.2)
-    if mode == "suivi":                                        # suit le buste, lissé depuis le début du plan
+    if mode == "suivi":                                        # suit le buste, lissé
         acc, wsum = (0.0, 0.0), 0.0
-        f0 = int(round(t0 * FPS))
-        for j in range(max(f0, f - 20), f + 1):
+        for j in range(max(0, f - 40), f + 1):
             J = build(show.frames[j]["pose"])
             q = v_lerp(J["pelvis"], J["head"], 0.45)
-            w = math.exp(-(f - j) / 8)
+            w = math.exp(-(f - j) / 14)
             acc, wsum = v_add(acc, v_mul(q, w)), wsum + w
         center = v_mul(acc, 1 / wsum)
+    return center, zoom, rot
+
+
+def camera(t, show, f):
+    """Caméra continue : pas de coupe sèche, elle glisse, zoome et pivote d'un cadrage au suivant."""
+    def blended(k):
+        center, zoom, rot = shot_state(k, t, show, f)
+        if k > 0:
+            pc, pz, pr = blended(k - 1)                        # le plan d'avant peut être encore en mouvement
+            trans = 0.8 + 0.1 * abs(rot - pr) / 180            # une grande rotation prend un peu plus de temps
+            u = (t - SHOTS[k][0]) / trans
+            if u < 1:
+                e = ease_io(u)
+                center = v_lerp(pc, center, e)
+                zoom = math.exp(math.log(pz) + (math.log(zoom) - math.log(pz)) * e)
+                rot = pr + (rot - pr) * e
+        return center, zoom, rot
+    k = max(i for i, s in enumerate(SHOTS) if s[0] <= t)
+    center, zoom, rot = blended(k)
     shake = 0.0
     for (te, kind, pos, force) in show.events:
         dt = t - te
