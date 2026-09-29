@@ -743,6 +743,43 @@ SHOTS = [
 ]
 
 
+# ---------------------------------------------------------------- tempo : vitesse du récit selon les moments
+# (début dans le récit, vitesse). Les moments de jeu (réveil, surprise, idée) respirent ; chutes et chaos restent vifs.
+TEMPO = [(0.00, 0.60), (0.70, 0.90), (1.35, 0.55), (3.60, 0.75), (5.30, 0.85), (6.30, 0.55), (7.45, 0.85),
+         (8.50, 0.62), (11.05, 0.70), (13.70, 0.68), (15.55, 0.90), (18.30, 0.58)]
+
+
+def _tempo_rate(x):
+    """Vitesse du récit en x, avec un passage doux (0,3 s) à chaque changement."""
+    for (a, ra), (b, rb) in zip(TEMPO, TEMPO[1:]):
+        if abs(x - b) < 0.15:
+            return ra + (rb - ra) * ease_io((x - b + 0.15) / 0.3)
+    r = TEMPO[0][1]
+    for a, ra in TEMPO:
+        if x >= a:
+            r = ra
+    return r
+
+
+def _build_tempo():
+    story = [0.0]
+    while story[-1] < DURATION - 1e-9:
+        x = story[-1]
+        story.append(min(DURATION - 1e-6, x + _tempo_rate(x) / FPS))
+        if story[-1] >= DURATION - 1e-6:
+            break
+    return np.array(story)
+
+
+F2S = _build_tempo()                                   # temps du récit pour chaque image du film
+FILM_DUR = (len(F2S) - 1) / FPS
+
+
+def s2f(x):
+    """Instant du film correspondant à un instant du récit."""
+    return float(np.interp(x, F2S, np.arange(len(F2S)) / FPS))
+
+
 def shot_state(k, t, show, f):
     """Cadrage voulu par le plan k à l'instant t (centre, zoom, rotation)."""
     t0, mode, center, z0, z1, r0, r1 = SHOTS[k]
@@ -827,9 +864,23 @@ def draw_stone(c, pos, r, sides, ang, lw):
         c.drawCircle(*q, 3.2 * lw, pen(LINE, 1.6 * lw))
 
 
-def draw_frame(c, show, f, stars):
-    t = f / FPS
-    fr = show.frames[f]
+def frame_at(show, t):
+    """État interpolé entre deux images de la simulation (le récit peut avancer moins vite que le film)."""
+    x = t * FPS
+    f0 = min(int(x), len(show.frames) - 2)
+    a = min(max(x - f0, 0.0), 1.0)
+    A, B = show.frames[f0], show.frames[f0 + 1]
+    return f0, {
+        "pose": lerp_pose(A["pose"], B["pose"], a) if a > 1e-6 else A["pose"],
+        "cape": [v_lerp(p, q, a) for p, q in zip(A["cape"], B["cape"])],
+        "stones": [(v_lerp(p[0], q[0], a), p[1], p[2], p[3] + (q[3] - p[3]) * a) for p, q in zip(A["stones"], B["stones"])],
+        "arrow": (arrow_center(t), arrow_phi(t)),
+    }
+
+
+def draw_frame(c, show, i, stars):
+    t = float(F2S[min(i, len(F2S) - 1)])
+    f, fr = frame_at(show, t)
     (cx, cy), zoom, rot = camera(t, show, f)
     c.clear(skia.ColorBLACK)
     c.save()
@@ -903,14 +954,16 @@ def soundtrack(show, path):
     from satisfying.engine import PROGRESSIONS, Sound
     import wave
     SR = 48000
-    n = int(DURATION * SR)
+    D = FILM_DUR
+    n = int(D * SR)
     mix = np.zeros((n, 2))
-    fr = int(DURATION * FPS)
+    fr = int(D * FPS)
 
-    def env(keys):
+    def env(keys0):
         out = []
         for k in range(fr):
             x = k / FPS
+            keys = [(s2f(a) if a < DURATION else D, v) for a, v in keys0]
             v = keys[-1][1]
             for (a, va), (b, vb) in zip(keys, keys[1:]):
                 if a <= x < b:
@@ -921,15 +974,15 @@ def soundtrack(show, path):
     layers = []
     music = Sound(np.random.default_rng(5), key="ré", timbre="kalimba", prog=PROGRESSIONS[1])
     music.bar = 2.0
-    for t in np.arange(3.6, 15.5, 0.25):                        # petite mélodie qui avance avec lui
-        if not (8.0 < t < 9.8):
+    for t in np.arange(s2f(3.6), s2f(15.5), 0.3):              # petite mélodie qui avance avec lui
+        if not (s2f(8.0) < t < s2f(9.8)):
             music.hit(float(t), 0.28)
-    for t, st in [(1.35, 4), (3.2, 7), (5.3, 9), (6.8, 11), (13.55, 11), (15.55, 14), (19.6, 11)]:
-        music.hit(t, 0.8, step=st)
+    for t, st in [(1.35, 4), (3.2, 7), (5.3, 9), (6.8, 11), (13.55, 11), (15.55, 14), (19.4, 11)]:
+        music.hit(s2f(t), 0.8, step=st)
     layers.append((music, 0.35))
     fx = Sound(np.random.default_rng(6), key="ré", timbre="cristal", prog=PROGRESSIONS[0])
     last = {}
-    for (te, kind, pos, force) in sorted(show.events):
+    for (te, kind, pos, force) in sorted((s2f(e[0]),) + tuple(e[1:]) for e in show.events):
         if kind == "clack":
             if te - last.get(kind, -1) < 0.05:
                 continue
@@ -946,7 +999,7 @@ def soundtrack(show, path):
     layers.append((fx, 0.25))
     for i, (snd, pad) in enumerate(layers):
         wav = Path(path).with_name(f"f{i}.wav")
-        snd.render(DURATION, wav, pad_level=pad)
+        snd.render(D, wav, pad_level=pad)
         with wave.open(str(wav)) as w:
             part = np.frombuffer(w.readframes(w.getnframes()), np.int16).astype(float).reshape(-1, 2)[:n] / 32767
         mix[:len(part)] += part / max(1e-9, np.abs(part).max()) * (1.0 if i else 0.8)
@@ -1010,11 +1063,10 @@ def main():
         surf = skia.Surface(W, H)
         stars = make_stars()
         for s in a.images.split(","):
-            f = min(int(round(float(s) * FPS)), len(show.frames) - 1)
-            draw_frame(surf.getCanvas(), show, f, stars)
+            draw_frame(surf.getCanvas(), show, min(int(round(float(s) * FPS)), len(F2S) - 1), stars)
             surf.makeImageSnapshot().save(str(out / f"t{float(s):06.2f}.png"), skia.kPNG)
         return
-    total = len(show.frames)
+    total = len(F2S)
     n = max(1, a.morceaux)
     cuts = [total * i // n for i in range(n + 1)]
     with tempfile.TemporaryDirectory() as tmp:
