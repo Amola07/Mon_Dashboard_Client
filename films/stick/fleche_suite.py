@@ -14,6 +14,7 @@ from dataclasses import replace
 
 from . import corps as K
 from . import fleche as F
+from . import jeu
 from .corps import Frame, Pose, build, lerp_pose, stand, up_vec, v_add, v_len, v_lerp, v_mul, v_sub
 
 R = F.ROOM
@@ -260,10 +261,20 @@ class Suite:
             u = (tau - 0.25) / 0.5
             pu = self.u + (self.uT - self.u) * u
             ph = F.K.HIP_H * 0.7 + (top + F.K.HIP_H * 0.75 - F.K.HIP_H * 0.7) * u + 90 * 4 * u * (1 - u)
-            p = standing(F.CEIL, pu, fc, expr="decide")
+            p = standing(F.CEIL, pu, fc, expr="decide", lean=6)
             p.pelvis = F.CEIL.w(pu, ph)
-            p.feet = [None, None]
             p.g = (0.0, -1.0)
+            # détente (jambes tendues vers le bas), genoux repliés au sommet, puis les pieds cherchent la pile
+            base_h = top * min(1.0, u / 0.7)
+            if u < 0.2:
+                p.feet = [F.CEIL.w(pu - fc * 8, ph - 84), F.CEIL.w(pu + fc * 6, ph - 82)]
+            elif u < 0.65:
+                p.feet = [F.CEIL.w(pu - fc * 10, ph - 48), F.CEIL.w(pu + fc * 20, ph - 40)]
+            else:
+                p.feet = [F.CEIL.w(pu - fc * 8, max(base_h, ph - 80)), F.CEIL.w(pu + fc * 10, max(base_h, ph - 76))]
+            J = build(replace(p, hands=[None, None]))
+            p.hands = [v_add(J["shoulder"], v_add(v_mul(J["up"], 30), v_mul(J["fwd"], -56))),
+                       v_add(J["shoulder"], v_add(v_mul(J["up"], 36), v_mul(J["fwd"], 56)))]
             return p
         st["done"] = tau >= 1.0
         return on
@@ -299,7 +310,7 @@ class Suite:
         h = st["h0"] + v0 * T - 0.5 * G * T * T
         p = standing(F.CEIL, self.uT, fc, expr="decide", gaze=grip[0], head=-26)
         p.pelvis = F.CEIL.w(self.uT, h)
-        p.feet = [None, None]
+        p.feet = [F.CEIL.w(self.uT - fc * 6, h - 86), F.CEIL.w(self.uT + fc * 8, h - 84)]   # tout le corps s'étire
         p.g = (0.0, -1.0)
         J = build(replace(p, hands=[None, None]))
         up_h = [v_add(J["shoulder"], v_add(v_mul(J["up"], 62), v_mul(J["fwd"], -56))),
@@ -323,12 +334,19 @@ class Suite:
         grip = [F.arrow_point(t, 110), F.arrow_point(t, 88)]
         grip = [v_add(F.A, v_mul(F.unit(270 + wob), 110)), v_add(F.A, v_mul(F.unit(270 + wob), 88))]
         mid = v_lerp(grip[0], grip[1], 0.5)
-        sw = 14 * math.sin(tau * 7)
-        th = 180 + sw * 0.4
+        # il se balance pour prendre de l'élan (jambes ensemble, en pendule), replie les genoux… et tire d'un coup
+        sw = 26 * math.sin(tau * 5.5) * min(1.0, tau * 2) if tau < 0.8 else 0.0
+        th = 180 + sw * 0.6
         pel = v_sub(mid, v_mul(up_vec(th), K.SHOULDER + 66))
-        kick = math.sin(tau * 14) * (1 if tau < 0.9 else 0)
-        J = build(Pose(pel, th, 0, 0, self.facing, [None, None], [grip[1], grip[0]], g=(0.0, -1.0)))
-        feet = [v_add(pel, v_mul(F.unit(th + 90 + 20 * kick), 70)), v_add(pel, v_mul(F.unit(th + 90 - 20 * kick), 66))]
+        swing = th + 90 - sw * 1.4                             # les jambes suivent le balancier, en retard
+        if tau < 0.8:
+            feet = [v_add(pel, v_mul(F.unit(swing - 6), 86)), v_add(pel, v_mul(F.unit(swing + 6), 84))]
+        elif tau < 1.0:                                        # anticipation : genoux remontés
+            k = ease((tau - 0.8) / 0.12)
+            feet = [v_add(pel, v_mul(F.unit(th + 90 - 50 * k), 86 - 40 * k)),
+                    v_add(pel, v_mul(F.unit(th + 90 - 40 * k), 84 - 36 * k))]
+        else:                                                  # détente : il se jette vers le bas
+            feet = [v_add(pel, v_mul(F.unit(th + 90 + 4), 88)), v_add(pel, v_mul(F.unit(th + 90 - 6), 86))]
         p = Pose(pel, th, 0, -12, self.facing, feet, [grip[1], grip[0]], expr="decide" if tau < 0.9 else "colere",
                  g=(0.0, -1.0), gaze=mid)
         if tau >= 1.25:
@@ -354,6 +372,7 @@ class Suite:
         st["p"] = v_add(st["p"], v_mul(st["v"], DT))
         th = turn(st["th"], 180.0, ease(tau / 0.4))
         p = Pose(st["p"], th, 0, -6, self.facing, [None, None], [None, None], expr="surpris", g=(0.0, -1.0))
+        p.feet = [v_add(st["p"], v_mul(F.unit(th + 90 - 8), 84)), v_add(st["p"], v_mul(F.unit(th + 90 + 10), 80))]
         k = ease(tau / 0.4)
         c_hold = hold(show, p, phi, L0)
         c = v_lerp(st["c0"], c_hold, k)
@@ -641,11 +660,8 @@ class Suite:
         if tb.contact and tb.contact[2] > 150:
             show.events.append((t, "thud", tuple(tb.c), min(1.0, tb.contact[2] / 900)))
         pel = v_sub(tuple(tb.c), v_mul(up_vec(tb.th), 30))
-        fl = t * 9
-        p = Pose(pel, tb.th, 8 * math.sin(fl), 0, self.facing, [None, None], [None, None], g=v_mul(g, 1 / max(1, v_len(g))),
-                 expr="peur", emote=("sueur", tau))
-        p.feet = [v_add(pel, v_mul(F.unit(tb.th + 90 + 30 * math.sin(fl * 0.8)), 70)),
-                  v_add(pel, v_mul(F.unit(tb.th + 90 - 30 * math.cos(fl * 0.9)), 66))]
+        p = jeu.airborne(pel, tb.th, tuple(tb.v), None, R, self.facing, t)   # jambes : équilibre, puis réception
+        p = replace(p, expr="peur", emote=("sueur", tau), g=v_mul(g, 1 / max(1, v_len(g))))
         c = hold(show, p, hphi, 300.0)
         show.arrows[0]["c"] = c
         if tau < 0.25:

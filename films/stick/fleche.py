@@ -587,7 +587,7 @@ class Show:
         follow.hands = [v_add(J["shoulder"], v_add(v_mul(J["up"], -40), v_mul(J["fwd"], -20))),
                         v_add(J["shoulder"], v_add(v_mul(J["up"], -30), v_mul(J["fwd"], 70)))]
         if t < 15.60:
-            p = keyed(t, [(14.50, grab), (14.70, hold), (14.95, wind), (15.00, release), (15.25, follow),
+            p = keyed(t, [(14.50, grab), (14.64, hold), (14.80, wind), (14.95, wind), (15.00, release), (15.25, follow),
                           (15.60, replace(follow, expr="surpris" if t > T_HIT + 0.02 else "joie", gaze=A,
                                           emote=("!", t - T_HIT) if t > T_HIT else None))],
                       ease=lambda u: ease_io(u) if t < 14.95 or t > 15.0 else u)
