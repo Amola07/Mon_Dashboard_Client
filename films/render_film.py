@@ -113,8 +113,8 @@ def main(argv=None):
         # image : agrandissement + halo doux
         subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-framerate", str(tl.FPS),
                         "-pattern_type", "glob", "-i", str(frames / "*.png"), "-vf",
-                        "scale=1080:1920:flags=lanczos,split[a][b];[b]gblur=sigma=24,eq=brightness=-0.05:contrast=1.25[g];"
-                        "[a][g]blend=all_mode=screen:all_opacity=0.35",
+                        "scale=1080:1920:flags=lanczos,format=gbrp,split[a][b];[b]gblur=sigma=24,eq=brightness=-0.05:contrast=1.25[g];"
+                        "[a][g]blend=all_mode=screen:all_opacity=0.35,format=yuv420p",
                         "-c:v", "libx264", "-preset", "slow", "-crf", "16", "-pix_fmt", "yuv420p", str(tmp / "v.mp4")],
                        check=True)
         # son : nappe d'accords, notes aux moments clés, vent du désert, voix off

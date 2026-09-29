@@ -142,8 +142,8 @@ def main(argv=None):
                 src, fps_in = tmp / "interp", FPS
                 print("  fluidité doublée avec RIFE", flush=True)
         # agrandissement + halo lumineux doux (bloom) autour des zones claires
-        vf = [f"scale={W}:{H}:flags=lanczos,split[a][b];[b]gblur=sigma=22,eq=brightness=-0.06:contrast=1.3[g];"
-              f"[a][g]blend=all_mode=screen:all_opacity=0.45"]
+        vf = [f"scale={W}:{H}:flags=lanczos,format=gbrp,split[a][b];[b]gblur=sigma=22,eq=brightness=-0.06:contrast=1.3[g];"
+              f"[a][g]blend=all_mode=screen:all_opacity=0.45,format=yuv420p"]
         if fps_in < FPS:
             vf.append(f"minterpolate=fps={FPS}:mi_mode=mci:mc_mode=aobmc:me_mode=bidir:vsbmc=1")
             print("  fluidité doublée avec ffmpeg (RIFE absent)", flush=True)
