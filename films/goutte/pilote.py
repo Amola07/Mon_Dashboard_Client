@@ -153,8 +153,8 @@ wl.new(star_amt.outputs["Value"], night.inputs["B"])
 wl.new(night.outputs["Result"], wn["Background"].inputs["Color"])
 wn["Background"].inputs["Strength"].default_value = 0.6
 
-for t, el, stars, gain in [(0, -3.5, 1.0, 0.25), (5, -2.5, 0.7, 0.45), (T.SUNRISE[0], -2.0, 0.5, 0.6),
-                           (T.SUNRISE[1], 5.0, 0.0, 1.0)]:
+for t, el, stars, gain in [(0, -3.5, 1.0, 0.25), (5, -2.8, 0.8, 0.35), (9, -2.0, 0.6, 0.5),
+                           (T.SUNRISE[0], -0.8, 0.35, 0.7), (T.SUNRISE[1], 4.0, 0.0, 1.0)]:
     sky.sun_elevation = math.radians(el)
     sky.keyframe_insert("sun_elevation", frame=F(t))
     socket_key(star_amt.inputs[1], F(t), stars)
@@ -169,7 +169,7 @@ sun.data.angle = math.radians(1.5)
 sun.data.color = lin(255, 196, 150)
 c = sun.constraints.new("TRACK_TO")
 c.target, c.track_axis, c.up_axis = origin, "TRACK_NEGATIVE_Z", "UP_Y"
-for t, el, energy in [(0, -3.5, 0.0), (T.SUNRISE[0], -1.0, 0.3), (T.SUNRISE[1], 5.0, 4.5)]:
+for t, el, energy in [(0, -3.5, 0.0), (9, -2.0, 0.1), (T.SUNRISE[0], -0.8, 0.8), (T.SUNRISE[1], 4.0, 4.0)]:
     e = math.radians(el)
     sun.location = (0, 60 * math.cos(e), 60 * math.sin(e))
     sun.keyframe_insert("location", frame=F(t))
@@ -225,6 +225,10 @@ bpy.ops.object.shade_smooth()
 
 # ---------------------------------------------------------------- la goutte
 water = mat("eau", lin(215, 235, 255), rough=0.0, trans=1.0, ior=1.33)
+vol = water.node_tree.nodes.new("ShaderNodeVolumePrincipled")
+vol.inputs["Color"].default_value = (*lin(170, 215, 255), 1)
+vol.inputs["Density"].default_value = 0.35
+water.node_tree.links.new(vol.outputs["Volume"], water.node_tree.nodes["Material Output"].inputs["Volume"])
 bpy.ops.mesh.primitive_uv_sphere_add(radius=0.5, segments=128, ring_count=64)
 drop = bpy.context.object
 for v in drop.data.vertices:
@@ -255,27 +259,98 @@ for side in (-1, 1):
     e.parent = drop
     eyes.append(e)
 
+# lueur bleutée à l'intérieur : la goutte reste lumineuse avant l'aube
+bpy.ops.object.light_add(type="POINT", location=(0, 0, 0.42))
+glow = bpy.context.object
+glow.data.energy, glow.data.color, glow.data.shadow_soft_size = 2.5, lin(160, 205, 255), 0.12
+glow.parent = drop
+for ray in ("visible_camera", "visible_glossy", "visible_transmission", "visible_diffuse"):
+    setattr(glow, ray, ray == "visible_diffuse")   # on voit sa lumière, jamais l'ampoule elle-même
+
+# paupières : dômes d'eau givrée qui pivotent devant les yeux
+lid_m = mat("paupière", lin(150, 200, 245), rough=0.25, coat=1.0)
+lids = []
+for e in eyes:
+    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.064, segments=32, ring_count=16, location=e.location)
+    lid = bpy.context.object
+    bpy.ops.object.mode_set(mode="EDIT")
+    bpy.ops.mesh.select_all(action="DESELECT")
+    bpy.ops.object.mode_set(mode="OBJECT")
+    for v in lid.data.vertices:
+        v.select = v.co.z < -0.001
+    bpy.ops.object.mode_set(mode="EDIT")
+    bpy.ops.mesh.delete(type="VERT")
+    bpy.ops.object.mode_set(mode="OBJECT")
+    lid.data.materials.append(lid_m)
+    bpy.ops.object.shade_smooth()
+    lid.parent = drop
+    lids.append(lid)
+# bouche : sourire (arc) et « o » de surprise
+mouth_m = mat("bouche", lin(15, 25, 45), rough=0.25, coat=1.0)
+bpy.ops.mesh.primitive_torus_add(major_radius=0.055, minor_radius=0.013, location=(0, -0.505, 0.47),
+                                 rotation=(math.pi / 2, 0, 0))
+smile = bpy.context.object
+bpy.ops.object.mode_set(mode="EDIT")
+bpy.ops.mesh.select_all(action="DESELECT")
+bpy.ops.object.mode_set(mode="OBJECT")
+for v in smile.data.vertices:
+    v.select = v.co.y > 0.004            # moitié haute (avant rotation) : on garde l'arc du bas
+bpy.ops.object.mode_set(mode="EDIT")
+bpy.ops.mesh.delete(type="VERT")
+bpy.ops.object.mode_set(mode="OBJECT")
+smile.data.materials.append(mouth_m)
+bpy.ops.object.shade_smooth()
+smile.parent = drop
+bpy.ops.mesh.primitive_torus_add(major_radius=0.028, minor_radius=0.012, location=(0, -0.505, 0.47),
+                                 rotation=(math.pi / 2, 0, 0))
+ooh = bpy.context.object
+ooh.data.materials.append(mouth_m)
+bpy.ops.object.shade_smooth()
+ooh.parent = drop
+
 LAND_Z = 0.0
-# chute : très haut dans le ciel → contact (accélération), puis écrasement et rebond
-key(drop, "location", F(0), (0.0, 0.0, 30.0), "CONSTANT")
-key(drop, "location", F(T.FALL_START), (0.0, 0.0, 30.0), "QUAD", "EASE_IN")
+# chute suivie par la caméra, puis écrasement, rebond ; respiration ; petit saut de joie
+key(drop, "location", F(0), (0.0, 0.0, T.FALL_HEIGHT), "CONSTANT")
+key(drop, "location", F(T.FALL_START), (0.0, 0.0, T.FALL_HEIGHT), "QUAD", "EASE_IN")
 key(drop, "location", F(T.LAND), (0.0, 0.0, LAND_Z), "BEZIER")
-for dt, s in [(0, (1, 1, 1)), (0.08, (1.32, 1.32, 0.62)), (0.3, (0.9, 0.9, 1.14)), (0.5, (1.04, 1.04, 0.96)),
-              (0.7, (1, 1, 1))]:
-    key(drop, "scale", F(T.LAND + dt), s)
+key(drop, "location", F(T.HOP[0]), (0.0, 0.0, LAND_Z), "QUAD", "EASE_OUT")
+key(drop, "location", F((T.HOP[0] + T.HOP[1]) / 2), (0.0, 0.0, 0.22), "QUAD", "EASE_IN")
+key(drop, "location", F(T.HOP[1]), (0.0, 0.0, LAND_Z))
+squash = [(0, (1, 1, 1)), (0.08, (1.32, 1.32, 0.62)), (0.3, (0.9, 0.9, 1.14)), (0.5, (1.04, 1.04, 0.96)),
+          (0.7, (1, 1, 1))]
+for dt, sc_ in squash:
+    key(drop, "scale", F(T.LAND + dt), sc_)
 key(drop, "scale", F(T.LAND - 0.4), (0.8, 0.8, 1.35))   # étirée pendant la chute
 key(drop, "scale", F(T.FALL_START), (0.8, 0.8, 1.35))
-# yeux fermés pendant la chute, ouverture lente, regards, clignement, plissement au soleil
-closed, opened, squint = (1, 1, 0.08), (1, 1, 1), (1.05, 1, 0.45)
-for e in eyes:
-    key(e, "scale", F(0), closed)
-    key(e, "scale", F(T.EYES_OPEN[0]), closed)
-    key(e, "scale", F(T.EYES_OPEN[1]), opened)
-    key(e, "scale", F(T.BLINK[0]), opened)
-    key(e, "scale", F((T.BLINK[0] + T.BLINK[1]) / 2), closed)
-    key(e, "scale", F(T.BLINK[1]), opened)
-    key(e, "scale", F(T.SQUINT[0]), opened)
-    key(e, "scale", F(T.SQUINT[1]), squint)
+t_b = T.EYES_OPEN[1] + 0.4
+while t_b < T.HOP[0] - 1.0:                              # respiration lente
+    key(drop, "scale", F(t_b), (1.0, 1.0, 1.0))
+    key(drop, "scale", F(t_b + 0.7), (1.018, 1.018, 0.982))
+    t_b += 1.4
+for dt, sc_ in [(-0.12, (1.12, 1.12, 0.86)), (0.05, (0.9, 0.9, 1.15)), (0.3, (0.96, 0.96, 1.05))]:
+    key(drop, "scale", F(T.HOP[0] + dt), sc_)
+for dt, sc_ in [(0.0, (1.25, 1.25, 0.72)), (0.2, (0.95, 0.95, 1.06)), (0.4, (1, 1, 1))]:
+    key(drop, "scale", F(T.HOP[1] + dt), sc_)
+
+# paupières : fermées pendant la chute, ouverture lente, double clignement, plissement au soleil
+CLOSED, HALF, OPEN = math.radians(92), math.radians(40), math.radians(-70)
+for lid in lids:
+    for t, ang in [(0, CLOSED), (T.EYES_OPEN[0], CLOSED), (T.EYES_OPEN[0] + 0.35, HALF), (T.EYES_OPEN[1], OPEN),
+                   (T.EYES_OPEN[1] + 0.3, OPEN), (T.EYES_OPEN[1] + 0.4, CLOSED), (T.EYES_OPEN[1] + 0.5, OPEN),
+                   (T.EYES_OPEN[1] + 0.62, CLOSED), (T.EYES_OPEN[1] + 0.72, OPEN),
+                   (T.BLINK[0], OPEN), ((T.BLINK[0] + T.BLINK[1]) / 2, CLOSED), (T.BLINK[1], OPEN),
+                   (T.SQUINT[0], OPEN), (T.SQUINT[1], HALF), (T.HOP[0] - 0.1, HALF), (T.HOP[0] + 0.1, CLOSED),
+                   (T.HOP[1] + 0.3, CLOSED), (T.HOP[1] + 0.6, HALF)]:
+        key(lid, "rotation_euler", F(t), (ang, 0, 0))
+# bouche : rien, puis « o » de surprise, puis sourire qui grandit au lever du soleil
+for t, s_o, s_s in [(0, 0, 0), (T.SURPRISE[0], 0, 0), (T.SURPRISE[0] + 0.2, 1, 0), (T.SURPRISE[1], 1, 0),
+                    (T.SURPRISE[1] + 0.2, 0, 0), (T.SMILE[0], 0, 0), (T.SMILE[1], 0, 0.6), (T.SUNRISE[0] + 1, 0, 0.6),
+                    (T.SQUINT[1], 0, 1.0), (T.HOP[1], 0, 1.25)]:
+    key(ooh, "scale", F(t), (s_o, s_o, s_o))
+    key(smile, "scale", F(t), (1.0 * s_s, 1.0, 1.0 * s_s) if s_s else (0, 0, 0))
+
+# regards : pupilles et paupières suivent, la goutte tourne un peu
+for e, lid in zip(eyes, lids):
     base = e.location.copy()
     for (t0, t1), dx in [(T.LOOK_LEFT, -0.045), (T.LOOK_RIGHT, 0.045), (T.LOOK_BACK, 0.0)]:
         key(e, "location", F(t0), e.location.copy())
@@ -283,6 +358,10 @@ for e in eyes:
 for (t0, t1), rz in [(T.LOOK_LEFT, 0.18), (T.LOOK_RIGHT, -0.18), (T.LOOK_BACK, 0.0)]:
     key(drop, "rotation_euler", F(t0), drop.rotation_euler.copy())
     key(drop, "rotation_euler", F(t1), (0, 0, rz))
+closed, opened, squint = (1, 1, 1), (1, 1, 1), (1.05, 1, 0.8)
+for e in eyes:
+    key(e, "scale", F(T.SQUINT[0]), opened)
+    key(e, "scale", F(T.SQUINT[1]), squint)
 
 # grains de sable soulevés à l'impact
 grain_m = mat("grain", lin(214, 160, 110), rough=0.9)
@@ -322,7 +401,8 @@ def camera(name, lens, fstop, keys):
 
 
 cams = {
-    "large": camera("large", 28, 8.0, [(0, (0.6, -16, 1.2), (0, 20, 9)), (4.6, (0.4, -13.5, 1.0), (0, 10, 1.6))]),
+    "large": camera("large", 30, 8.0, [(0, (0.6, -14, 1.2), (0, 6, 14))] +
+                    [(t, (0.6 - 0.05 * t, -14 + 0.3 * t, 1.2), (0, 0, T.fall_z(t) + 0.6)) for t in (1.6, 2.4, 3.2, 4.0, 4.99)]),
     "proche": camera("proche", 40, 2.0, [(5, (0.3, -4.4, 0.75), (0, 0, 0.9)), (9, (0.25, -4.0, 0.7), (0, 0, 0.6))]),
     "visage": camera("visage", 50, 2.2, [(9, (0.15, -3.3, 0.7), (0, 0, 0.62)), (14, (0.05, -3.0, 0.68), (0, 0, 0.6))]),
     "contre": camera("contre", 30, 2.0, [(14, (-0.55, -2.9, 0.14), (0, 0.5, 0.75)), (18, (-0.35, -2.5, 0.16), (0, 0.5, 0.8))]),

@@ -1,7 +1,7 @@
-"""Rendu d'un court métrage 3D : python -m films.render_film --film goutte [--scale 0.5] [--samples 96] [--voix].
+"""Rendu d'un court métrage 3D : python -m films.render_film --film goutte [--scale 0.5] [--samples 96].
 
-Blender calcule les images (GPU conseillé : Kaggle), puis on agrandit en 1080×1920, on ajoute un halo doux,
-la musique (accords, notes sur les moments clés, vent) et, avec --voix, la voix off Kokoro.
+Film muet : Blender calcule les images (GPU conseillé : Kaggle), puis on agrandit en 1080×1920, on ajoute un
+halo doux, la musique (accords, notes sur les moments clés) et les bruitages (vent, sifflement de la chute).
 """
 from __future__ import annotations
 
@@ -21,27 +21,6 @@ from satisfying.engine import SR, Sound
 from satisfying.render3d import find_blender
 
 FILMS = Path(__file__).resolve().parent
-
-
-def voice_track(lines, duration):
-    """Voix off française (Kokoro, voix ff_siwis) placée aux instants donnés ; None si Kokoro est absent."""
-    try:
-        from kokoro import KPipeline
-    except ImportError:
-        print("Kokoro absent : pas de voix off", flush=True)
-        return None
-    pipe = KPipeline(lang_code="f", repo_id="hexgrad/Kokoro-82M")
-    track = np.zeros(int((duration + 1) * SR))
-    for t0, text in lines:
-        chunks = [np.asarray(audio, dtype=float) for _, _, audio in pipe(text, voice="ff_siwis", speed=0.92)]
-        if not chunks:
-            continue
-        v = np.concatenate(chunks)
-        v = np.interp(np.arange(int(len(v) * SR / 24000)) * 24000 / SR, np.arange(len(v)), v)   # 24 → 48 kHz
-        i = int(t0 * SR)
-        n = min(len(v), len(track) - i)
-        track[i:i + n] += v[:n]
-    return track[: int(duration * SR)]
 
 
 def read_wav(path):
@@ -65,7 +44,6 @@ def main(argv=None):
     ap.add_argument("--scale", type=float, default=0.5, help="0.5 = 540×960 (agrandi ensuite), 1 = 1080×1920")
     ap.add_argument("--samples", type=int, default=96)
     ap.add_argument("--device", default="auto", choices=["auto", "cpu"])
-    ap.add_argument("--voix", action="store_true", help="ajoute la voix off (Kokoro)")
     ap.add_argument("--still", type=int, default=None, help="rend une seule image (n°)")
     ap.add_argument("--blender", default=None)
     ap.add_argument("--out", default="output/films")
@@ -117,21 +95,19 @@ def main(argv=None):
                         "[a][g]blend=all_mode=screen:all_opacity=0.35,format=yuv420p",
                         "-c:v", "libx264", "-preset", "slow", "-crf", "16", "-pix_fmt", "yuv420p", str(tmp / "v.mp4")],
                        check=True)
-        # son : nappe d'accords, notes aux moments clés, vent du désert, voix off
+        # son : nappe d'accords, notes aux moments clés, vent du désert, sifflement de la chute
         duration = n_total / tl.FPS
         snd = Sound(np.random.default_rng(7), key="ré", timbre="cristal")
         for t, step, vel in tl.CUES:
             snd.hit(t, vel, step=step)
         env = np.clip(np.linspace(0.3, 1.0, int(duration * 60)), 0, 1)
         snd.bed("vent", env, level=0.8)
+        whoosh = np.zeros(int(duration * 60))                  # la chute siffle de plus en plus fort
+        i0, i1 = int(tl.FALL_START * 60), int(tl.LAND * 60)
+        whoosh[i0:i1] = np.linspace(0, 1, i1 - i0) ** 2
+        snd.bed("vent", whoosh, level=1.6)
         snd.render(duration, tmp / "music.wav", pad_level=0.6)
         music = read_wav(tmp / "music.wav")
-        voice = voice_track(tl.VOICE, duration) if a.voix else None
-        if voice is not None:
-            n = min(len(voice), len(music))
-            level = np.convolve(np.abs(voice[:n]), np.ones(SR // 5) / (SR // 5), mode="same")
-            duck = 1 - 0.55 * np.clip(level / max(1e-9, level.max()) * 4, 0, 1)
-            music = music[:n] * duck[:, None] * 0.8 + voice[:n, None] * 1.1
         write_wav(tmp / "a.wav", music)
         out = out_dir / f"{a.film}_pilote.mp4"
         subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-i", str(tmp / "v.mp4"),
