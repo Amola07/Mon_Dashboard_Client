@@ -244,9 +244,21 @@ def keyed(t, keys, ease=None):
     (t0, a), (t1, b) = keys[k], keys[k + 1]
     pa, pb = P(a), P(b)
     u = (t - t0) / (t1 - t0)
-    e = ease(u) if ease is not None else snap(u, t1 - t0)
-    p = lerp_pose(pa, pb, e)
+    if ease is not None:
+        p = K.cascade(pa, pb, u, ease)
+        e = ease(u)
+    else:                                                      # tenue, puis cascade rapide avec dépassement
+        T = t1 - t0
+        hold = min(0.62, max(0.0, (T - 0.12) / T * 0.62))
+        u2 = 0.0 if u <= hold else min(1.0, (u - hold) / (1 - hold))
+        p = K.cascade(pa, pb, u2, back_out)
+        e = back_out(u2)
     return arc_limbs(p, pa, pb, K.pose_vec(pa), K.pose_vec(pb), min(1.0, max(0.0, e)))
+
+
+def back_out(x, s=1.2):
+    x = min(1.0, max(0.0, x)) - 1
+    return 1 + (s + 1) * x ** 3 + s * x ** 2
 
 
 def arc_limbs(p, pa, pb, va, vb, u):
@@ -526,10 +538,14 @@ class Show:
             off = v_sub(off, RWALL.w(0, 0))
             p.pelvis = v_add(p.pelvis, off)
             J = build(replace(p, hands=[None, None]))
-            p.feet = [None, None]
             p.hands = [v_add(J["shoulder"], v_add(v_mul(J["up"], 62), v_mul(J["fwd"], -58))),   # bras en V, bien
                        v_add(J["shoulder"], v_add(v_mul(J["up"], 64), v_mul(J["fwd"], 60)))]    # visibles
-            if tau > 0.5 * (t_down - t_up):                    # redescend : les jambes se tendent vers le sol
+            ph = tau / (t_down - t_up)
+            if ph < 0.3:                                       # détente : tout le corps s'étire, pieds tendus
+                p.feet = [RWALL.w(u_jump - 5, h + 2), RWALL.w(u_jump + 7, h + 4)]
+            elif ph < 0.62:                                    # sommet : genoux repliés
+                p.feet = [RWALL.w(u_jump - 12, h + 36), RWALL.w(u_jump + 18, h + 44)]
+            else:                                              # redescend : les jambes cherchent le sol
                 p.feet = [RWALL.w(u_jump - 10, max(0.0, h - 6)), RWALL.w(u_jump + 10, max(0.0, h - 4))]
             return p
         land = stand(RWALL, u_jump, 1, crouch=0.5, lean=12, g=GRAV_RIGHT, expr="colere")
@@ -575,7 +591,7 @@ class Show:
                      feet_u=(u_stand - 34, u_stand + 6))
         J = build(wind)
         wind.hands = [v_add(J["shoulder"], v_add(v_mul(J["up"], 30), v_mul(J["fwd"], 50))),
-                      v_add(J["shoulder"], v_add(v_mul(J["up"], 50), v_mul(J["fwd"], -55)))]
+                      v_add(J["shoulder"], v_add(v_mul(J["up"], 34), v_mul(J["fwd"], -74)))]   # bras armé derrière
         release = stand(RWALL, u_stand, 1, g=GRAV_RIGHT, lean=16, expr="decide", gaze=tgt, head=-25,
                         feet_u=(u_stand - 34, u_stand + 6))
         J = build(release)

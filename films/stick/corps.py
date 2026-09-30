@@ -118,6 +118,59 @@ def lerp_pose(a, b, u):
                    look=v_lerp(a.look, b.look, u))
 
 
+def _win(u, w):
+    a, b = w
+    return min(1.0, max(0.0, (u - a) / (b - a)))
+
+
+def fenetres(a, b):
+    """Ordre dans lequel les parties du corps partent (fractions de la transition), comme dans l'animation de
+    référence : on ne bouge jamais tout le corps d'un bloc.
+      • il se relève : les hanches poussent d'abord, puis le dos se déroule, la tête arrive en dernier ;
+      • il se baisse : le buste plonge d'abord, les genoux suivent ;
+      • sinon : le bassin mène, le buste suit, la tête et les bras traînent.
+    Les bras partent toujours en retard (ils pendent de l'épaule, comme un pendule)."""
+    g = b.g or a.g or (0.0, 1.0)
+    dh = -((b.pelvis[0] - a.pelvis[0]) * g[0] + (b.pelvis[1] - a.pelvis[1]) * g[1])
+    if dh > 4:
+        W = dict(pel=(0.0, 0.66), feet=(0.0, 0.6), lean=(0.16, 0.82), bend=(0.22, 0.92), head=(0.34, 1.0),
+                 hands=(0.26, 1.0))
+    elif dh < -4:
+        W = dict(lean=(0.0, 0.68), bend=(0.0, 0.7), head=(0.06, 0.78), pel=(0.14, 0.86), feet=(0.12, 0.72),
+                 hands=(0.22, 1.0))
+    else:
+        W = dict(pel=(0.0, 0.8), feet=(0.0, 0.75), lean=(0.06, 0.86), bend=(0.1, 0.9), head=(0.18, 1.0),
+                 hands=(0.16, 1.0))
+    return W, dh
+
+
+def cascade(a, b, u, ease):
+    """Transition de la pose a à la pose b en cascade (u : 0 → 1 dans la transition, ease : courbe d'une partie).
+    Le dos s'arrondit pendant un grand mouvement vertical (il ne monte pas raide comme un piquet)."""
+    if u <= 0:
+        return a
+    if u >= 1:
+        return b
+    W, dh = fenetres(a, b)
+    e = {k: ease(_win(u, w)) for k, w in W.items()}
+    ja, jb = build(a), build(b)
+
+    def pts(pa, pb, key, x):
+        out = []
+        for i in range(2):
+            qa = pa[i] if pa[i] is not None else ja[key][i][2]
+            qb = pb[i] if pb[i] is not None else jb[key][i][2]
+            out.append(v_lerp(qa, qb, x))
+        return out
+    curl = min(1.0, abs(dh) / 40) * 16 * math.sin(math.pi * u)
+    return replace(b if e["head"] >= 0.5 else a, pelvis=v_lerp(a.pelvis, b.pelvis, e["pel"]),
+                   theta=a.theta + ((b.theta - a.theta + 180) % 360 - 180) * e["lean"],
+                   bend=a.bend + (b.bend - a.bend) * e["bend"] + curl,
+                   head=a.head + (b.head - a.head) * e["head"],
+                   feet=pts(a.feet, b.feet, "legs", e["feet"]), hands=pts(a.hands, b.hands, "arms", e["hands"]),
+                   look=v_lerp(a.look, b.look, e["head"]))
+
+
 def pose_vec(p):
     """Pose → liste de nombres (les membres libres prennent leur position calculée)."""
     J = build(p)
@@ -144,12 +197,14 @@ def build(p):
     """Articulations dans le monde."""
     u = up_vec(p.theta)
     f = v_mul(right_vec(p.theta), p.facing)
+    # la colonne se courbe sur toute sa longueur (dos rond en C) : le bas plie un peu, le haut beaucoup
+    low_dir = up_vec(p.theta + 0.3 * p.bend * p.facing)
     neck_dir = up_vec(p.theta + p.bend * p.facing)
-    neck = v_add(p.pelvis, v_mul(neck_dir, SPINE))
-    chest = v_add(p.pelvis, v_mul(u, SPINE * 0.5))
+    chest = v_add(p.pelvis, v_mul(low_dir, SPINE * 0.5))
+    neck = v_add(chest, v_mul(neck_dir, SPINE * 0.5))
     head_theta = p.theta + (p.bend + p.head) * p.facing
     head = v_add(neck, v_mul(up_vec(head_theta), NECK))
-    shoulder = v_add(p.pelvis, v_mul(v_lerp(u, neck_dir, 0.7), SHOULDER))
+    shoulder = v_add(chest, v_mul(neck_dir, SHOULDER - SPINE * 0.5))
     legs, arms = [], []
     for i in range(2):
         if p.feet[i] is not None:

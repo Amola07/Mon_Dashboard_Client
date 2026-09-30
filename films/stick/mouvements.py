@@ -22,7 +22,7 @@ Une main vaut :
 import math
 from dataclasses import dataclass, field, replace
 
-from .corps import HIP_H, Pose, build, v_add, v_len, v_mul, v_sub
+from .corps import HIP_H, Pose, _win, build, fenetres, v_add, v_len, v_mul, v_sub
 
 FPS = 24
 
@@ -104,33 +104,47 @@ def pose_at(clip, frame, F, u0=0.0, facing=1, g=(0.0, 1.0)):
         k = max(i for i in range(len(keys) - 1) if keys[i][0] <= frame)
         u = (frame - keys[k][0]) / max(1e-6, keys[k + 1][0] - keys[k][0])
     (f0, a, _), (f1, b, ease) = keys[k], keys[k + 1]
-    e = _ease(ease, u)
-    pel = _lerp2(a.pel, b.pel, e)
+    # chaque partie du corps a sa propre fenêtre de temps (cascade) : voir corps.fenetres
+    ba = _body(F, u0, facing, a.pel, a.lean, a.bend, a.head, a.feet, a.expr, g)
+    bb = _body(F, u0, facing, b.pel, b.lean, b.bend, b.head, b.feet, b.expr, g)
+    W, dh = fenetres(ba, bb)
+    e = {kk: _ease(ease, _win(u, w)) for kk, w in W.items()}
+    curl = min(1.0, abs(dh) / 40) * 16 * math.sin(math.pi * u) if 0 < u < 1 else 0.0
+    pel = _lerp2(a.pel, b.pel, e["pel"])
+    ef = min(1.0, max(0.0, e["feet"]))
     feet = []
     for i in range(2):
         fa, fb = a.feet[i], b.feet[i]
-        q = _lerp2(fa, fb, min(1.0, max(0.0, e)))
+        q = _lerp2(fa, fb, ef)
         step = abs(fb[0] - fa[0])
         if step > 6 and fa[1] < 3 and fb[1] < 3:               # un pied qui change de place se soulève
-            q = (q[0], q[1] + min(26.0, 0.35 * step) * math.sin(math.pi * min(1.0, max(0.0, e))))
+            q = (q[0], q[1] + min(26.0, 0.35 * step) * math.sin(math.pi * ef))
         feet.append(q)
-    p = _body(F, u0, facing, pel, _lerp(a.lean, b.lean, e), _lerp(a.bend, b.bend, e), _lerp(a.head, b.head, e),
-              feet, (b if e >= 0.5 else a).expr, g)
+    p = _body(F, u0, facing, pel, _lerp(a.lean, b.lean, e["lean"]), _lerp(a.bend, b.bend, e["bend"]) + curl,
+              _lerp(a.head, b.head, e["head"]), feet, (b if e["head"] >= 0.5 else a).expr, g)
     sh = build(p)["shoulder"]
     fw = v_sub(F.w(1, 0), F.w(0, 0))
     fw = v_mul(fw, facing)
     up = v_sub(F.w(0, 1), F.w(0, 0))
+    sa, sb = build(ba)["shoulder"], build(bb)["shoulder"]
+    eh = e["hands"]
     hands = []
     for i in range(2):
-        ra = _hand_rel(a.hands[i], i, F, u0, facing, sh)
-        rb = _hand_rel(b.hands[i], i, F, u0, facing, sh)
-        # arc autour de l'épaule : on interpole l'angle et la distance, pas la position
+        ra = _hand_rel(a.hands[i], i, F, u0, facing, sa)
+        rb = _hand_rel(b.hands[i], i, F, u0, facing, sb)
+        # arc autour de l'épaule (angle et distance interpolés)…
         aa, ab = math.atan2(ra[1], ra[0]), math.atan2(rb[1], rb[0])
         d = (ab - aa + math.pi) % (2 * math.pi) - math.pi
-        ang = aa + d * e
-        r = _lerp(math.hypot(*ra), math.hypot(*rb), e)
-        hands.append(v_add(sh, v_add(v_mul(fw, r * math.cos(ang)), v_mul(up, r * math.sin(ang)))))
+        ang = aa + d * eh
+        r = _lerp(math.hypot(*ra), math.hypot(*rb), eh)
+        arc = v_add(sh, v_add(v_mul(fw, r * math.cos(ang)), v_mul(up, r * math.sin(ang))))
+        # … mêlé au trajet dans le monde : quand le corps part, la main reste en arrière et se fait tirer
+        wa = v_add(sa, v_add(v_mul(fw, ra[0]), v_mul(up, ra[1])))
+        wb = v_add(sb, v_add(v_mul(fw, rb[0]), v_mul(up, rb[1])))
+        world = (wa[0] + (wb[0] - wa[0]) * eh, wa[1] + (wb[1] - wa[1]) * eh)
+        hands.append(((arc[0] + world[0]) / 2, (arc[1] + world[1]) / 2))
     p.hands = hands
+    e = e["head"]
     em = b.emote if e >= 0.5 else a.emote
     p.emote = (em, (frame - f0) / FPS) if em else None
     return p
@@ -188,7 +202,7 @@ _point = replace(REPOS, lean=8, bend=8, head=-2, pel=(4, HIP_H - 6), feet=((-12,
 clip("pointer", "Montrer du doigt", K(
     (0, _repos(), "io"),
     (6, _point_prep, "io"),                                    # anticipation : le bras recule
-    (10, _point, "snap"),                                      # 4 images : le geste part et se pose
+    (8, _point, "out"),                                        # 2 images : le bras part d'un coup (référence)
     (34, _point, "io"),                                        # tenue
     (44, _repos(), "io"),
     (50, _repos(), "io")))
@@ -255,7 +269,7 @@ _idea = replace(REPOS, pel=(-2, HIP_H - 2), lean=-4, bend=4, head=-12, hands=(No
 clip("idee", "Avoir une idée", K(
     (0, _repos("curieux"), "io"),
     (5, replace(REPOS, pel=(-3, HIP_H - 9), head=14, expr="curieux"), "io"),
-    (9, _idea, "snap"),
+    (7, _idea, "out"),
     (34, _idea, "io"),
     (44, _repos("joie"), "io"),
     (50, _repos("joie"), "io")))

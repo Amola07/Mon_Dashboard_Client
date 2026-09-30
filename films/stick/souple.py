@@ -150,7 +150,7 @@ def simulate(show, Y, X, room, G):
         firm = min(1.0, spin / 0.08) * 0.35
         # colonne : de la pose (courbe par le buste), + respiration
         mid = (pel + neck) / 2
-        tgt_sp = bezier_points(pel, mid + 3.0 * (chest - mid), neck, N_SPINE)   # ligne d'action accentuée
+        tgt_sp = bezier_points(pel, 2 * chest - mid, neck, N_SPINE)          # passe par le milieu du dos (courbe en C)
         up = (neck - pel) / max(1e-6, float(np.hypot(*(neck - pel))))
         breath = 0.0 * math.sin(2 * math.pi * 0.32 * t)            # tenues vraiment immobiles
         tgt_sp[1:] += up * breath * np.linspace(0, 1, N_SPINE)[1:, None]
