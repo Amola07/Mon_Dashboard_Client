@@ -23,9 +23,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 VOIX = os.path.join(HERE, "audio", "voix.mp3")
 VOICE_END = 47.72
 # La voix donne une consigne… puis se tait le temps que l'Orbe l'exécute. (instant dans l'enregistrement, pause)
-GAPS = [(1.36, 1.9), (6.18, 0.6), (8.8, 0.6), (9.8, 1.0), (11.27, 1.3), (12.96, 0.9), (14.41, 0.9), (16.57, 1.2),
-        (17.91, 0.8), (20.76, 2.6), (24.42, 0.9), (27.13, 1.5), (28.88, 1.6), (30.5, 0.6), (34.15, 0.9),
-        (37.0, 1.2), (40.65, 2.1), (41.98, 0.7), (43.7, 0.5)]
+GAPS = []                                            # rythme de l'enregistrement, sans pause ajoutée
 
 
 def N(v):
@@ -67,23 +65,24 @@ TIMING = [("Dessine un triangle.", 0.0, 1.16), ("N'importe lequel.", 1.57, 2.32)
           ("dépendent de la surface sur laquelle tu vis.", 43.88, 47.7)]
 
 TIMING = [(txt, N(a_), N(b_)) for txt, a_, b_ in TIMING]
-T_DRAW = (GS(1.36) + 0.35, GS(1.36) + 1.75)          # il trace le triangle APRÈS « Dessine un triangle »
+T_DRAW = (1.2, 2.55)                                 # il trace juste APRÈS « Dessine un triangle »          # il trace le triangle APRÈS « Dessine un triangle »
 T_DROP = N(7.48)                                     # « 180 » tombe (révélation du narrateur)
 T_BADGE = GS(9.8) + 0.65                             # « 180 » part en petit badge
-T_ANG = (GS(11.27) + 1.2, GS(12.96) + 0.8, GS(14.41) + 0.8)   # chaque angle finit d'être mesuré
-T_FLY = GS(16.57) + 0.25                             # il additionne : les nombres volent
+T_ANG = (11.5, 13.2, 14.6)   # chaque angle finit d'être mesuré
+T_FLY = 15.95                             # il additionne : les nombres volent
 T_SUM = N(16.71)                                     # « = 180 »
 G0 = GS(20.76)
-T_WOB = (G0 + 0.25, N(24.3))                         # il tire sur les sommets
+T_WOB = (20.6, N(24.3))
+MEASURE = (("A", 10.3, 12.3), ("B", 12.3, 13.75), ("C", 13.75, 15.6))   # il va mesurer chaque angle                         # il tire sur les sommets
 T_LOCK = N(23.78)                                    # « jamais »
 T_BACK = N(24.6)                                     # retour à la forme de départ
-T_CUT = (GS(27.13) + 0.2, GS(27.13) + 0.65, GS(27.13) + 1.1)   # il découpe les coins
-T_MOVE = (GS(28.88) + 0.15, GS(28.88) + 1.45)        # il les porte et les colle
+T_CUT = (25.95, 26.35, 26.75)   # il découpe les coins
+T_MOVE = (27.55, 28.9)        # il les porte et les colle
 T_LINE = T_MOVE[1] + 0.05                            # ligne droite
 T_ARC = N(32.4)                                      # demi-cercle 180°
-T_ZOOM = (GS(37.0) + 0.35, GS(37.0) + 1.4)           # on recule : la planète
-T_SPH = (GS(40.65) + 0.2, GS(40.65) + 1.4)           # il trace le triangle sur la sphère
-T_RIGHT = GS(40.65) + 1.5                            # trois angles droits
+T_ZOOM = (36.5, 37.6)           # on recule : la planète
+T_SPH = (38.4, 39.7)           # il trace le triangle sur la sphère
+T_RIGHT = 39.75                            # trois angles droits
 T_270 = N(40.79)
 T_END = (N(47.7) + 0.4, N(47.7) + 2.0)               # retour à l'image de départ (boucle)
 
@@ -91,9 +90,9 @@ T_END = (N(47.7) + 0.4, N(47.7) + 2.0)               # retour à l'image de dép
 ORBE = [(0.0, "neutre", None), (T_DRAW[0], "neutre", "ray"), (T_DRAW[1] + 0.1, "joie", "tri"),
         (N(2.73), "neutre", None), (GS(6.18) + 0.1, "reflechit", None), (N(6.37), "neutre", "haut"),
         (T_DROP + 0.3, "surpris", "drop"), (GS(9.8) + 0.05, "reflechit", "drop"),
-        (GS(11.27) + 0.1, "neutre", "ray"), (T_FLY - 0.05, "neutre", "sum"), (T_SUM + 0.35, "surpris", "sum"),
-        (N(18.98) + 0.1, "reflechit", None), (G0 + 0.25, "neutre", "ray"), (N(22.65), "reflechit", "ray"),
-        (T_LOCK + 0.35, "triste", "sum"), (N(24.59), "reflechit", "tri"), (GS(27.13) + 0.15, "neutre", "ray"),
+        (10.3, "neutre", "ray"), (T_FLY - 0.05, "neutre", "sum"), (T_SUM + 0.35, "surpris", "sum"),
+        (N(18.98) + 0.1, "reflechit", None), (20.6, "neutre", "ray"), (N(22.65), "reflechit", "ray"),
+        (T_LOCK + 0.35, "triste", "sum"), (N(24.59), "reflechit", "tri"), (25.9, "neutre", "ray"),
         (T_LINE + 0.2, "surpris", "P"), (N(30.63), "reflechit", "P"), (T_ARC + 0.4, "idee", "P"),
         (GS(34.15) + 0.1, "joie", None), (N(34.34) + 0.3, "surpris", None), (N(36.82) + 0.2, "reflechit", None),
         (T_ZOOM[1] - 0.2, "surpris", "planete"), (T_SPH[0], "neutre", "ray"), (T_RIGHT + 0.3, "surpris", "ray"),
@@ -171,9 +170,9 @@ A0, B0, C0 = (28.5, -237.3), (-260.0, 119.0), (260.0, 119.0)          # angles :
 PT = (0.0, 330.0)                                                     # là où les coins se rejoignent
 
 
-GRAB = [("A", G0 + 0.25, G0 + 1.45, (180.0, 40.0), (190.0, -40.0)),
-        ("B", G0 + 1.45, G0 + 2.6, (-80.0, -170.0), (-60.0, -190.0)),
-        ("C", G0 + 2.6, N(22.45), (70.0, -150.0), (60.0, -190.0))]      # sommet, fenêtre, déplacement, place de l'Orbe
+GRAB = [("A", 20.6, 21.6, (180.0, 40.0), (190.0, -40.0)),
+        ("B", 21.6, 22.6, (-80.0, -170.0), (-60.0, -190.0)),
+        ("C", 22.6, 23.6, (70.0, -150.0), (60.0, -190.0))]      # sommet, fenêtre, déplacement, place de l'Orbe
 OFFS = {"A": (0.0, -200.0), "B": (-60.0, -190.0), "C": (60.0, -190.0)}
 
 
@@ -605,10 +604,9 @@ def ray_at(t):
     V = {"A": A, "B": B, "C": C}
     if T_DRAW[0] <= t < T_DRAW[1] + 0.1:
         return pen_tip(t), T_DRAW[0]
-    for name, t0, t1 in (("A", GS(11.27) + 0.45, GS(12.96)), ("B", GS(12.96) + 0.4, GS(14.41)),
-                         ("C", GS(14.41) + 0.4, T_FLY - 0.2)):
-        if t0 <= t < t1:
-            return scr(V[name]), t0
+    for name, t0, t1 in MEASURE:
+        if t0 + 0.25 <= t < t1:
+            return scr(V[name]), t0 + 0.25
     for name, t0, t1, _, _ in GRAB:
         if t0 <= t < t1:
             return scr(V[name]), t0
@@ -642,10 +640,9 @@ def orbe_target(t):
         return 540, 600, 0.8
     if t < T_DROP - 0.2:
         return 540, 560, 0.9
-    if t < GS(11.27) + 0.1:
+    if t < MEASURE[0][1]:
         return 540, 420, 0.85
-    for name, t0, t1 in (("A", GS(11.27) + 0.1, GS(12.96)), ("B", GS(12.96), GS(14.41)),
-                         ("C", GS(14.41), T_FLY - 0.3)):
+    for name, t0, t1 in MEASURE:
         if t0 <= t < t1:
             x, y = near(name, (-40 if name == "B" else 40 if name == "C" else 0, -230))
             return x, y, 0.8
