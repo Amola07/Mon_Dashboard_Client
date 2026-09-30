@@ -69,17 +69,23 @@ T_RIGHT = 39.72                      # trois angles droits
 T_270 = 40.79
 T_END = (46.9, 48.6)                 # retour à l'image de départ (boucle)
 
-# Orbe : (début, expression, regard)
-ORBE = [(0.0, "neutre", "tri"), (1.57, "joie", "tri"), (2.73, "reflechit", None), (6.37, "neutre", "haut"),
-        (7.5, "surpris", "drop"), (8.97, "reflechit", None), (9.98, "neutre", "A"), (11.46, "neutre", "A"),
-        (13.17, "neutre", "B"), (14.57, "neutre", "C"), (15.79, "reflechit", "sum"), (16.71, "surpris", "sum"),
-        (18.09, "reflechit", None), (19.26, "neutre", "tri"), (22.65, "reflechit", "sum"),
-        (23.78, "surpris", "sum"), (24.59, "neutre", "tri"), (27.31, "neutre", "P"), (29.07, "surpris", "P"),
-        (30.63, "neutre", "P"), (32.4, "idee", "P"), (33.3, "joie", None), (34.34, "surpris", None),
-        (35.22, "reflechit", None), (37.19, "surpris", "planete"), (39.72, "reflechit", "planete"),
-        (40.79, "etourdi", None), (42.0, "reflechit", "planete"), (44.4, "idee", None), (45.8, "amour", None),
-        (T_END[0] + 0.6, "neutre", "tri")]
-
+# Orbe : (début, expression, regard) — c'est lui l'élève : il essaie, se trompe, comprend
+ORBE = [(0.0, "neutre", "ray"), (1.57, "joie", "tri"), (2.73, "reflechit", None), (6.37, "neutre", "haut"),
+        (7.5, "surpris", "drop"), (8.97, "reflechit", "drop"), (9.98, "neutre", "ray"), (15.79, "reflechit", "sum"),
+        (16.71, "surpris", "sum"), (18.09, "reflechit", None), (19.26, "neutre", "ray"), (22.65, "reflechit", "ray"),
+        (23.78, "triste", "sum"), (24.59, "reflechit", "tri"), (25.73, "neutre", "ray"), (29.07, "surpris", "P"),
+        (30.63, "reflechit", "P"), (32.4, "idee", "P"), (33.3, "joie", None), (34.34, "surpris", None),
+        (35.22, "reflechit", None), (37.19, "surpris", "planete"), (38.4, "neutre", "ray"),
+        (39.72, "surpris", "ray"), (40.79, "etourdi", None), (42.0, "reflechit", "planete"), (44.4, "idee", None),
+        (45.8, "amour", None), (T_END[0] + 0.6, "neutre", "tri")]
+# bulles au-dessus de l'Orbe : (instant, symbole)
+EMO = [(2.9, "?"), (7.55, "!"), (16.75, "!"), (18.15, "?"), (22.7, "…"), (29.1, "!"), (32.45, "!"), (35.3, "?"),
+       (37.25, "!"), (39.75, "!")]
+# petits bips de l'Orbe (sa « voix » d'élève) : (instant, genre)
+CHIRPS = [(1.6, "joie"), (2.9, "question"), (7.55, "surprise"), (9.0, "non"), (11.5, "bip"), (13.2, "bip"),
+          (14.6, "bip"), (16.75, "surprise"), (18.15, "question"), (19.35, "effort"), (20.95, "effort"),
+          (22.35, "effort"), (23.8, "triste"), (29.1, "surprise"), (32.45, "joie"), (35.3, "question"),
+          (37.25, "surprise"), (39.75, "surprise"), (44.45, "joie")]
 
 def ease(u):
     u = min(max(u, 0.0), 1.0)
@@ -142,16 +148,21 @@ A0, B0, C0 = (28.5, -237.3), (-260.0, 119.0), (260.0, 119.0)          # angles :
 PT = (0.0, 330.0)                                                     # là où les coins se rejoignent
 
 
+GRAB = [("A", 19.3, 20.9, (180.0, 40.0), (190.0, -40.0)), ("B", 20.9, 22.3, (-80.0, -170.0), (-60.0, -190.0)),
+        ("C", 22.3, 23.7, (70.0, -150.0), (60.0, -190.0))]      # sommet, fenêtre, déplacement, place de l'Orbe
+OFFS = {"A": (0.0, -200.0), "B": (-60.0, -190.0), "C": (60.0, -190.0)}
+
+
 def tri_at(t):
-    """Sommets du triangle (repère centré) : forme de base, déformée pendant T_WOB."""
-    A, B, C = A0, B0, C0
-    if T_WOB[0] <= t <= T_BACK + 0.7:
-        k = ease((t - T_WOB[0]) / 0.5) * (1 - ease((t - T_BACK) / 0.7))
-        u = t - T_WOB[0]
-        A = (A0[0] + k * 170 * math.sin(u * 1.7), A0[1] + k * 80 * math.sin(u * 2.3 + 1))
-        B = (B0[0] + k * 60 * math.sin(u * 1.3 + 2), B0[1] - k * 90 * math.sin(u * 1.9))
-        C = (C0[0] - k * 70 * math.sin(u * 1.1 + 0.5), C0[1] + k * 50 * math.sin(u * 2.1 + 2))
-    return A, B, C
+    """Sommets du triangle (repère centré). Pendant la déformation, l'Orbe tire chaque sommet à son tour."""
+    P0 = {"A": A0, "B": B0, "C": C0}
+    out_ = dict(P0)
+    for name, t0, t1, d, _ in GRAB:
+        if t0 <= t <= t1:
+            u = (t - t0) / (t1 - t0)
+            k = math.sin(math.pi * u) * (1 + 0.06 * math.sin(u * 30))
+            out_[name] = (P0[name][0] + d[0] * k, P0[name][1] + d[1] * k)
+    return out_["A"], out_["B"], out_["C"]
 
 
 def ang(v, a, b):
@@ -523,9 +534,9 @@ def draw_sphere_triangle(c, t, scale):
 # ------------------------------------------------------------------------------------------------ l'Orbe
 def orbe_state(t, targets):
     cur, prev = ORBE[0], ORBE[0]
-    for s in ORBE:
-        if t >= s[0]:
-            prev, cur = cur, s
+    for s_ in ORBE:
+        if t >= s_[0]:
+            prev, cur = cur, s_
     t0, expr, gaze = cur
     a = t - t0
     e = Etat(expr=expr, age=a, humeur_mix=a / 0.6,
@@ -534,34 +545,221 @@ def orbe_state(t, targets):
     return e, targets.get(gaze)
 
 
+def scr(q):
+    return (CX + q[0], CY + q[1])
+
+
+def pen_tip(t):
+    u = ease((t - T_DRAW[0]) / (T_DRAW[1] - T_DRAW[0]))
+    segs = partial_path([A0, B0, C0], max(u, 1e-4))
+    return scr(segs[-1][1]) if segs else scr(A0)
+
+
+def sphere_pen(t):
+    edges = sphere_triangle(t, 1.0)
+    u = ease((t - T_SPH[0]) / (T_SPH[1] - T_SPH[0])) * 3
+    k = min(2, int(u))
+    kk = min(1.0, u - k)
+    pts = edges[k]
+    return pts[min(len(pts) - 1, int(kk * (len(pts) - 1)))]
+
+
+def pieces_now(t):
+    """Position écran des coins découpés pendant qu'ils glissent (ordre B, A, C)."""
+    A, B, C = tri_at(t)
+    V = {"A": A, "B": B, "C": C}
+    out_ = []
+    for k, name in enumerate(("B", "A", "C")):
+        u = ease((t - T_MOVE[0] - 0.12 * k) / (T_MOVE[1] - T_MOVE[0] - 0.24))
+        out_.append(scr(lerp2(V[name], PT, u)))
+    return out_
+
+
+def ray_at(t):
+    """Le rayon de l'Orbe (ce qu'il touche, et depuis quand) : c'est lui qui trace, mesure, tire, découpe, porte."""
+    A, B, C = tri_at(t)
+    V = {"A": A, "B": B, "C": C}
+    if T_DRAW[0] <= t < T_DRAW[1] + 0.1:
+        return pen_tip(t), T_DRAW[0]
+    for name, t0, t1 in (("A", 10.1, 12.9), ("B", 12.9, 14.3), ("C", 14.3, 15.6)):
+        if t0 <= t < t1:
+            return scr(V[name]), t0
+    for name, t0, t1, _, _ in GRAB:
+        if t0 <= t < t1:
+            return scr(V[name]), t0
+    for k, tc in enumerate(T_CUT):
+        if tc - 0.05 <= t < tc + 0.4:
+            name = "ABC"[k]
+            v, a, b = {"A": (A, B, C), "B": (B, A, C), "C": (C, A, B)}[name]
+            st, sw = span(v, a, b)
+            aa = math.radians(st + sw * ease((t - tc) / 0.35))
+            return scr((v[0] + 82 * math.cos(aa), v[1] + 82 * math.sin(aa))), tc - 0.05
+    if T_MOVE[0] <= t < T_MOVE[1]:
+        k = min(2, int((t - T_MOVE[0]) / 0.45))
+        return pieces_now(t)[k], T_MOVE[0] + 0.45 * k
+    if T_SPH[0] <= t < T_SPH[1]:
+        return sphere_pen(t), T_SPH[0]
+    if T_SPH[1] <= t < T_RIGHT + 0.8:
+        return proj(90, 0, 1.0)[0], T_SPH[1]
+    return None
+
+
+def orbe_target(t):
+    """Où l'Orbe veut être (x, y, taille) : il va là où se passe l'action."""
+    A, B, C = tri_at(t)
+    V = {"A": A, "B": B, "C": C}
+    near = lambda name, off=None: (scr(V[name])[0] + (off or OFFS[name])[0],
+                                   scr(V[name])[1] + (off or OFFS[name])[1])
+    if t < 1.57:
+        x, y = pen_tip(t)
+        return x, y - 230, 0.75
+    if t < 2.73:
+        return 540, 600, 0.8
+    if t < 7.3:
+        return 540, 560, 0.9
+    if t < 9.95:
+        return 540, 420, 0.85
+    for name, t0, t1 in (("A", 9.95, 12.9), ("B", 12.9, 14.3), ("C", 14.3, 15.6)):
+        if t0 <= t < t1:
+            x, y = near(name, (-40 if name == "B" else 40 if name == "C" else 0, -230))
+            return x, y, 0.8
+    if t < 19.2:
+        return 540, 450, 0.8
+    for name, t0, t1, _, off in GRAB:
+        if t0 - 0.1 <= t < t1:
+            x, y = near(name, off)
+            return x, y, 0.72
+    if t < 25.55:
+        return 540, 450, 0.8
+    for k, tc in enumerate(T_CUT):
+        if t < tc + 0.4:
+            x, y = near("ABC"[k])
+            return x, y, 0.7
+    if t < 28.9:
+        return 870, 1380, 0.7
+    if t < 32.3:
+        return 540, 560, 0.8
+    if t < 34.3:
+        return 540, 530, 0.95
+    if t < T_ZOOM[0]:
+        return 540, 560, 0.85
+    if t < T_SPH[0]:
+        return 330, 720, 0.6
+    if t < T_SPH[1]:
+        x, y = sphere_pen(t)
+        d = (x - PC[0], y - PC[1])
+        n = math.hypot(*d) or 1.0
+        return x + d[0] / n * 150, y + d[1] / n * 150, 0.6
+    if t < 40.7:
+        p = proj(90, 0, 1.0)[0]
+        return p[0] - 190, p[1] - 80, 0.6
+    if t < T_END[0] + 0.3:
+        return 190, 560, 0.62
+    x, y = pen_tip(0.0)
+    return x, y - 230, 0.75
+
+
+_POSE = {}
+
+
 def orbe_pose(t):
-    """Position et taille de l'Orbe à l'écran."""
-    base = ((540.0, 470.0), 0.7)
-    planet = ((250.0, 470.0), 0.55)
-    u = ease((t - T_ZOOM[0]) / (T_ZOOM[1] - T_ZOOM[0])) * (1 - ease((t - T_END[0]) / (T_END[1] - T_END[0])))
-    pos = lerp2(base[0], planet[0], u)
-    s = lerp(base[1], planet[1], u)
-    bob = 10 * math.sin(t * 2.1)
-    return (pos[0], pos[1] + bob), s
+    """Position et taille de l'Orbe : il suit sa cible avec un ressort (il se déplace, il ne se téléporte pas)."""
+    if not _POSE:
+        n = int(DUR * FPS) + 2
+        x, y, s = orbe_target(0.0)
+        vx = vy = vs = 0.0
+        sub = 4
+        h = 1.0 / (FPS * sub)
+        w = 11.0
+        for f in range(n):
+            _POSE[f] = (x, y, s)
+            for k in range(sub):
+                tx, ty, ts = orbe_target((f + k / sub) / FPS)
+                vx += (w * w * (tx - x) - 2 * 0.8 * w * vx) * h
+                vy += (w * w * (ty - y) - 2 * 0.8 * w * vy) * h
+                vs += (w * w * (ts - s) - 2 * 0.9 * w * vs) * h
+                x, y, s = x + vx * h, y + vy * h, s + vs * h
+    f = t * FPS
+    i = min(int(f), len(_POSE) - 2)
+    u = f - i
+    a, b = _POSE[i], _POSE[i + 1]
+    x, y, s = (a[j] + (b[j] - a[j]) * u for j in range(3))
+    y += 8 * math.sin(t * 2.1)
+    if 8.97 <= t < 9.9:                                         # « non, je n'y crois pas » : il secoue la tête
+        x += 22 * math.sin((t - 8.97) * 20) * (1 - (t - 8.97) / 0.93)
+    if 19.3 <= t < 23.7:                                        # l'effort : il tremble en tirant
+        x += 3 * math.sin(t * 60)
+    if 32.4 <= t < 33.0:                                        # le déclic : il bondit
+        y -= 60 * math.sin(math.pi * (t - 32.4) / 0.6)
+    return (x, y), s
 
 
-def draw_orbe_at(c, t, targets, ray_target=None):
+def draw_beam(c, t, orig, s):
+    r = ray_at(t)
+    if r is None:
+        return None
+    (tx, ty), t0 = r
+    d = (tx - orig[0], ty - orig[1])
+    n = math.hypot(*d) or 1.0
+    ux, uy = d[0] / n, d[1] / n
+    sx, sy = orig[0] + ux * 140 * s, orig[1] + uy * 140 * s
+    g = ease((t - t0) / 0.18)
+    ex, ey = sx + (tx - sx) * g, sy + (ty - sy) * g
+    c.drawLine(sx, sy, ex, ey, P(CYAN, 110, blur=10, stroke=18))
+    c.drawLine(sx, sy, ex, ey, P(WHITE, 235, stroke=5))
+    if g > 0.95:
+        pulse = 1 + 0.2 * math.sin(t * 10)
+        c.drawCircle(tx, ty, 24 * pulse, P(CYAN, 130, blur=12))
+        c.drawCircle(tx, ty, 9, P(WHITE))
+    return (tx, ty)
+
+
+def draw_emote(c, t, x, y, s):
+    for t0, sym in EMO:
+        a = t - t0
+        if 0 <= a < 1.3:
+            al = 255 * min(1.0, (1.3 - a) / 0.3)
+            sc = pop(a) * s * 1.5
+            c.save()
+            c.translate(x + 120 * s, y - 170 * s - 18 * min(1.0, a / 0.4))
+            c.scale(sc, sc)
+            c.drawCircle(0, -30, 46, P(WHITE, al * 0.9))
+            c.drawCircle(0, -30, 46, P(VIOLET, al, stroke=4))
+            tail = skia.Path()
+            tail.moveTo(-22, 6)
+            tail.lineTo(-40, 30)
+            tail.lineTo(-4, 12)
+            tail.close()
+            c.drawPath(tail, P(WHITE, al * 0.9))
+            if sym == "…":
+                for k in range(3):
+                    on = int(a * 5) % 4 > k
+                    c.drawCircle(-18 + k * 18, -30, 7, P((60, 40, 110), al if on else al * 0.3))
+            else:
+                f = skia.Font(FONT, 60)
+                w = f.measureText(sym)
+                c.drawString(sym, -w / 2, -9, f, P((60, 40, 110), al))
+            c.restore()
+
+
+def draw_orbe_at(c, t, targets):
     (x, y), s = orbe_pose(t)
+    hit = draw_beam(c, t, (x, y), s)
+    targets = dict(targets, ray=hit)
     e, g = orbe_state(t, targets)
     if g is not None:
         d = (g[0] - x, g[1] - y)
         n = math.hypot(*d) or 1.0
         k = min(1.0, n / 200)
         e.regard = (0.75 * d[0] / n * k, 0.75 * d[1] / n * k)
-    if e.expr == "reflechit" and g is None:
+    elif e.expr == "reflechit":
         e.regard = (0.6 * ease(e.age / 0.3), -0.6 * ease(e.age / 0.3))
-    if ray_target is not None:
-        e.cible = ((ray_target[0] - x) / s, (ray_target[1] - y) / s)
     c.save()
     c.translate(x, y)
     c.scale(s, s)
     draw_orbe(c, t, e)
     c.restore()
+    draw_emote(c, t, x, y, s)
 
 
 # ------------------------------------------------------------------------------------------------ sous-titres
@@ -634,19 +832,7 @@ def frame(c, t):
     to_screen = lambda q: (CX + q[0], CY + q[1])
     targets = {"tri": (CX, CY), "A": to_screen(A), "B": to_screen(B), "C": to_screen(C), "haut": (540, 0),
                "drop": (540, 720), "sum": (540, CY - 420), "P": to_screen(PT), "planete": PC}
-    ray = None
-    if 9.98 <= t < 11.0:
-        ray = to_screen(A)
-    for k, tc in enumerate(T_CUT):
-        if tc - 0.05 <= t < tc + 0.4:
-            name = "ABC"[k]
-            v, a, b = {"A": (A, B, C), "B": (B, A, C), "C": (C, A, B)}[name]
-            st, sw = span(v, a, b)
-            aa = math.radians(st + sw * ease((t - tc) / 0.35))
-            ray = to_screen((v[0] + 82 * math.cos(aa), v[1] + 82 * math.sin(aa)))
-    if T_RIGHT - 0.1 <= t < T_RIGHT + 0.7:
-        ray = proj(90, 0, 1.0)[0]
-    draw_orbe_at(c, t, targets, ray)
+    draw_orbe_at(c, t, targets)
     draw_subtitle(c, t)
 
 
@@ -719,6 +905,40 @@ def music(dur):
     return y
 
 
+def chirp(f0, f1, dur, amp=0.22):
+    n = int(dur * SR)
+    tt = np.arange(n) / SR
+    f = f0 + (f1 - f0) * (tt / dur)
+    ph = 2 * np.pi * np.cumsum(f) / SR
+    y = np.sin(ph) + 0.25 * np.sin(2 * ph) + 0.1 * np.sin(3 * ph)
+    env = np.minimum(1, tt / 0.01) * np.minimum(1, (dur - tt) / 0.03)
+    return y * env * amp
+
+
+def seq(*parts):
+    out_ = np.zeros(0)
+    for p in parts:
+        out_ = np.concatenate([out_, p if isinstance(p, np.ndarray) else np.zeros(int(p * SR))])
+    return out_
+
+
+def orbe_voice(kind):
+    """La « voix » de l'Orbe : de petits bips expressifs, comme un robot qui réagit."""
+    if kind == "question":
+        return seq(chirp(520, 620, 0.09), 0.04, chirp(640, 1150, 0.17))
+    if kind == "surprise":
+        return seq(chirp(700, 1700, 0.11, 0.25), 0.03, chirp(1500, 1400, 0.06, 0.15))
+    if kind == "joie":
+        return seq(chirp(880, 900, 0.07), 0.02, chirp(1100, 1120, 0.07), 0.02, chirp(1320, 1400, 0.1))
+    if kind == "triste":
+        return chirp(760, 380, 0.45, 0.2)
+    if kind == "non":
+        return seq(chirp(620, 520, 0.09), 0.1, chirp(620, 500, 0.11))
+    if kind == "effort":
+        return chirp(330, 390, 0.16, 0.18)
+    return chirp(900, 1000, 0.06, 0.14)
+
+
 def soundtrack(path):
     raw = subprocess.run(["ffmpeg", "-v", "error", "-i", VOIX, "-ac", "1", "-ar", str(SR), "-f", "s16le", "-"],
                          capture_output=True).stdout
@@ -761,6 +981,8 @@ def soundtrack(path):
     add(T_270, foley.boom(0.4), 0.6)
     add(T_270, ding(587, 0.2))
     add(44.4, sparkle(0.14))
+    for t0, kind in CHIRPS:
+        add(t0, orbe_voice(kind), 0.9)
     add(T_END[0], foley.whoosh(1.2, 0.25, 600))
     mus = music(DUR)
     # la musique s'efface sous la voix (ducking)
