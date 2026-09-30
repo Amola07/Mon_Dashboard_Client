@@ -82,7 +82,7 @@ T_CURVE = S("vieillir") + 0.4
 T_END = S("question")
 T_LOOP = E("combien") + 0.5
 
-ORBE = [(0.0, "neutre", None), (T_TURN, "surpris", "ghost"), (S("phys"), "reflechit", "slit"),
+ORBE = [(0.0, "surpris", "cam"), (T_TURN, "surpris", "ghost"), (S("phys"), "reflechit", "slit"),
         (T_WAVE + 0.6, "surpris", "slit"), (T_BUBBLE, "neutre", "bubble"), (T_SPLIT[0], "surpris", "bubble"),
         (T_FORK, "reflechit", "left"), (T_LEFT + 0.6, "neutre", "right"), (T_TREE[0], "surpris", "tree"),
         (T_DARK, "reflechit", None), (T_COIN, "neutre", "coin"), (T_DEAD, "triste", "tree"),
@@ -125,7 +125,7 @@ def scene_hook(c, t):
     """Le fantôme de l'Orbe derrière lui, qui s'efface (et revient pour la boucle)."""
     a = 0.0
     if t < S("phys") + 0.3:
-        a = 120 * ease(t / 0.8) * (1 - ease((t - (S("h2") + 2.0)) / 1.0))
+        a = 120 * (1 - ease((t - (S("h2") + 2.0)) / 1.0))                # visible dès la 1re image
     if t >= T_LOOP:
         a = 120 * ease((t - T_LOOP) / 0.8)
     if a > 1:
@@ -469,7 +469,7 @@ def orbe_state(t):
     a = t - t0
     e = Etat(expr=expr, age=a, humeur_mix=a / 0.6,
              humeur_avant=HUMEUR_DE.get(prev[1], "calme") if prev is not cur else "calme")
-    e.cligne = (t % 3.3) < 0.12
+    e.cligne = t > 1.0 and (t % 3.3) < 0.12                                # yeux grands ouverts sur l'accroche
     return e, gaze
 
 
