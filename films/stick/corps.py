@@ -16,15 +16,17 @@ from .hero import CAPES, CYAN, _brush, _pen, draw_emote, draw_face
 
 # Proportions : jambes longues (≈ 42 % de la hauteur), buste court, pas de cou visible (la tête pose sur le haut du
 # buste) et bras attachés juste sous la tête. Hauteur totale inchangée (≈ 210) : le décor reste valable.
-THIGH, SHIN = 45.0, 44.0
-UPPER, FORE = 44.0, 42.0         # bras longs : la main pendante arrive à mi-cuisse
-SPINE = 68.0                     # bassin → haut du buste
-SHOULDER = 62.0                  # bassin → épaules (juste sous la tête)
-HEAD_R = 28.0                    # tête ≈ un quart de la hauteur (comme la référence), le visage reste lisible
+# Proportions MESURÉES au pixel sur la référence (hauteur totale ≈ 207) : tête 0,30 · buste 0,32 · jambes 0,38 ·
+# bras 0,32 (la main pendante arrive à l'entrejambe) · trait 0,045. Pas de cou, épaules juste sous la tête.
+THIGH, SHIN = 38.5, 38.5
+UPPER, FORE = 34.0, 32.0
+SPINE = 82.0                     # bassin → haut du buste
+SHOULDER = 78.0                  # bassin → épaules (juste sous la tête)
+HEAD_R = 26.5                    # diamètre extérieur (trait compris) ≈ 0,30 de la hauteur, comme mesuré
 NECK = HEAD_R - 4                # haut du buste → centre de la tête (< HEAD_R : aucun trait de cou)
-HIP_H = 86.0                     # hauteur du bassin debout (genoux jamais verrouillés)
+HIP_H = 76.0                     # hauteur du bassin debout
 TOP = SPINE + NECK + HEAD_R      # bassin → sommet du crâne
-LINE_W = 12.0                    # trait épais, comme la référence (~6 % de la hauteur)
+LINE_W = 9.3                     # trait : 4,5 % de la hauteur, mesuré sur la référence
 
 
 def v_add(*vs):
@@ -229,7 +231,7 @@ def build(p):
         elif p.g is None:                                      # apesanteur : bras qui flottent devant
             tgt = free_limb(shoulder, p.theta, p.facing, 95 + 20 * i, 60)
         else:
-            tgt = v_add(shoulder, v_mul(p.g, 76), v_mul(f, 24 if i else -20))
+            tgt = v_add(shoulder, v_mul(p.g, 62), v_mul(f, 18 if i else -15))
         elbow, hand = ik2(shoulder, tgt, UPPER, FORE, back_down, stretch=1.3)   # bras élastiques
         arms.append([shoulder, elbow, hand])
     return {"pelvis": p.pelvis, "chest": chest, "neck": neck, "shoulder": shoulder, "head": head,
@@ -402,10 +404,10 @@ def stand(F, u, facing=1, crouch=0.0, lean=0.0, width=13.0, shift=0.0, hands=Non
     """Debout sur la surface F, bassin au-dessus de u. crouch 0..1 plie les genoux ; lean incline le buste."""
     # contrapposto : pied arrière sous le bassin (il porte le poids), pied avant plus loin ; le bassin s'abaisse
     # un peu, le haut du dos s'arrondit et la tête avance (ligne d'action en S, jamais un piquet vertical)
-    fu = feet_u or (u - facing * width * 0.7, u + facing * width * 1.5)
+    fu = feet_u or (u - facing * width * 1.05, u + facing * width * 1.85)   # pieds bien écartés (référence)
     h = HIP_H * (1 - 0.5 * crouch) - 1
     pelvis = F.w(u + shift - facing * crouch * 14 - facing * 3, h)
-    return Pose(pelvis, F.alpha + (lean + 2) * facing, bend + 16 + 8 * crouch, head + 9, facing,
+    return Pose(pelvis, F.alpha + (lean + 5) * facing, bend + 6 + 14 * crouch, head + 4, facing,
                 [F.w(fu[0]), F.w(fu[1])], hands or [None, None], **kw)
 
 

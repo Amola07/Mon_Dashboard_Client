@@ -30,10 +30,10 @@ FPS = 24
 @dataclass
 class P:
     pel: tuple = (-3.0, HIP_H - 1)                              # jambes presque tendues, comme en vrai
-    lean: float = 2.0                                           # légèrement voûté, tête en avant (référence)
-    bend: float = 16.0
-    head: float = 9.0
-    feet: tuple = ((-9.0, 0.0), (20.0, 0.0))
+    lean: float = 5.0                                           # buste presque droit, un peu penché (mesuré)
+    bend: float = 6.0
+    head: float = 4.0
+    feet: tuple = ((-14.0, 0.0), (24.0, 0.0))                   # pieds écartés comme la référence
     hands: tuple = (None, None)
     expr: str = "neutre"
     emote: str = None
@@ -80,7 +80,7 @@ def _lerp2(a, b, u):
 def _hand_rel(spec, i, F, u0, facing, shoulder):
     """Main → vecteur (avant, haut) depuis l'épaule, dans le repère de la surface."""
     if spec is None:
-        return (-18.0, -80.0) if i == 0 else (22.0, -79.0)         # bras détendu : presque tendu
+        return (-22.0, -58.0) if i == 0 else (22.0, -58.0)         # bras détendus, de part et d'autre du buste
     kind, a, b = spec
     if kind == "e":
         return (a, b)
@@ -202,7 +202,7 @@ clip("reflechir", "Réfléchir : main au menton", K(
 
 _point_prep = replace(REPOS, lean=-8, head=4, pel=(-6, HIP_H - 7), hands=(None, ("e", -26, -26)), expr="decide")
 _point = replace(REPOS, lean=8, bend=8, head=-2, pel=(4, HIP_H - 6), feet=((-12, 0), (26, 0)),
-                 hands=(("e", -24, -66), ("e", 85, 4)), expr="decide")
+                 hands=(("e", -24, -66), ("e", 68, 4)), expr="decide")
 clip("pointer", "Montrer du doigt", K(
     (0, _repos(), "io"),
     (6, _point_prep, "io"),                                    # anticipation : le bras recule
@@ -364,9 +364,9 @@ def cycle(kind, frame, F, u0=0.0, facing=1, g=(0.0, 1.0), expr="neutre"):
     montée (le plus haut), contact. Le pied d'appui ne glisse jamais ; le bassin monte et descend ;
     les bras balancent à l'opposé des jambes ; le buste penche dans le sens de la marche."""
     if kind == "marche":
-        n, stride, h_keys, lean, lift, arm = 12, 64.0, (80.0, 74.0, 82.0, 86.0), 6.0, 20.0, 34.0
+        n, stride, h_keys, lean, lift, arm = 12, 58.0, (70.0, 65.0, 72.0, 75.5), 6.0, 18.0, 34.0
     else:
-        n, stride, h_keys, lean, lift, arm = 7, 112.0, (72.0, 64.0, 82.0, 92.0), 26.0, 48.0, 60.0
+        n, stride, h_keys, lean, lift, arm = 7, 96.0, (62.0, 56.0, 71.0, 81.0), 26.0, 40.0, 60.0
     step = int(frame // n)
     ph = (frame % n) / n                                       # 0 contact · .25 descente · .5 passage · .75 montée
     base = u0 + step * stride
@@ -402,10 +402,10 @@ def cycle(kind, frame, F, u0=0.0, facing=1, g=(0.0, 1.0), expr="neutre"):
         a = s * (1 if j == front else -1)
         if kind == "marche":
             ang = math.radians(-90 + a * arm)
-            r = 80
+            r = 62
         else:                                                  # course : coudes pliés, bras qui pompent
             ang = math.radians(-60 + a * arm)
-            r = 52
+            r = 44
         hands.append(v_add(sh, v_add(v_mul(fw, r * math.cos(ang)), v_mul(up, r * math.sin(ang)))))
     p.hands = hands
     return p, (pu if facing > 0 else 2 * u0 - pu)
