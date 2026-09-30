@@ -80,7 +80,7 @@ def _lerp2(a, b, u):
 def _hand_rel(spec, i, F, u0, facing, shoulder):
     """Main → vecteur (avant, haut) depuis l'épaule, dans le repère de la surface."""
     if spec is None:
-        return (-22.0, -58.0) if i == 0 else (22.0, -58.0)         # bras détendus, de part et d'autre du buste
+        return (-22.0, -64.0) if i == 0 else (22.0, -64.0)         # bras détendus, de part et d'autre du buste
     kind, a, b = spec
     if kind == "e":
         return (a, b)
@@ -381,9 +381,9 @@ def cycle(kind, frame, F, u0=0.0, facing=1, g=(0.0, 1.0), expr="neutre"):
     montée (le plus haut), contact. Le pied d'appui ne glisse jamais ; le bassin monte et descend ;
     les bras balancent à l'opposé des jambes ; le buste penche dans le sens de la marche."""
     if kind == "marche":
-        n, stride, h_keys, lean, lift, arm = 8, 70.0, (68.8, 68.4, 68.9, 69.3), 6.0, 16.0, 30.0   # mesuré : pas 0,33 s, tête presque plate
+        n, stride, h_keys, lean, lift, arm = 8, 70.0, (82.8, 82.3, 82.9, 83.4), 6.0, 18.0, 30.0   # mesuré : pas 0,33 s, tête presque plate
     else:
-        n, stride, h_keys, lean, lift, arm = 7, 128.0, (60.0, 55.0, 68.0, 78.0), 28.0, 40.0, 60.0   # grandes foulées (mesuré)
+        n, stride, h_keys, lean, lift, arm = 7, 136.0, (70.0, 64.0, 79.0, 90.0), 28.0, 44.0, 60.0   # grandes foulées (mesuré)
     step = int(frame // n)
     ph = (frame % n) / n                                       # 0 contact · .25 descente · .5 passage · .75 montée
     base = u0 + step * stride

@@ -16,15 +16,16 @@ from .hero import CAPES, CYAN, _brush, _pen, draw_emote, draw_face
 
 # Proportions : jambes longues (≈ 42 % de la hauteur), buste court, pas de cou visible (la tête pose sur le haut du
 # buste) et bras attachés juste sous la tête. Hauteur totale inchangée (≈ 210) : le décor reste valable.
-# Proportions MESURÉES au pixel sur la référence (hauteur totale ≈ 207) : tête 0,30 · buste 0,32 · jambes 0,38 ·
-# bras 0,32 (la main pendante arrive à l'entrejambe) · trait 0,045. Pas de cou, épaules juste sous la tête.
-THIGH, SHIN = 38.5, 38.5
-UPPER, FORE = 34.0, 32.0
-SPINE = 82.0                     # bassin → haut du buste
-SHOULDER = 78.0                  # bassin → épaules (juste sous la tête)
-HEAD_R = 26.5                    # diamètre extérieur (trait compris) ≈ 0,30 de la hauteur, comme mesuré
-NECK = HEAD_R - 4                # haut du buste → centre de la tête (< HEAD_R : aucun trait de cou)
-HIP_H = 76.0                     # hauteur du bassin debout
+# Proportions MESURÉES sur la référence, par ajustement d'un squelette libre image par image (3 passages, ~150 images) :
+# buste 0,30 de la hauteur, genou HAUT (cuisse 0,18 < tibia 0,24), bras 0,18 + 0,16, tête 0,30 de diamètre posée
+# juste au-dessus du buste (bas de l'anneau au ras du buste). Hauteur totale ≈ 201.
+THIGH, SHIN = 37.0, 49.0
+UPPER, FORE = 37.0, 33.0
+SPINE = 62.0                     # bassin → haut du buste
+SHOULDER = 59.0                  # bassin → épaules (juste sous la tête)
+HEAD_R = 26.5
+NECK = 29.0                      # haut du buste → centre de la tête : le bas de l'anneau touche le buste
+HIP_H = 84.0                     # hauteur du bassin debout
 TOP = SPINE + NECK + HEAD_R      # bassin → sommet du crâne
 LINE_W = 9.3                     # trait : 4,5 % de la hauteur, mesuré sur la référence
 
@@ -104,6 +105,8 @@ class Pose:
     st: float = 1.0                             # étirement du buste (>1 étiré, <1 écrasé)
     sway: float = 0.0                           # courbure du bas du dos (avec bend : dos en S)
     hsq: float = 1.0                            # tête étirée (>1) ou écrasée (<1) le long du buste, aire conservée
+    ak: tuple = (1.0, 1.0)                      # longueur de chaque bras (raccourci de perspective / étirement dessiné)
+    lk: tuple = (1.0, 1.0)                      # longueur de chaque jambe
 
 
 def lerp_pose(a, b, u):
@@ -222,7 +225,7 @@ def build(p):
             tgt = free_limb(p.pelvis, p.theta, p.facing, 28 + 14 * i, 58)
         else:                                                  # pendent dans le sens de la gravité
             tgt = v_add(p.pelvis, v_mul(p.g, 70), v_mul(f, 6 if i else -6))
-        knee, foot = ik2(p.pelvis, tgt, THIGH, SHIN, f, stretch=1.25)   # jambes élastiques
+        knee, foot = ik2(p.pelvis, tgt, THIGH * p.lk[i], SHIN * p.lk[i], f, stretch=1.25)   # jambes élastiques
         legs.append([p.pelvis, knee, foot])
     back_down = v_add(v_mul(f, -1), v_mul(u, -0.6))
     for i in range(2):
@@ -232,7 +235,7 @@ def build(p):
             tgt = free_limb(shoulder, p.theta, p.facing, 95 + 20 * i, 60)
         else:
             tgt = v_add(shoulder, v_mul(p.g, 62), v_mul(f, 18 if i else -15))
-        elbow, hand = ik2(shoulder, tgt, UPPER, FORE, back_down, stretch=1.3)   # bras élastiques
+        elbow, hand = ik2(shoulder, tgt, UPPER * p.ak[i], FORE * p.ak[i], back_down, stretch=1.3)   # bras élastiques
         arms.append([shoulder, elbow, hand])
     return {"pelvis": p.pelvis, "chest": chest, "neck": neck, "shoulder": shoulder, "head": head,
             "head_theta": head_theta, "legs": legs, "arms": arms, "up": u, "fwd": f, "hsq": p.hsq}
@@ -336,12 +339,13 @@ def draw(c, p, t, cape=None, cape_color="violet", glow=1.0, alpha=255, screen_ro
         for pts, dst in [(q, path) for q in C["legs"]] + [(q, arms) for q in C["arms"]]:
             a0, m, b0 = pts[0], pts[len(pts) // 2], pts[-1]
             dst.moveTo(float(a0[0]), float(a0[1]))
-            dst.quadTo(float(m[0]), float(m[1]), float(b0[0]), float(b0[1]))
+            dst.lineTo(float(m[0]), float(m[1]))               # articulation anguleuse (dessin à main levée)
+            dst.lineTo(float(b0[0]), float(b0[1]))
     else:
         for (a, m, b), dst in [(x, arms) for x in J["arms"]] + [(x, path) for x in J["legs"]]:
-            cp = m                                              # coude arrondi, membre presque droit
             dst.moveTo(*a)
-            dst.quadTo(*cp, *b)
+            dst.lineTo(*m)                                      # articulation anguleuse (dessin à main levée)
+            dst.lineTo(*b)
         path.moveTo(*J["pelvis"])
         mid = v_lerp(J["pelvis"], J["neck"], 0.5)
         ctrl = v_add(v_sub(v_mul(J["chest"], 2.0), mid), v_mul(J["fwd"], p.bend * 0.25))
