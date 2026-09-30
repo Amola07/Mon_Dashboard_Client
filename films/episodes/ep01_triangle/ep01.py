@@ -1086,7 +1086,7 @@ def render(out_path, t0=0.0, t1=DUR):
     wav = f"{tmp}/a.wav"
     soundtrack(wav)
     subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", vid, "-ss", str(t0), "-t", str(t1 - t0), "-i", wav,
-                    "-c:v", "copy", "-c:a", "aac", "-b:a", "192k", "-shortest", out_path], check=True)
+                    "-c:v", "copy", "-c:a", "aac", "-b:a", "192k", "-shortest", "-movflags", "+faststart", out_path], check=True)
 
 
 def main():
