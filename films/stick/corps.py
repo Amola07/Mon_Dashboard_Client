@@ -303,6 +303,52 @@ def smooth_path(path, pts):
         path.cubicTo(*c1, *c2, *p2)
 
 
+def _cr_points(P, n=10):
+    """Points d'une courbe de Catmull-Rom passant par P."""
+    P = [(float(q[0]), float(q[1])) for q in P]
+    out = []
+    for i in range(len(P) - 1):
+        p0 = P[i - 1] if i > 0 else P[i]
+        p1, p2 = P[i], P[i + 1]
+        p3 = P[i + 2] if i + 2 < len(P) else P[i + 1]
+        for k in range(n):
+            t = k / n
+            t2, t3 = t * t, t * t * t
+            out.append(tuple(0.5 * (2 * p1[j] + (p2[j] - p0[j]) * t + (2 * p0[j] - 5 * p1[j] + 4 * p2[j] - p3[j]) * t2
+                                    + (3 * p1[j] - p0[j] - 3 * p2[j] + p3[j]) * t3) for j in (0, 1)))
+    out.append(P[-1])
+    return out
+
+
+class Stroke:
+    """Trait de pinceau : courbe continue, épaisseur légèrement irrégulière le long du tracé, bouts arrondis.
+    Dessiné par petits tronçons à bouts ronds (aucune couture visible, même dans les virages serrés)."""
+
+    def __init__(self, pts, w, seed=0.0):
+        self.Q = _cr_points(pts)
+        L = [0.0]
+        for a, b in zip(self.Q, self.Q[1:]):
+            L.append(L[-1] + math.hypot(b[0] - a[0], b[1] - a[1]))
+        tot = L[-1] or 1.0
+        self.w = [w * (1 + 0.07 * math.sin(2 * math.pi * 1.6 * l / tot + seed)
+                       + 0.04 * math.sin(2 * math.pi * 4.1 * l / tot + 2 * seed)) for l in L]
+
+    def centerline(self):
+        path = skia.Path()
+        path.moveTo(*self.Q[0])
+        for q in self.Q[1:]:
+            path.lineTo(*q)
+        return path
+
+    def draw(self, c, color, alpha):
+        for a, b, wa, wb in zip(self.Q, self.Q[1:], self.w, self.w[1:]):
+            c.drawLine(*a, *b, _pen(color, (wa + wb) / 2, alpha))
+
+
+def brush_stroke(pts, w, seed=0.0):
+    return Stroke(pts, w, seed)
+
+
 def head_shape(J, grow=0.0):
     """Tête : un cercle, étiré ou écrasé le long du buste (l'aire reste la même)."""
     k = J.get("hsq", 1.0)
@@ -329,32 +375,36 @@ def draw(c, p, t, cape=None, cape_color="violet", glow=1.0, alpha=255, screen_ro
         path.close()
         c.drawPath(path, _brush(cc, 110 * glow * alpha / 255, glow=10))
         c.drawPath(path, _brush(cc, 225 * alpha / 255))
-    path = skia.Path()                                          # corps : colonne et jambes
-    arms = skia.Path()                                          # bras : dessinés PAR-DESSUS la tête, pour qu'un
-    if "chains" in J:                                           # geste près du visage reste visible
+    # Le corps n'est pas un assemblage de bâtons : comme un dessin à main levée, chaque membre est UN trait courbe
+    # continu qui naît du corps — les jambes sortent du buste en Y, les bras partent de sous la tête et s'évasent —
+    # avec une épaisseur légèrement irrégulière (pinceau). Les articulations restent des courbes, pas des angles.
+    pel, neck = J["pelvis"], J["neck"]
+    if "chains" in J:
         C = J["chains"]
-        smooth_path(path, C["spine"])
-        # membres : trait net (presque droit, coude/genou arrondi) ; la chaîne souple ne donne que la position
-        # des articulations, elle ne dessine plus d'ondulations
-        for pts, dst in [(q, path) for q in C["legs"]] + [(q, arms) for q in C["arms"]]:
-            a0, m, b0 = pts[0], pts[len(pts) // 2], pts[-1]
-            dst.moveTo(float(a0[0]), float(a0[1]))
-            dst.lineTo(float(m[0]), float(m[1]))               # articulation anguleuse (dessin à main levée)
-            dst.lineTo(float(b0[0]), float(b0[1]))
+        spine = [tuple(map(float, q)) for q in C["spine"]]
+        legs = [[tuple(map(float, q[0])), tuple(map(float, q[len(q) // 2])), tuple(map(float, q[-1]))] for q in C["legs"]]
+        arms_pts = [[tuple(map(float, q[0])), tuple(map(float, q[len(q) // 2])), tuple(map(float, q[-1]))]
+                    for q in C["arms"]]
+        neck = spine[-1]
     else:
-        for (a, m, b), dst in [(x, arms) for x in J["arms"]] + [(x, path) for x in J["legs"]]:
-            dst.moveTo(*a)
-            dst.lineTo(*m)                                      # articulation anguleuse (dessin à main levée)
-            dst.lineTo(*b)
-        path.moveTo(*J["pelvis"])
-        mid = v_lerp(J["pelvis"], J["neck"], 0.5)
-        ctrl = v_add(v_sub(v_mul(J["chest"], 2.0), mid), v_mul(J["fwd"], p.bend * 0.25))
-        path.quadTo(*ctrl, *J["neck"])
-    path.addPath(head_shape(J))
-    glow_all = skia.Path(path)
-    glow_all.addPath(arms)
-    c.drawPath(glow_all, _pen(CYAN, LINE_W * 1.8, 38 * glow * alpha / 255, glow=LINE_W * 0.6))   # halo discret : le trait reste net
-    c.drawPath(path, _pen(CYAN, LINE_W, alpha))
+        mid = v_lerp(pel, neck, 0.5)
+        ctrl = v_add(J["chest"], v_mul(J["fwd"], p.bend * 0.12))
+        spine = [pel, ctrl, neck]
+        legs = [list(x) for x in J["legs"]]
+        arms_pts = [list(x) for x in J["arms"]]
+    fork = v_lerp(pel, neck, 0.16)                              # les jambes naissent un peu au-dessus du bassin
+    body = [brush_stroke(spine, LINE_W, 0.3)]
+    body += [brush_stroke([fork] + leg, LINE_W, 1.1 + 2.3 * i) for i, leg in enumerate(legs)]
+    arms = [brush_stroke([neck] + arm, LINE_W * 0.96, 4.2 + 1.7 * i) for i, arm in enumerate(arms_pts)]
+    ring = skia.Path()
+    ring.addPath(head_shape(J))
+    glow_all = skia.Path(ring)
+    for q in body + arms:
+        glow_all.addPath(q.centerline())
+    c.drawPath(glow_all, _pen(CYAN, LINE_W * 1.8, 30 * glow * alpha / 255, glow=LINE_W * 0.7))   # halo discret
+    for q in body:
+        q.draw(c, CYAN, alpha)
+    c.drawPath(ring, _pen(CYAN, LINE_W, alpha))
     c.drawPath(head_shape(J, -LINE_W / 2), _brush((0, 0, 0), alpha))
     look = p.look
     if p.gaze is not None:                                     # les yeux visent le point regardé
@@ -365,7 +415,8 @@ def draw(c, p, t, cape=None, cape_color="violet", glow=1.0, alpha=255, screen_ro
         k = min(1.0, n / 120)
         look = ((lx / n) * k, (ly / n) * k)
     draw_face(c, J["head"], HEAD_R, math.radians(J["head_theta"]), p.facing, p.expr, look, t, alpha)
-    c.drawPath(arms, _pen(CYAN, LINE_W, alpha))                # pas de boule au bout : le trait arrondi suffit
+    for q in arms:                                              # bras par-dessus la tête (gestes près du visage)
+        q.draw(c, CYAN, alpha)
     if p.emote:                                                # symboles toujours droits à l'écran
         kind, age = p.emote
         c.save()
