@@ -27,19 +27,21 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 TEX = os.path.join(HERE, "tex")
 
 # ------------------------------------------------------------------------------------------------ l'échelle
-KEYS = [(0, 26.3), (2.5, 25.0), (6, 24.2), (9, 23.3), (12.5, 22.3), (15, 21.4), (18, 20.9), (20.5, 20.2),
-        (22.5, 19.2), (26, 17.2), (29, 16.3), (32, 15.2), (35, 13.4), (38, 12.2), (41, 11.1), (44, 9.9), (47, 9.0),
-        (51, 7.8), (55, 6.7), (58, 6.45), (61.5, 6.4)]
-DUR = 61.5
+# ≈ 31 s : une chute continue, rapide au début (vitesse lumière), qui ne ralentit qu'à l'arrivée
+KEYS = [(0, 26.3), (1.6, 24.9), (3.6, 23.6), (5.6, 22.5), (7.6, 21.4), (9.6, 20.4), (11.2, 19.4), (13.0, 17.8),
+        (14.6, 16.6), (16.6, 14.9), (18.6, 13.2), (20.4, 11.8), (22.2, 10.2), (23.8, 9.0), (25.6, 7.7), (27.4, 6.8),
+        (29.0, 6.48), (31.0, 6.4)]
+DUR = 31.0
+_KT = np.array([k[0] for k in KEYS])
+_KL = np.array([k[1] for k in KEYS])
+_FINE = np.arange(-2, DUR + 2, 0.01)
+_LIN = np.interp(_FINE, _KT, _KL)
+_KER = np.exp(-0.5 * (np.arange(-120, 121) / 45.0) ** 2)
+_LSM = np.convolve(np.pad(_LIN, 120, mode="edge"), _KER / _KER.sum(), mode="valid")   # lissé : aucun à-coup
 
 
 def L_at(t):
-    for (t0, l0), (t1, l1) in zip(KEYS, KEYS[1:]):
-        if t <= t1:
-            u = max(0.0, (t - t0) / (t1 - t0))
-            v = 0.5 * u + 0.5 * (u * u * (3 - 2 * u))
-            return l0 + (l1 - l0) * v
-    return KEYS[-1][1]
+    return float(np.interp(t, _FINE, _LSM))
 
 
 _TT = np.arange(0, DUR + 1, 1 / FPS)
@@ -68,10 +70,21 @@ def roll_at(t):
 
 # ------------------------------------------------------------------------------------------------ outils de rendu
 def splat(buf, x, y, val):
-    ix, iy = x.astype(np.int32), y.astype(np.int32)
-    m = (ix >= 0) & (ix < buf.shape[1]) & (iy >= 0) & (iy < buf.shape[0])
-    for ch in range(val.shape[1]):
-        np.add.at(buf[:, :, ch], (iy[m], ix[m]), val[m, ch])
+    """Dépôt bilinéaire (sous-pixel) : les étoiles restent fines et ne scintillent pas en bougeant."""
+    h, w = buf.shape[:2]
+    x = x - 0.5
+    y = y - 0.5
+    m = (x > -1) & (x < w) & (y > -1) & (y < h)
+    x, y, val = x[m], y[m], val[m]
+    x0, y0 = np.floor(x).astype(np.int64), np.floor(y).astype(np.int64)
+    fx, fy = (x - x0)[:, None], (y - y0)[:, None]
+    for dx, dy, wt in ((0, 0, (1 - fx) * (1 - fy)), (1, 0, fx * (1 - fy)), (0, 1, (1 - fx) * fy), (1, 1, fx * fy)):
+        xi, yi = x0 + dx, y0 + dy
+        ok = (xi >= 0) & (xi < w) & (yi >= 0) & (yi < h)
+        idx = yi[ok] * w + xi[ok]
+        vv = val[ok] * wt[ok]
+        for ch in range(buf.shape[2]):
+            buf[:, :, ch] += np.bincount(idx, weights=vv[:, ch], minlength=h * w).reshape(h, w)
 
 
 def to_screen(x, y, z, t):
@@ -95,7 +108,7 @@ def render_points(img, diff, pts, lum, col, D, k, t, a_sharp, a_diff, cap=2.5):
         splat(img, sx, sy, np.minimum(val, cap) * 0.35 * a_sharp)
     if a_diff > 0.003:
         far = (b < 25)[:, None]
-        splat(diff, sx / 8, sy / 8, val * far / 64 * 0.65 * a_diff)
+        splat(diff, sx / 4, sy / 4, val * far / 16 * 0.65 * a_diff)
 
 
 def basis_from(fwd, up_hint):
@@ -108,7 +121,7 @@ def basis_from(fwd, up_hint):
 
 # ------------------------------------------------------------------------------------------------ A. toile cosmique
 UA = 1e24
-K_WEB, K_MW = 900.0, 0.45
+K_WEB, K_MW = 380.0, 0.18
 rng = np.random.default_rng(21)
 
 
@@ -120,14 +133,14 @@ def make_web():
         d = np.linalg.norm(nodes - a, axis=1)
         for j in np.argsort(d)[1:4]:
             b = nodes[j]
-            n = int(d[j] * 90)
+            n = int(d[j] * 220)
             u = rng.random(n)[:, None]
             pts.append(a + (b - a) * u + rng.normal(0, 0.35, (n, 3)))
-        pts.append(a + rng.normal(0, 0.55, (900, 3)))
+        pts.append(a + rng.normal(0, 0.55, (2200, 3)))
     p = np.concatenate(pts)
     p = p[np.linalg.norm(p, axis=1) > 0.06]
-    if len(p) > 170000:
-        p = p[rng.choice(len(p), 170000, replace=False)]
+    if len(p) > 420000:
+        p = p[rng.choice(len(p), 420000, replace=False)]
     col = np.where(rng.random((len(p), 1)) < 0.5, [1.0, 0.86, 0.68], [0.78, 0.84, 1.0])
     return p, rng.lognormal(0, 0.8, len(p)), col
 
@@ -140,29 +153,55 @@ UB = 5e20
 
 
 def make_galaxy(n_disk, n_bulge, n_dust, seed):
+    """Spirale réaliste : bras ouverts semés d'amas bleus et de nébuleuses roses, étoiles vieilles et dorées entre
+    les bras, bulbe doré, poussière fine sur le bord intérieur des bras."""
     g = np.random.default_rng(seed)
-    r = g.gamma(2.0, 0.17, n_disk)
-    arm = g.integers(0, 2, n_disk)
-    th = arm * math.pi + np.log(r + 0.05) / math.tan(math.radians(14)) + g.normal(0, 0.32, n_disk)
-    x, z = r * np.cos(th), r * np.sin(th)
-    y = g.normal(0, 0.012 + 0.01 * np.exp(-r / 0.2), n_disk)
-    warm = np.clip(1 - r / 0.9, 0, 1)[:, None]
-    col = warm * np.array([1.0, 0.82, 0.6]) + (1 - warm) * np.array([0.72, 0.8, 1.0])
-    pink = g.random(n_disk) < 0.012
-    col[pink] = [1.0, 0.45, 0.7]
-    lum = g.lognormal(0, 0.7, n_disk) * (1 + 4 * pink)
-    b = g.normal(0, 1, (n_bulge, 3)) * np.array([0.11, 0.07, 0.11])
+    pitch = 1 / math.tan(math.radians(21))
+    n_arm = int(n_disk * 0.62)
+    n_int = n_disk - n_arm
+    # bras (deux majeurs, deux mineurs)
+    r = 0.12 + g.gamma(2.0, 0.16, n_arm)
+    arm = g.choice(4, n_arm, p=[0.36, 0.36, 0.14, 0.14])
+    th = arm * (math.pi / 2) + np.log(r) * pitch + g.normal(0, 0.16, n_arm)
+    # amas le long des bras
+    nc = 700
+    rc = 0.15 + g.gamma(2.0, 0.17, nc)
+    ac = g.choice(4, nc, p=[0.36, 0.36, 0.14, 0.14])
+    tc = ac * (math.pi / 2) + np.log(rc) * pitch + g.normal(0, 0.1, nc)
+    cl = g.random(n_arm) < 0.3
+    pick = g.integers(0, nc, cl.sum())
+    xa, za = r * np.cos(th), r * np.sin(th)
+    xa[cl] = rc[pick] * np.cos(tc[pick]) + g.normal(0, 0.012, cl.sum())
+    za[cl] = rc[pick] * np.sin(tc[pick]) + g.normal(0, 0.012, cl.sum())
+    col_a = np.tile([0.68, 0.8, 1.0], (n_arm, 1))
+    lum_a = g.lognormal(0, 0.8, n_arm)
+    knots = cl & (g.random(n_arm) < 0.08)
+    col_a[knots] = [1.0, 0.42, 0.62]
+    lum_a[knots] *= 2.5
+    # étoiles entre les bras (vieilles, dorées, plus pâles)
+    ri = g.gamma(2.0, 0.2, n_int)
+    ti = g.uniform(0, 2 * math.pi, n_int)
+    xi, zi = ri * np.cos(ti), ri * np.sin(ti)
+    col_i = np.tile([1.0, 0.86, 0.68], (n_int, 1))
+    lum_i = g.lognormal(-0.5, 0.6, n_int)
+    x = np.concatenate([xa, xi])
+    z = np.concatenate([za, zi])
+    rr = np.hypot(x, z)
+    y = g.normal(0, 1, len(x)) * (0.01 + 0.012 * np.exp(-rr / 0.15))
+    # bulbe
+    b = g.normal(0, 1, (n_bulge, 3)) * np.array([0.1, 0.065, 0.1])
     pts = np.concatenate([np.stack([x, y, z], 1), b])
-    cols = np.concatenate([col, np.tile([1.0, 0.8, 0.55], (n_bulge, 1))])
-    lums = np.concatenate([lum, g.lognormal(0, 0.5, n_bulge) * 1.4])
-    rd = g.gamma(2.2, 0.17, n_dust)
-    armd = g.integers(0, 2, n_dust)
-    thd = armd * math.pi + np.log(rd + 0.05) / math.tan(math.radians(14)) - 0.35 + g.normal(0, 0.22, n_dust)
-    dust = np.stack([rd * np.cos(thd), g.normal(0, 0.008, n_dust), rd * np.sin(thd)], 1)
+    cols = np.concatenate([col_a, col_i, np.tile([1.0, 0.78, 0.5], (n_bulge, 1))])
+    lums = np.concatenate([lum_a, lum_i, g.lognormal(0, 0.5, n_bulge) * 1.6])
+    # poussière : fine, sur le bord intérieur des bras majeurs, jamais dans le bulbe
+    rd = 0.3 + g.gamma(2.0, 0.15, n_dust)
+    ad = g.integers(0, 2, n_dust)
+    td = ad * math.pi + np.log(rd) * pitch - 0.2 + g.normal(0, 0.06, n_dust)
+    dust = np.stack([rd * np.cos(td), g.normal(0, 0.006, n_dust), rd * np.sin(td)], 1)
     return pts, cols, lums, dust
 
 
-MW, MW_COL, MW_LUM, MW_DUST = make_galaxy(110000, 24000, 28000, 7)
+MW, MW_COL, MW_LUM, MW_DUST = make_galaxy(280000, 55000, 20000, 7)
 _ths = math.log(0.55) / math.tan(math.radians(14)) + 0.55                  # le Soleil, entre deux bras
 SUN_G = np.array([0.5 * math.cos(_ths), 0.0, 0.5 * math.sin(_ths)])
 _out = SUN_G / np.linalg.norm(SUN_G)
@@ -178,14 +217,14 @@ _ta = 1.1
 _RA = np.array([[1, 0, 0], [0, math.cos(_ta), -math.sin(_ta)], [0, math.sin(_ta), math.cos(_ta)]])
 AND_V = np.concatenate([(AND * 1.3) @ _RA.T + np.array([-12.0, 9.0, 25.0]),          # Andromède
                         (AND[::3] * 0.45) @ _RA.T[::-1] + np.array([9.0, -7.0, 18.0])])  # galaxie du Triangle
-AND_LUM = np.concatenate([AND_LUM, AND_LUM[::3]]) * 5.0                            # plus loin : on les éclaire
+AND_LUM = np.concatenate([AND_LUM, AND_LUM[::3]]) * 30.0                            # plus loin : on les éclaire
 AND_COL = np.concatenate([AND_COL, AND_COL[::3]])
 
 # ------------------------------------------------------------------------------------------------ C. le voisinage
 UC = 9.461e15
 
 
-def make_neigh(n=32000):
+def make_neigh(n=70000):
     p = rng.normal(0, 1, (n, 3))
     p *= (300 * rng.random((n, 1)) ** (1 / 3)) / np.linalg.norm(p, axis=1, keepdims=True)
     p = p[np.linalg.norm(p, axis=1) > 2.5]
@@ -291,7 +330,7 @@ def render_earth(c, t, dc, a):
     if a <= 0.003:
         return
     tx = textures()
-    hw, hh, fh = W // 2, H // 2, F / 2
+    hw, hh, fh = W, H, F
     rad_px = fh * math.tan(math.asin(min(0.9999, 1 / dc))) * 1.12 + 6
     x0, x1 = int(max(0, hw / 2 - rad_px)), int(min(hw, hw / 2 + rad_px + 1))
     y0, y1 = int(max(0, hh / 2 - rad_px)), int(min(hh, hh / 2 + rad_px + 1))
@@ -325,7 +364,7 @@ def render_earth(c, t, dc, a):
         lit = np.clip(ndl * 1.25 + 0.12, 0, 1)[:, None] ** 0.9
         hv = sun[None, :] - dd
         hv /= np.linalg.norm(hv, axis=1, keepdims=True)
-        spec = wat * np.clip((p * hv).sum(1), 0, 1)[:, None] ** 70 * 0.9 * lit
+        spec = wat * np.clip((p * hv).sum(1), 0, 1)[:, None] ** 90 * 0.35 * lit
         col = day * (0.03 + 0.97 * lit) + spec * np.array([1.0, 0.95, 0.85])
         col = col * (1 - cl * 0.92) + cl * np.array([1.0, 1.0, 1.0]) * (0.02 + 0.98 * lit)
         rim = (1 - np.clip(-(dd * p).sum(1), 0, 1))[:, None] ** 3
@@ -349,7 +388,7 @@ def render_earth(c, t, dc, a):
     rgba[..., :3] = (rgba[..., :3].astype(np.float32) * (rgba[..., 3:4] / 255.0)).astype(np.uint8)   # prémultiplié
     img = skia.Image.fromarray(np.ascontiguousarray(rgba), colorType=skia.ColorType.kRGBA_8888_ColorType,
                                alphaType=skia.AlphaType.kPremul_AlphaType)
-    c.drawImageRect(img, skia.Rect(x0 * 2, y0 * 2, x1 * 2, y1 * 2), skia.SamplingOptions(skia.FilterMode.kLinear))
+    c.drawImageRect(img, skia.Rect(x0, y0, x1, y1), skia.SamplingOptions(skia.FilterMode.kLinear))
 
 
 def draw_moon(c, t, dc, a):
@@ -381,7 +420,7 @@ NEAR = rng.uniform(-1, 1, (2600, 3)) * np.array([60, 60, 100]) + np.array([0, 0,
 
 def draw_warp(c, t):
     s = speed_at(t)
-    a = min(1.0, max(0.0, (s - 0.33) / 0.45))
+    a = min(1.0, max(0.0, (s - 0.85) / 0.5))
     if a <= 0.01:
         return
     sc = scroll_at(t) * 60
@@ -466,16 +505,14 @@ LABELS = [(26.4, 24.6, "L'univers observable : 93 milliards d'années-lumière")
           (12.6, 11.4, "La Terre et le Soleil : 150 millions de km"),
           (9.7, 8.5, "La Terre et la Lune : 384 400 km"),
           (8.3, 7.1, "La Terre : 12 742 km")]
-ORBE_EXPR = [(0, "surpris"), (6, "neutre"), (15, "joie"), (22, "reflechit"), (28, "surpris"), (33, "neutre"),
-             (38, "joie"), (46, "surpris"), (53, "amour")]
-T_HOME = 55.3
+T_HOME = 27.6
 
 
 def frame(c, t):
     Lg = L_at(t)
     D = 10 ** Lg
     img = np.zeros((H, W, 3), np.float32)
-    diff = np.zeros((H // 8, W // 8, 3), np.float32)
+    diff = np.zeros((H // 4, W // 4, 3), np.float32)
     # ciel lointain
     z = SKY_DIR[:, 2]
     sx, sy = to_screen(SKY_DIR[:, 0], SKY_DIR[:, 1], z, t)
@@ -517,26 +554,27 @@ def frame(c, t):
         ds.getCanvas().clear(skia.ColorBLACK)
         ds.getCanvas().drawImageRect(dimg, skia.Rect(0, 0, W, H), skia.SamplingOptions(skia.FilterMode.kLinear),
                                      skia.Paint(ImageFilter=skia.ImageFilters.Blur(10, 10)))
-        dust = ds.makeImageSnapshot().toarray()[:, :, :1].astype(np.float32) / 255 * 3.2
-        img = img * np.exp(-dust * 2.2) + dust * np.array([0.5, 0.26, 0.1], np.float32) * 0.6
-    dfa = np.zeros((H // 8, W // 8, 4), np.uint8)
+        dust = ds.makeImageSnapshot().toarray()[:, :, :1].astype(np.float32) / 255 * 0.9
+        img = img * np.exp(-dust * 1.6) + dust * np.array([0.3, 0.17, 0.08], np.float32) * 0.12
+    dfa = np.zeros((H // 4, W // 4, 4), np.uint8)
     dfa[..., :3] = np.clip(diff / 4, 0, 1) * 255
     dfa[..., 3] = 255
     dfi = skia.Image.fromarray(dfa, colorType=skia.ColorType.kRGBA_8888_ColorType)
     ds2 = skia.Surface(W, H)
     ds2.getCanvas().clear(skia.ColorBLACK)
     ds2.getCanvas().drawImageRect(dfi, skia.Rect(0, 0, W, H), skia.SamplingOptions(skia.FilterMode.kLinear),
-                                  skia.Paint(ImageFilter=skia.ImageFilters.Blur(22, 22)))
-    img = img + ds2.makeImageSnapshot().toarray()[:, :, :3].astype(np.float32) / 255 * 4
+                                  skia.Paint(ImageFilter=skia.ImageFilters.Blur(9, 9)))
+    img = img + ds2.makeImageSnapshot().toarray()[:, :, 2::-1].astype(np.float32) / 255 * 4
     expo = 1.6
-    tone = 1 - np.exp(-img * expo)
+    lmax = np.maximum(img.max(axis=2, keepdims=True), 1e-6)
+    tone = img * ((1 - np.exp(-lmax * expo)) / lmax)                      # la couleur ne vire pas au blanc
     rgba = np.empty((H, W, 4), np.uint8)
     rgba[..., :3] = np.clip(tone * 255, 0, 255)
     rgba[..., 3] = 255
     simg = skia.Image.fromarray(rgba, colorType=skia.ColorType.kRGBA_8888_ColorType)
     c.clear(skia.Color(3, 3, 8))
     c.drawImage(simg, 0, 0)
-    for sig, al in ((14, 0.75), (60, 0.5)):
+    for sig, al in ((5, 0.45), (26, 0.3)):
         g = skia.Paint(ImageFilter=skia.ImageFilters.Blur(sig, sig), BlendMode=skia.BlendMode.kPlus)
         g.setAlphaf(al)
         c.drawImage(simg, 0, 0, skia.SamplingOptions(), g)
@@ -587,13 +625,12 @@ def frame(c, t):
         c.drawCircle(W / 2, H / 2, 11, P((255, 90, 120), 255 * k))
         text_c(c, "Tu es ici.", W / 2, H / 2 - 110, 64, (255, 255, 255), 255 * k)
     # l'Orbe
-    expr = [e for t0, e in ORBE_EXPR if t >= t0][-1]
-    e = Etat(expr=expr, age=t - [t0 for t0, e_ in ORBE_EXPR if t >= t0][-1], humeur_mix=1.0)
+    e = Etat(expr="neutre", age=t, humeur_mix=1.0)
     e.regard = (0.0, -0.6)
     e.cligne = (t % 3.1) < 0.12
     c.save()
-    c.translate(540 + 14 * math.sin(t * 1.7), 1470 + 10 * math.sin(t * 2.3))
-    c.scale(0.4, 0.4)
+    c.translate(540 + 8 * math.sin(t * 1.7), 1540 + 6 * math.sin(t * 2.3))
+    c.scale(0.3, 0.3)
     draw_orbe(c, t, e)
     c.restore()
     # textes
@@ -622,10 +659,10 @@ def soundtrack(path):
     prev = 0.0
     for t in np.arange(0.5, DUR, 0.25):                                     # un souffle à chaque accélération
         s = speed_at(t)
-        if s > 0.45 and t - prev > 2.0:
+        if s > 0.85 and t - prev > 1.6:
             add(t, E1.swish(1.6, 0.18))
             prev = t
-    for t0 in (12.5, 20.5, 26.5, 34.0, 41.5, 47.5, 51.5):                   # révélations
+    for t0 in (5.6, 9.6, 13.0, 16.6, 20.4, 23.8, 25.6):                     # révélations
         add(t0, E1.swell(0.16))
     add(T_HOME, E1.sparkle(0.16))
     add(T_HOME + 0.2, E1.ding(784, 0.14))
