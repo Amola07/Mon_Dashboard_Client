@@ -175,29 +175,86 @@ def draw_cube(c, t, cx, cy, size, a, glow=1.0):
         c.drawCircle(cx + gx, cy + gy, size * 0.035, P((255, 255, 255), a * 0.7))
 
 
+# doigts : (base x, base y, longueur, largeur, inclinaison en degrés) ; paume vers nous, doigts légèrement écartés
+FINGERS = [(-104, -52, 232, 66, -9), (-34, -72, 262, 68, -2), (36, -66, 246, 64, 5), (102, -40, 186, 56, 13)]
+THUMB = (-146, 70, 196, 86, -50)
+
+
+def _finger_path(bx, by, L, w, ang):
+    """Doigt effilé au bout arrondi, orienté vers le haut puis incliné."""
+    w1 = w * 0.84
+    p = skia.Path()
+    p.moveTo(-w / 2, 40)
+    p.cubicTo(-w / 2, -L * 0.4, -w1 / 2, -L * 0.7, -w1 / 2, -L + w1 / 2)
+    p.arcTo(skia.Rect(-w1 / 2, -L, w1 / 2, -L + w1), 180, 180, False)
+    p.cubicTo(w1 / 2, -L * 0.7, w / 2, -L * 0.4, w / 2, 40)
+    p.close()
+    m = skia.Matrix()
+    m.setRotate(ang)
+    m.postTranslate(bx, by)
+    p.transform(m)
+    return p
+
+
+def _hand_path():
+    palm = skia.Path()
+    palm.moveTo(-160, -40)
+    palm.cubicTo(-125, -88, 125, -88, 160, -30)
+    palm.cubicTo(182, 60, 160, 175, 104, 222)
+    palm.lineTo(-104, 222)
+    palm.cubicTo(-160, 175, -182, 60, -160, -40)
+    palm.close()
+    wrist = skia.Path()
+    wrist.addRRect(skia.RRect.MakeRectXY(skia.Rect(-110, 150, 110, 440), 40, 40))
+    out_ = skia.Op(palm, wrist, skia.PathOp.kUnion_PathOp)
+    for f in FINGERS + [THUMB]:
+        out_ = skia.Op(out_, _finger_path(*f), skia.PathOp.kUnion_PathOp)
+    return out_
+
+
+HAND = _hand_path()
+_b = FINGERS[1]
+TIP = (_b[0] + (_b[2] - 45) * math.sin(math.radians(_b[4])), _b[1] - (_b[2] - 45) * math.cos(math.radians(_b[4])))
+
+
 def draw_hand(c, cx, cy, s, a):
+    """Main ouverte, paume face à nous : silhouette d'un seul tenant, plis des doigts et lignes de la main."""
     if a <= 1:
         return
     c.save()
     c.translate(cx, cy)
     c.scale(s, s)
-    skin, line = (255, 196, 170), (255, 150, 140)
-    parts = [skia.RRect.MakeRectXY(skia.Rect(-150, -40, 150, 230), 90, 90)]
-    for i, (fx, fl) in enumerate(((-110, 230), (-38, 280), (38, 265), (108, 210))):
-        parts.append(skia.RRect.MakeRectXY(skia.Rect(fx - 34, -40 - fl, fx + 34, 20), 34, 34))
-    for rr in parts:
-        c.drawRRect(rr, P(skin, a * 0.35, blur=26))
-    thumb = skia.Path()
-    thumb.addRRect(skia.RRect.MakeRectXY(skia.Rect(-40, -36, 40, 170), 40, 40))
-    c.save()
-    c.translate(-150, 110)
-    c.rotate(-50)
-    c.drawPath(thumb, P(skin, a))
+    skin_hi, skin, skin_lo, line = (255, 222, 200), (255, 192, 168), (236, 150, 140), (214, 118, 118)
+    c.drawPath(HAND, P((255, 170, 150), a * 0.35, blur=40))                  # halo doux
+    sh = skia.GradientShader.MakeLinear([skia.Point(0, -360), skia.Point(0, 520)],
+                                        [E1.rgb(skin_hi, a), E1.rgb(skin, a), E1.rgb(skin_lo, a)], [0.0, 0.45, 1.0])
+    c.drawPath(HAND, P(shader=sh))
+    c.save()                                                                  # ombre douce au creux de la paume
+    c.clipPath(HAND, doAntiAlias=True)
+    c.drawOval(skia.Rect(-110, 0, 110, 200), P(skin_lo, a * 0.35, blur=40))
+    c.drawOval(skia.Rect(-120, -60, 20, 60), P((255, 255, 255), a * 0.18, blur=30))
     c.restore()
-    for rr in parts:
-        c.drawRRect(rr, P(skin, a))
-    for y in (70, 120):
-        c.drawLine(-90, y, 90, y - 20, P(line, a * 0.6, stroke=5))
+    c.drawPath(HAND, P(line, a * 0.9, stroke=5))
+    for bx, by, L, w, ang in FINGERS + [THUMB]:                               # plis des phalanges
+        c.save()
+        c.translate(bx, by)
+        c.rotate(ang)
+        for k, u in enumerate((0.36, 0.66) if (bx, by) != THUMB[:2] else (0.5,)):
+            ww = w * (0.5 - 0.08 * u) * 0.8
+            y = -L * u
+            path = skia.Path()
+            path.moveTo(-ww, y)
+            path.quadTo(0, y + 7, ww, y)
+            c.drawPath(path, P(line, a * 0.55, stroke=4))
+        c.restore()
+    creases = skia.Path()                                                     # lignes de la main
+    creases.moveTo(150, 20)
+    creases.cubicTo(80, 10, 0, 40, -80, 0)                                    # ligne de cœur
+    creases.moveTo(-138, 60)
+    creases.cubicTo(-60, 60, 30, 90, 110, 120)                                # ligne de tête
+    creases.moveTo(-120, 70)
+    creases.cubicTo(-60, 110, -50, 170, -70, 220)                             # ligne de vie
+    c.drawPath(creases, P(line, a * 0.5, stroke=5))
     c.restore()
 
 
@@ -305,8 +362,11 @@ def scene_zoom(c, t):
     # la main (niveau 0)
     ha = win(t, T_HAND, T_ZOOM[0] + 0.3, 0.4, 0.4)
     if ha > 0:
-        hs = pop(t - T_HAND) * (1 + 5 * ease((t - T_ZOOM[0]) / 0.6))
-        draw_hand(c, 540, 1180 - 60 * ease((t - T_ZOOM[0]) / 0.6), 1.05 * hs, 255 * ha)
+        z = ease((t - T_ZOOM[0]) / 0.6)                        # on plonge vers le bout du majeur (l'empreinte)
+        hs = 1.05 * pop(t - T_HAND) * (1 + 5 * z)
+        tx = lerp(540 + TIP[0] * 1.05, 540, z)                 # le bout du doigt glisse vers le centre de l'écran
+        ty = lerp(1160 + TIP[1] * 1.05, 1060, z)
+        draw_hand(c, tx - TIP[0] * hs, ty - TIP[1] * hs, hs, 255 * ha)
     for k in range(1, 5):
         t0 = T_ZOOM[k - 1]
         t1 = T_ZOOM[k] if k < 4 else T_ENTER
