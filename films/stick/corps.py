@@ -27,6 +27,7 @@ HEAD_R = 26.5
 NECK = 29.0                      # haut du buste → centre de la tête : le bas de l'anneau touche le buste
 HIP_H = 84.0                     # hauteur du bassin debout
 TOP = SPINE + NECK + HEAD_R      # bassin → sommet du crâne
+GLOW = False                     # halo néon autour du trait (la référence a un trait plat)
 LINE_W = 9.3                     # trait : 4,5 % de la hauteur, mesuré sur la référence
 
 
@@ -330,8 +331,11 @@ class Stroke:
         for a, b in zip(self.Q, self.Q[1:]):
             L.append(L[-1] + math.hypot(b[0] - a[0], b[1] - a[1]))
         tot = L[-1] or 1.0
+        # épaisseur irrégulière comme un trait à la main : ondulation lente + petites irrégularités du bord
+        # (fonction de la position le long du trait : une pose tenue reste parfaitement immobile)
         self.w = [w * (1 + 0.07 * math.sin(2 * math.pi * 1.6 * l / tot + seed)
-                       + 0.04 * math.sin(2 * math.pi * 4.1 * l / tot + 2 * seed)) for l in L]
+                       + 0.04 * math.sin(2 * math.pi * 4.1 * l / tot + 2 * seed)
+                       + 0.05 * math.sin(l * 0.9 + 3 * seed) * math.sin(l * 0.37 + seed)) for l in L]
 
     def centerline(self):
         path = skia.Path()
@@ -347,6 +351,25 @@ class Stroke:
 
 def brush_stroke(pts, w, seed=0.0):
     return Stroke(pts, w, seed)
+
+
+def head_stroke(J):
+    """Anneau de la tête tracé comme à la main : très légèrement irrégulier, épaisseur variable, fermé."""
+    k = J.get("hsq", 1.0)
+    rx, ry = HEAD_R / math.sqrt(k), HEAD_R * math.sqrt(k)
+    th = math.radians(J["head_theta"])
+    ct, st = math.cos(th), math.sin(th)
+    pts = []
+    n = 16
+    for i in range(n + 3):
+        a = 2 * math.pi * (i % n) / n
+        r = 1 + 0.025 * math.sin(3 * a + 0.7) + 0.015 * math.sin(5 * a + 2.1)
+        x, y = rx * r * math.cos(a), ry * r * math.sin(a)
+        pts.append((J["head"][0] + x * ct - y * st, J["head"][1] + x * st + y * ct))
+    s = Stroke(pts, LINE_W * 1.02, 2.7)
+    m = len(s.Q) * n // (n + 2)                                # on garde un tour complet (fermé proprement)
+    s.Q, s.w = s.Q[:m + 1], s.w[:m + 1]
+    return s
 
 
 def head_shape(J, grow=0.0):
@@ -401,10 +424,11 @@ def draw(c, p, t, cape=None, cape_color="violet", glow=1.0, alpha=255, screen_ro
     glow_all = skia.Path(ring)
     for q in body + arms:
         glow_all.addPath(q.centerline())
-    c.drawPath(glow_all, _pen(CYAN, LINE_W * 1.8, 30 * glow * alpha / 255, glow=LINE_W * 0.7))   # halo discret
+    if GLOW:                                                   # halo néon (désactivé : trait plat comme la référence)
+        c.drawPath(glow_all, _pen(CYAN, LINE_W * 1.8, 30 * glow * alpha / 255, glow=LINE_W * 0.7))
     for q in body:
         q.draw(c, CYAN, alpha)
-    c.drawPath(ring, _pen(CYAN, LINE_W, alpha))
+    head_stroke(J).draw(c, CYAN, alpha)                        # tête : un anneau tracé à la main
     c.drawPath(head_shape(J, -LINE_W / 2), _brush((0, 0, 0), alpha))
     look = p.look
     if p.gaze is not None:                                     # les yeux visent le point regardé
