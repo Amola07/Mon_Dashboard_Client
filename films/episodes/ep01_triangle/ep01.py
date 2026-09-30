@@ -22,7 +22,23 @@ W, H, FPS = 1080, 1920, 30
 HERE = os.path.dirname(os.path.abspath(__file__))
 VOIX = os.path.join(HERE, "audio", "voix.mp3")
 VOICE_END = 47.72
-DUR = 49.2
+# La voix donne une consigne… puis se tait le temps que l'Orbe l'exécute. (instant dans l'enregistrement, pause)
+GAPS = [(1.36, 1.9), (6.18, 0.6), (8.8, 0.6), (9.8, 1.0), (11.27, 1.3), (12.96, 0.9), (14.41, 0.9), (16.57, 1.2),
+        (17.91, 0.8), (20.76, 2.6), (24.42, 0.9), (27.13, 1.5), (28.88, 1.6), (30.5, 0.6), (34.15, 0.9),
+        (37.0, 1.2), (40.65, 2.1), (41.98, 0.7), (43.7, 0.5)]
+
+
+def N(v):
+    """Instant de l'enregistrement → instant dans la vidéo (après insertion des pauses)."""
+    return v + sum(g for p, g in GAPS if p < v)
+
+
+def GS(p):
+    """Début de la pause insérée en p (l'Orbe agit à partir de là)."""
+    return N(p)
+
+
+DUR = N(VOICE_END) + 2.2
 
 WHITE = (255, 255, 255)
 GOLD = (255, 205, 90)
@@ -50,42 +66,49 @@ TIMING = [("Dessine un triangle.", 0.0, 1.16), ("N'importe lequel.", 1.57, 2.32)
           ("Les règles de la géométrie…", 42.0, 43.52),
           ("dépendent de la surface sur laquelle tu vis.", 43.88, 47.7)]
 
-T_DRAW = (0.1, 1.5)                  # le triangle se trace
-T_DROP = 7.5                         # « 180 » tombe
-T_BADGE = 9.9                        # « 180 » part en petit badge
-T_ANG = (11.46, 13.17, 14.57)        # 72 (A), 51 (B), 57 (C)
-T_FLY = 15.8                         # les nombres volent vers la somme
-T_SUM = 16.71                        # « = 180 »
-T_WOB = (19.3, 24.3)                 # déformation du triangle
-T_LOCK = 23.78                       # « jamais »
-T_BACK = 24.6                        # retour à la forme de départ
-T_CUT = (25.8, 26.2, 26.6)           # découpe des trois coins
-T_MOVE = (27.3, 28.6)                # les coins glissent et se collent
-T_LINE = 29.1                        # ligne droite
-T_ARC = 32.4                         # demi-cercle 180°
-T_ZOOM = (36.2, 37.4)                # on recule : la planète
-T_SPH = (38.4, 39.7)                 # triangle tracé sur la sphère
-T_RIGHT = 39.72                      # trois angles droits
-T_270 = 40.79
-T_END = (46.9, 48.6)                 # retour à l'image de départ (boucle)
+TIMING = [(txt, N(a_), N(b_)) for txt, a_, b_ in TIMING]
+T_DRAW = (GS(1.36) + 0.35, GS(1.36) + 1.75)          # il trace le triangle APRÈS « Dessine un triangle »
+T_DROP = N(7.48)                                     # « 180 » tombe (révélation du narrateur)
+T_BADGE = GS(9.8) + 0.65                             # « 180 » part en petit badge
+T_ANG = (GS(11.27) + 1.2, GS(12.96) + 0.8, GS(14.41) + 0.8)   # chaque angle finit d'être mesuré
+T_FLY = GS(16.57) + 0.25                             # il additionne : les nombres volent
+T_SUM = N(16.71)                                     # « = 180 »
+G0 = GS(20.76)
+T_WOB = (G0 + 0.25, N(24.3))                         # il tire sur les sommets
+T_LOCK = N(23.78)                                    # « jamais »
+T_BACK = N(24.6)                                     # retour à la forme de départ
+T_CUT = (GS(27.13) + 0.2, GS(27.13) + 0.65, GS(27.13) + 1.1)   # il découpe les coins
+T_MOVE = (GS(28.88) + 0.15, GS(28.88) + 1.45)        # il les porte et les colle
+T_LINE = T_MOVE[1] + 0.05                            # ligne droite
+T_ARC = N(32.4)                                      # demi-cercle 180°
+T_ZOOM = (GS(37.0) + 0.35, GS(37.0) + 1.4)           # on recule : la planète
+T_SPH = (GS(40.65) + 0.2, GS(40.65) + 1.4)           # il trace le triangle sur la sphère
+T_RIGHT = GS(40.65) + 1.5                            # trois angles droits
+T_270 = N(40.79)
+T_END = (N(47.7) + 0.4, N(47.7) + 2.0)               # retour à l'image de départ (boucle)
 
-# Orbe : (début, expression, regard) — c'est lui l'élève : il essaie, se trompe, comprend
-ORBE = [(0.0, "neutre", "ray"), (1.57, "joie", "tri"), (2.73, "reflechit", None), (6.37, "neutre", "haut"),
-        (7.5, "surpris", "drop"), (8.97, "reflechit", "drop"), (9.98, "neutre", "ray"), (15.79, "reflechit", "sum"),
-        (16.71, "surpris", "sum"), (18.09, "reflechit", None), (19.26, "neutre", "ray"), (22.65, "reflechit", "ray"),
-        (23.78, "triste", "sum"), (24.59, "reflechit", "tri"), (25.73, "neutre", "ray"), (29.07, "surpris", "P"),
-        (30.63, "reflechit", "P"), (32.4, "idee", "P"), (33.3, "joie", None), (34.34, "surpris", None),
-        (35.22, "reflechit", None), (37.19, "surpris", "planete"), (38.4, "neutre", "ray"),
-        (39.72, "surpris", "ray"), (40.79, "etourdi", None), (42.0, "reflechit", "planete"), (44.4, "idee", None),
-        (45.8, "amour", None), (T_END[0] + 0.6, "neutre", "tri")]
-# bulles au-dessus de l'Orbe : (instant, symbole)
-EMO = [(2.9, "?"), (7.55, "!"), (16.75, "!"), (18.15, "?"), (22.7, "…"), (29.1, "!"), (32.45, "!"), (35.3, "?"),
-       (37.25, "!"), (39.75, "!")]
-# petits bips de l'Orbe (sa « voix » d'élève) : (instant, genre)
-CHIRPS = [(1.6, "joie"), (2.9, "question"), (7.55, "surprise"), (9.0, "non"), (11.5, "bip"), (13.2, "bip"),
-          (14.6, "bip"), (16.75, "surprise"), (18.15, "question"), (19.35, "effort"), (20.95, "effort"),
-          (22.35, "effort"), (23.8, "triste"), (29.1, "surprise"), (32.45, "joie"), (35.3, "question"),
-          (37.25, "surprise"), (39.75, "surprise"), (44.45, "joie")]
+# Orbe : (début, expression, regard) — il écoute, PUIS il agit, puis il réagit
+ORBE = [(0.0, "neutre", None), (T_DRAW[0], "neutre", "ray"), (T_DRAW[1] + 0.1, "joie", "tri"),
+        (N(2.73), "neutre", None), (GS(6.18) + 0.1, "reflechit", None), (N(6.37), "neutre", "haut"),
+        (T_DROP + 0.3, "surpris", "drop"), (GS(9.8) + 0.05, "reflechit", "drop"),
+        (GS(11.27) + 0.1, "neutre", "ray"), (T_FLY - 0.05, "neutre", "sum"), (T_SUM + 0.35, "surpris", "sum"),
+        (N(18.98) + 0.1, "reflechit", None), (G0 + 0.25, "neutre", "ray"), (N(22.65), "reflechit", "ray"),
+        (T_LOCK + 0.35, "triste", "sum"), (N(24.59), "reflechit", "tri"), (GS(27.13) + 0.15, "neutre", "ray"),
+        (T_LINE + 0.2, "surpris", "P"), (N(30.63), "reflechit", "P"), (T_ARC + 0.4, "idee", "P"),
+        (GS(34.15) + 0.1, "joie", None), (N(34.34) + 0.3, "surpris", None), (N(36.82) + 0.2, "reflechit", None),
+        (T_ZOOM[1] - 0.2, "surpris", "planete"), (T_SPH[0], "neutre", "ray"), (T_RIGHT + 0.3, "surpris", "ray"),
+        (T_270 + 0.5, "etourdi", None), (N(42.0), "reflechit", "planete"), (N(45.2), "idee", None),
+        (N(46.6), "amour", None), (T_END[0] + 0.6, "neutre", "tri")]
+# bulles au-dessus de l'Orbe : (instant, symbole) — toujours APRÈS ce qui les provoque
+EMO = [(GS(6.18) + 0.15, "?"), (T_DROP + 0.35, "!"), (T_SUM + 0.4, "!"), (N(18.98) + 0.15, "?"),
+       (N(22.65) + 0.1, "…"), (T_LINE + 0.25, "!"), (T_ARC + 0.45, "!"), (N(36.82) + 0.25, "?"),
+       (T_ZOOM[1] - 0.15, "!"), (T_RIGHT + 0.35, "!")]
+# petits sons doux de l'Orbe
+CHIRPS = [(T_DRAW[1] + 0.15, "joie"), (GS(6.18) + 0.15, "question"), (T_DROP + 0.35, "surprise"),
+          (GS(9.8) + 0.05, "non"), (T_ANG[0] - 0.4, "bip"), (T_ANG[1] - 0.4, "bip"), (T_ANG[2] - 0.4, "bip"),
+          (T_SUM + 0.4, "surprise"), (N(18.98) + 0.15, "question"), (T_LOCK + 0.4, "triste"),
+          (T_LINE + 0.25, "surprise"), (T_ARC + 0.45, "joie"), (N(36.82) + 0.25, "question"),
+          (T_RIGHT + 0.35, "surprise"), (N(45.2), "joie")]
 
 def ease(u):
     u = min(max(u, 0.0), 1.0)
@@ -148,8 +171,9 @@ A0, B0, C0 = (28.5, -237.3), (-260.0, 119.0), (260.0, 119.0)          # angles :
 PT = (0.0, 330.0)                                                     # là où les coins se rejoignent
 
 
-GRAB = [("A", 19.3, 20.9, (180.0, 40.0), (190.0, -40.0)), ("B", 20.9, 22.3, (-80.0, -170.0), (-60.0, -190.0)),
-        ("C", 22.3, 23.7, (70.0, -150.0), (60.0, -190.0))]      # sommet, fenêtre, déplacement, place de l'Orbe
+GRAB = [("A", G0 + 0.25, G0 + 1.45, (180.0, 40.0), (190.0, -40.0)),
+        ("B", G0 + 1.45, G0 + 2.6, (-80.0, -170.0), (-60.0, -190.0)),
+        ("C", G0 + 2.6, N(22.45), (70.0, -150.0), (60.0, -190.0))]      # sommet, fenêtre, déplacement, place de l'Orbe
 OFFS = {"A": (0.0, -200.0), "B": (-60.0, -190.0), "C": (60.0, -190.0)}
 
 
@@ -253,11 +277,11 @@ def draw_triangle_scene(c, t, s):
     vals = dict(zip("ABC", angles_display(A, B, C)))
     for k, name in enumerate("ABC"):
         t0 = T_ANG[k]
-        if t < t0 - 0.35:
+        if t < t0 - 0.9:
             continue
         v, a, b = V[name]
         st, sw = span(v, a, b)
-        grow = ease((t - (t0 - 0.35)) / 0.7)
+        grow = ease((t - (t0 - 0.9)) / 1.0)
         moving = T_MOVE[0] <= t
         if cut_done[k] and moving:
             continue                                             # le coin a été découpé et déplacé
@@ -285,7 +309,7 @@ def draw_triangle_scene(c, t, s):
         fly = ease((t - T_FLY) / 0.6) if t < T_WOB[0] else 0.0
         if T_FLY <= t < T_WOB[0]:                               # la valeur vole vers la somme
             continue
-        sc = pop(t - (t0 - 0.35))
+        sc = pop(t - (t0 - 0.9))
         c.save()
         c.translate(*lp)
         c.scale(sc, sc)
@@ -581,7 +605,8 @@ def ray_at(t):
     V = {"A": A, "B": B, "C": C}
     if T_DRAW[0] <= t < T_DRAW[1] + 0.1:
         return pen_tip(t), T_DRAW[0]
-    for name, t0, t1 in (("A", 10.1, 12.9), ("B", 12.9, 14.3), ("C", 14.3, 15.6)):
+    for name, t0, t1 in (("A", GS(11.27) + 0.45, GS(12.96)), ("B", GS(12.96) + 0.4, GS(14.41)),
+                         ("C", GS(14.41) + 0.4, T_FLY - 0.2)):
         if t0 <= t < t1:
             return scr(V[name]), t0
     for name, t0, t1, _, _ in GRAB:
@@ -610,36 +635,37 @@ def orbe_target(t):
     V = {"A": A, "B": B, "C": C}
     near = lambda name, off=None: (scr(V[name])[0] + (off or OFFS[name])[0],
                                    scr(V[name])[1] + (off or OFFS[name])[1])
-    if t < 1.57:
+    if t < T_DRAW[1] + 0.1:
         x, y = pen_tip(t)
         return x, y - 230, 0.75
-    if t < 2.73:
+    if t < N(2.73):
         return 540, 600, 0.8
-    if t < 7.3:
+    if t < T_DROP - 0.2:
         return 540, 560, 0.9
-    if t < 9.95:
+    if t < GS(11.27) + 0.1:
         return 540, 420, 0.85
-    for name, t0, t1 in (("A", 9.95, 12.9), ("B", 12.9, 14.3), ("C", 14.3, 15.6)):
+    for name, t0, t1 in (("A", GS(11.27) + 0.1, GS(12.96)), ("B", GS(12.96), GS(14.41)),
+                         ("C", GS(14.41), T_FLY - 0.3)):
         if t0 <= t < t1:
             x, y = near(name, (-40 if name == "B" else 40 if name == "C" else 0, -230))
             return x, y, 0.8
-    if t < 19.2:
+    if t < GRAB[0][1] - 0.1:
         return 540, 450, 0.8
     for name, t0, t1, _, off in GRAB:
         if t0 - 0.1 <= t < t1:
             x, y = near(name, off)
             return x, y, 0.72
-    if t < 25.55:
+    if t < T_CUT[0] - 0.25:
         return 540, 450, 0.8
     for k, tc in enumerate(T_CUT):
         if t < tc + 0.4:
             x, y = near("ABC"[k])
             return x, y, 0.7
-    if t < 28.9:
+    if t < T_MOVE[1] + 0.2:
         return 870, 1380, 0.7
-    if t < 32.3:
+    if t < T_ARC - 0.1:
         return 540, 560, 0.8
-    if t < 34.3:
+    if t < N(34.34):
         return 540, 530, 0.95
     if t < T_ZOOM[0]:
         return 540, 560, 0.85
@@ -650,7 +676,7 @@ def orbe_target(t):
         d = (x - PC[0], y - PC[1])
         n = math.hypot(*d) or 1.0
         return x + d[0] / n * 150, y + d[1] / n * 150, 0.6
-    if t < 40.7:
+    if t < T_RIGHT + 0.9:
         p = proj(90, 0, 1.0)[0]
         return p[0] - 190, p[1] - 80, 0.6
     if t < T_END[0] + 0.3:
@@ -685,12 +711,14 @@ def orbe_pose(t):
     a, b = _POSE[i], _POSE[i + 1]
     x, y, s = (a[j] + (b[j] - a[j]) * u for j in range(3))
     y += 8 * math.sin(t * 2.1)
-    if 8.97 <= t < 9.9:                                         # « non, je n'y crois pas » : il secoue la tête
-        x += 22 * math.sin((t - 8.97) * 20) * (1 - (t - 8.97) / 0.93)
-    if 19.3 <= t < 23.7:                                        # l'effort : il tremble en tirant
+    h0 = GS(9.8) + 0.05
+    if h0 <= t < h0 + 0.9:                                      # « non, je n'y crois pas » : il secoue la tête
+        x += 22 * math.sin((t - h0) * 16) * (1 - (t - h0) / 0.9)
+    if GRAB[0][1] <= t < GRAB[2][2]:                            # l'effort : il tremble en tirant
         x += 3 * math.sin(t * 60)
-    if 32.4 <= t < 33.0:                                        # le déclic : il bondit
-        y -= 60 * math.sin(math.pi * (t - 32.4) / 0.6)
+    b0 = T_ARC + 0.4
+    if b0 <= t < b0 + 0.6:                                      # le déclic : il bondit
+        y -= 60 * math.sin(math.pi * (t - b0) / 0.6)
     return (x, y), s
 
 
@@ -848,35 +876,68 @@ def tone(freq, dur, amp=0.3, attack=0.005, decay=0.3, harm=((1, 1.0),)):
     return y * env * amp
 
 
+def soften(y, k=18):
+    """Filtre passe-bas simple : arrondit tous les sons (rien d'aigu ni de claquant)."""
+    return np.convolve(y, np.ones(k) / k, mode="same")
+
+
 def ding(f=880, amp=0.25):
-    return tone(f, 1.2, amp, 0.002, 0.35, ((1, 1.0), (2, 0.35), (3, 0.12)))
+    """Clochette douce : une octave plus grave, attaque lente, presque pure (marimba feutré)."""
+    f = f / 2
+    return tone(f, 1.4, amp * 0.8, 0.012, 0.5, ((1, 1.0), (2, 0.12), (4, 0.03)))
 
 
 def pop_s(f=600, amp=0.3):
-    n = int(0.12 * SR)
+    """« Bloop » rond et grave (bulle), au lieu d'un clic."""
+    n = int(0.22 * SR)
     tt = np.arange(n) / SR
-    fr = f * (1 + 2 * np.exp(-tt * 60))
-    return np.sin(2 * np.pi * np.cumsum(fr) / SR) * np.exp(-tt / 0.03) * amp
+    fr = f * 0.4 * (1 + 0.35 * np.minimum(1, tt / 0.1))
+    y = np.sin(2 * np.pi * np.cumsum(fr) / SR) * np.minimum(1, tt / 0.012) * np.exp(-tt / 0.07)
+    return y * amp * 0.7
 
 
 def sparkle(amp=0.15):
-    out_ = np.zeros(int(0.9 * SR))
-    rng = np.random.default_rng(3)
-    for k in range(7):
-        s = ding(1600 + 400 * rng.random(), amp * (0.5 + 0.5 * rng.random()))
-        i = int(k * 0.09 * SR)
-        m = min(len(out_) - i, len(s))
-        out_[i:i + m] += s[:m]
+    """Petit carillon doux (trois notes montantes, graves et feutrées)."""
+    out_ = np.zeros(int(1.6 * SR))
+    for k, f in enumerate((523.25, 659.25, 783.99)):
+        s_ = tone(f, 1.2, amp * 0.6, 0.02, 0.45, ((1, 1.0), (2, 0.08)))
+        i = int(k * 0.12 * SR)
+        m = min(len(out_) - i, len(s_))
+        out_[i:i + m] += s_[:m]
     return out_
 
 
 def scribble(dur, amp=0.12):
+    """Crayon feutré : bruit très filtré, doux."""
     n = int(dur * SR)
     x = np.random.default_rng(5).standard_normal(n)
-    x = np.convolve(x, np.ones(6) / 6, mode="same")
+    x = soften(soften(x, 40), 40)
     tt = np.arange(n) / SR
-    env = (0.6 + 0.4 * np.sin(tt * 40)) * np.minimum(1, tt / 0.05) * np.minimum(1, (dur - tt) / 0.1)
-    return x * env * amp
+    env = (0.7 + 0.3 * np.sin(tt * 18)) * np.minimum(1, tt / 0.1) * np.minimum(1, (dur - tt) / 0.15)
+    return x * env * amp * 2.2
+
+
+def swish(dur, amp=0.25):
+    """Souffle doux (mouvement), grave et filtré."""
+    n = int(dur * SR)
+    x = soften(soften(np.random.default_rng(9).standard_normal(n), 60), 60)
+    tt = np.arange(n) / SR
+    env = np.sin(np.pi * np.clip(tt / dur, 0, 1)) ** 2
+    return x * env * amp * 3.0
+
+
+def tock(amp=0.25):
+    """« Toc » de bois feutré (quand deux pièces se collent)."""
+    return tone(170, 0.35, amp, 0.004, 0.07, ((1, 1.0), (2.6, 0.15)))
+
+
+def swell(amp=0.25):
+    """Nappe grave qui gonfle (grande révélation), sans explosion."""
+    n = int(2.0 * SR)
+    tt = np.arange(n) / SR
+    env = np.minimum(1, tt / 0.35) * np.exp(-np.maximum(0, tt - 0.35) / 0.7)
+    return (np.sin(2 * np.pi * 110 * tt) + 0.5 * np.sin(2 * np.pi * 165 * tt)
+            + 0.25 * np.sin(2 * np.pi * 220 * tt)) * env * amp
 
 
 def music(dur):
@@ -897,7 +958,7 @@ def music(dur):
             y[i0:i0 + m] += s[:m]
         for j in range(4):                                      # notes pincées
             f = ch[j % 3] * 2
-            p = tone(f, 0.8, 0.05, 0.003, 0.25, ((1, 1.0), (2, 0.2)))
+            p = tone(f, 1.0, 0.04, 0.02, 0.35, ((1, 1.0), (2, 0.06)))
             i = i0 + int(j * bar / 4 * SR)
             m = min(n - i, len(p))
             if m > 0:
@@ -906,13 +967,15 @@ def music(dur):
 
 
 def chirp(f0, f1, dur, amp=0.22):
+    """Voyelle douce de l'Orbe : sinus pur, glissé lent, attaque et chute arrondies."""
     n = int(dur * SR)
     tt = np.arange(n) / SR
-    f = f0 + (f1 - f0) * (tt / dur)
+    u = tt / dur
+    f = f0 + (f1 - f0) * (u * u * (3 - 2 * u))
     ph = 2 * np.pi * np.cumsum(f) / SR
-    y = np.sin(ph) + 0.25 * np.sin(2 * ph) + 0.1 * np.sin(3 * ph)
-    env = np.minimum(1, tt / 0.01) * np.minimum(1, (dur - tt) / 0.03)
-    return y * env * amp
+    y = np.sin(ph) + 0.08 * np.sin(2 * ph)
+    env = np.sin(np.pi * np.clip(u, 0, 1)) ** 1.5
+    return y * env * amp * 0.55
 
 
 def seq(*parts):
@@ -923,20 +986,20 @@ def seq(*parts):
 
 
 def orbe_voice(kind):
-    """La « voix » de l'Orbe : de petits bips expressifs, comme un robot qui réagit."""
+    """La « voix » de l'Orbe : de petits « hmm ? », « oh ! », « mmm » doux et graves (jamais aigus)."""
     if kind == "question":
-        return seq(chirp(520, 620, 0.09), 0.04, chirp(640, 1150, 0.17))
+        return seq(chirp(260, 280, 0.14), 0.03, chirp(280, 420, 0.24))
     if kind == "surprise":
-        return seq(chirp(700, 1700, 0.11, 0.25), 0.03, chirp(1500, 1400, 0.06, 0.15))
+        return chirp(300, 520, 0.26, 0.26)
     if kind == "joie":
-        return seq(chirp(880, 900, 0.07), 0.02, chirp(1100, 1120, 0.07), 0.02, chirp(1320, 1400, 0.1))
+        return seq(chirp(330, 350, 0.12), 0.02, chirp(392, 410, 0.12), 0.02, chirp(494, 523, 0.2))
     if kind == "triste":
-        return chirp(760, 380, 0.45, 0.2)
+        return chirp(380, 230, 0.55, 0.2)
     if kind == "non":
-        return seq(chirp(620, 520, 0.09), 0.1, chirp(620, 500, 0.11))
+        return seq(chirp(330, 290, 0.16), 0.08, chirp(330, 280, 0.18))
     if kind == "effort":
-        return chirp(330, 390, 0.16, 0.18)
-    return chirp(900, 1000, 0.06, 0.14)
+        return chirp(200, 230, 0.2, 0.16)
+    return chirp(420, 440, 0.12, 0.14)
 
 
 def soundtrack(path):
@@ -945,52 +1008,60 @@ def soundtrack(path):
     voice = np.frombuffer(raw, np.int16).astype(float) / 32768
     n = int(DUR * SR)
     mix = np.zeros(n)
-    mix[:min(n, len(voice))] += voice[:n]
+    # la voix, découpée aux pauses et replacée avec les silences d'action
+    cuts = [0.0] + [p for p, _ in GAPS] + [len(voice) / SR]
+    for a_, b_ in zip(cuts, cuts[1:]):
+        chunk = voice[int(a_ * SR):int(b_ * SR)]
+        i = int(N(a_ + 1e-6) * SR)
+        m = min(n - i, len(chunk))
+        if m > 0:
+            mix[i:i + m] += chunk[:m]
     fx = np.zeros(n)
 
-    def add(t, s, g=1.0):
+    def add(t, s_, g=1.0):
         i = int(t * SR)
-        m = min(n - i, len(s))
+        m = min(n - i, len(s_))
         if m > 0:
-            fx[i:i + m] += s[:m] * g
+            fx[i:i + m] += s_[:m] * g
 
     add(T_DRAW[0], scribble(T_DRAW[1] - T_DRAW[0]))
-    add(T_DROP, foley.whoosh(0.35, 0.5, 700))
-    add(T_DROP + 0.35, foley.thud(0.7), 0.8)
-    add(T_DROP + 0.35, ding(660, 0.2))
+    add(T_DROP - 0.1, swish(0.45, 0.2))
+    add(T_DROP + 0.35, tock(0.3))
+    add(T_DROP + 0.35, ding(660, 0.16))
     for k, t0 in enumerate(T_ANG):
-        add(t0 - 0.35, pop_s(500 + 120 * k))
-        add(t0 + 0.2, ding(700 + 140 * k, 0.12))
-    add(T_FLY, foley.whoosh(0.5, 0.4, 1200))
-    add(T_SUM, ding(880, 0.2))
-    add(T_SUM, ding(1320, 0.12))
-    add(T_WOB[0], foley.whoosh(1.2, 0.25, 500))
-    add(T_LOCK, foley.clack(0.5, 14))
+        add(t0 - 0.9, swish(0.9, 0.08))
+        add(t0 + 0.1, ding(660 + 110 * k, 0.12))
+    add(T_FLY, swish(0.6, 0.18))
+    add(T_SUM, ding(880, 0.16))
+    add(T_SUM + 0.12, ding(1100, 0.1))
+    for _, t0, _, _, _ in GRAB:
+        add(t0, swish(0.9, 0.12))
+    add(T_LOCK, tock(0.28))
     for tc in T_CUT:
-        add(tc, foley.snap(0.25))
-    add(T_MOVE[0], foley.whoosh(1.2, 0.35, 900))
-    add(T_MOVE[1], foley.clack(0.6, 20))
-    add(T_LINE, sparkle(0.1))
-    add(T_ARC, ding(523, 0.18))
-    add(T_ARC + 0.1, ding(784, 0.14))
-    add(33.3, sparkle(0.14))
-    add(T_ZOOM[0], foley.whoosh(1.2, 0.4, 400))
+        add(tc, swish(0.35, 0.14))
+    add(T_MOVE[0], swish(1.3, 0.16))
+    add(T_MOVE[1] - 0.05, tock(0.28))
+    add(T_LINE + 0.1, sparkle(0.12))
+    add(T_ARC, ding(523, 0.16))
+    add(T_ARC + 0.15, ding(784, 0.12))
+    add(T_ARC + 0.45, sparkle(0.12))
+    add(T_ZOOM[0], swish(1.3, 0.2))
     add(T_SPH[0], scribble(T_SPH[1] - T_SPH[0], 0.1))
     for k in range(3):
-        add(T_RIGHT + 0.18 * k, pop_s(700 + 100 * k))
-    add(T_270, foley.boom(0.4), 0.6)
-    add(T_270, ding(587, 0.2))
-    add(44.4, sparkle(0.14))
+        add(T_RIGHT + 0.18 * k, pop_s(700 + 100 * k, 0.25))
+    add(T_270, swell(0.18))
+    add(T_270, ding(587, 0.15))
+    add(N(45.2), sparkle(0.12))
     for t0, kind in CHIRPS:
         add(t0, orbe_voice(kind), 0.9)
-    add(T_END[0], foley.whoosh(1.2, 0.25, 600))
+    add(T_END[0], swish(1.4, 0.15))
     mus = music(DUR)
     # la musique s'efface sous la voix (ducking)
     env = np.abs(mix)
     k = int(0.15 * SR)
     env = np.convolve(env, np.ones(k) / k, mode="same")
     duck = 1 - 0.55 * np.minimum(1, env / 0.05)
-    out_ = mix + fx * 0.8 + mus * duck
+    out_ = mix + soften(fx, 6) * 0.8 + mus * duck
     out_ = np.tanh(out_ * 1.3) / np.tanh(1.3)
     stereo = np.stack([out_, out_], axis=1)
     with wave.open(path, "wb") as w:
