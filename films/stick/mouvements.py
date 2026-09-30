@@ -239,7 +239,7 @@ _squat = replace(ACCROUPI, pel=(-8, 50), lean=30, head=-10, hands=(("e", -48, -4
 _push = P(pel=(2, HIP_H - 2), lean=-4, bend=0, head=-12, feet=((-8, 6), (14, 8)),
           hands=(("e", -10, 72), ("e", 18, 72)), expr="decide", st=1.2, hsq=1.12)   # détente : tout s'étire
 _tuck = P(pel=(0, 150), lean=6, bend=14, head=-6, feet=((-14, 96), (16, 104)),
-          hands=(("e", -50, 34), ("e", 54, 40)), expr="joie")
+          hands=(("e", -66, 16), ("e", 68, 22)), expr="joie")
 _reach_down = P(pel=(0, 104), lean=4, bend=10, head=4, feet=((-12, 18), (16, 22)),
                 hands=(("e", -56, 10), ("e", 56, 14)), expr="joie")
 _land = replace(ACCROUPI, pel=(-6, 46), lean=30, head=4, hands=(("e", -30, -40), ("e", 40, -42)), expr="joie",
@@ -269,7 +269,7 @@ clip("sursaut", "Sursauter", K(
     (40, _repos("surpris"), "io"),
     (46, _repos("surpris"), "io")))
 
-_idea = replace(REPOS, pel=(-2, HIP_H - 2), lean=-4, bend=4, head=-12, hands=(None, ("e", 58, 44)),
+_idea = replace(REPOS, pel=(-2, HIP_H - 2), lean=-4, bend=4, head=-12, hands=(None, ("e", 34, 80)),
                 expr="joie", emote="!")
 clip("idee", "Avoir une idée", K(
     (0, _repos("curieux"), "io"),
@@ -281,7 +281,7 @@ clip("idee", "Avoir une idée", K(
 
 
 def _scratch(dx):
-    return replace(REPOS, lean=-4, head=-10, bend=10, hands=(("e", -28 + dx, 58), None), expr="curieux",
+    return replace(REPOS, lean=-4, head=-10, bend=10, hands=(("e", -50 + dx, 50), None), expr="curieux",
                    emote="?")
 
 
