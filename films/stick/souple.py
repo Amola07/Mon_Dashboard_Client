@@ -154,6 +154,7 @@ def simulate(show, Y, X, room, G):
         up = (neck - pel) / max(1e-6, float(np.hypot(*(neck - pel))))
         breath = 0.0 * math.sin(2 * math.pi * 0.32 * t)            # tenues vraiment immobiles
         tgt_sp[1:] += up * breath * np.linspace(0, 1, N_SPINE)[1:, None]
+        spine.rest = K.SPINE * fr["pose"].st / (N_SPINE - 1)     # le buste s'étire / s'écrase
         for s in range(SUB):
             a = (s + 1) / SUB
             root = prev[0] + (pel - prev[0]) * a
@@ -166,7 +167,9 @@ def simulate(show, Y, X, room, G):
         for i in range(2):
             hand, elbow = Y[f][10 + 2 * i], Y[f][9 + 2 * i]
             pinned = contact(hand, prev[10 + 2 * i], True)
-            tgt = arc_points(shoulder, hand, ARM_L, elbow, N_LIMB)
+            La = min(1.3 * ARM_L, max(ARM_L, float(np.hypot(*(hand - shoulder)))))   # bras élastique
+            arms[i].rest = La / (N_LIMB - 1)
+            tgt = arc_points(shoulder, hand, La, elbow, N_LIMB)
             # un bras levé volontairement (contre la gravité, ou tendu en apesanteur) est tenu par les muscles ;
             # un bras qui pend reste mou
             reach = hand - shoulder
@@ -181,7 +184,9 @@ def simulate(show, Y, X, room, G):
         for i in range(2):
             foot, knee = Y[f][6 + 2 * i], Y[f][5 + 2 * i]
             pinned = contact(foot, prev[6 + 2 * i], False)
-            tgt = arc_points(pel, foot, LEG_L, knee, N_LIMB)
+            Ll = min(1.25 * LEG_L, max(LEG_L, float(np.hypot(*(foot - pel)))))   # jambe élastique
+            legs[i].rest = Ll / (N_LIMB - 1)
+            tgt = arc_points(pel, foot, Ll, knee, N_LIMB)
             k = k_pinned if pinned else k_leg + firm
             grav = 0.0 if pinned else gdir * 0.012 * gm
             for s in range(SUB):

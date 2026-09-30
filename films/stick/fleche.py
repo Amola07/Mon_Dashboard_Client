@@ -524,7 +524,8 @@ class Show:
             return walk(RWALL, t, 11.05, 11.75, uf, u_jump, 2, GRAV_RIGHT, expr="decide", gaze=tip)
         look_up = stand(RWALL, u_jump, 1, g=GRAV_RIGHT, expr="decide", gaze=tip, head=-24)
         look_up.hands = swing_hands(look_up, [-4, 6])
-        crouch = stand(RWALL, u_jump, 1, crouch=0.6, lean=10, g=GRAV_RIGHT, expr="decide", head=-26, gaze=tip)
+        crouch = stand(RWALL, u_jump, 1, crouch=0.6, lean=10, g=GRAV_RIGHT, expr="decide", head=-26, gaze=tip,
+                       st=0.84, hsq=0.9)                          # ramassé, écrasé : il charge le saut
         crouch.hands = swing_hands(crouch, [-40, -30])
         t_up, v0 = 12.15, 680.0
         t_down = t_up + 2 * v0 / G
@@ -548,7 +549,7 @@ class Show:
             else:                                              # redescend : les jambes cherchent le sol
                 p.feet = [RWALL.w(u_jump - 10, max(0.0, h - 6)), RWALL.w(u_jump + 10, max(0.0, h - 4))]
             return p
-        land = stand(RWALL, u_jump, 1, crouch=0.5, lean=12, g=GRAV_RIGHT, expr="colere")
+        land = stand(RWALL, u_jump, 1, crouch=0.5, lean=12, g=GRAV_RIGHT, expr="colere", st=0.8, hsq=0.86)
         land.hands = swing_hands(land, [30, 20])
         mad = stand(RWALL, u_jump, 1, g=GRAV_RIGHT, expr="colere", gaze=tip, head=-18)
         J = build(mad)
@@ -1101,7 +1102,7 @@ def impact_squash(show, t, J, g):
         dt = t - te
         if kind == "thud" and 0 <= dt < 0.35 and v_len(v_sub(pos, J["pelvis"])) < 190:
             k += force * math.exp(-dt * 11) * math.cos(dt * 26)
-    if abs(k) < 0.02 or v_len(g) < 1:
+    if True:                                                   # remplacé par squash_stretch (rig souple)
         return None
     k = max(-0.6, min(1.0, k))
     feet = v_lerp(J["legs"][0][2], J["legs"][1][2], 0.5)
@@ -1398,9 +1399,31 @@ def points_joint(P, J, head_theta):
     return out
 
 
+def squash_stretch(show):
+    """Écrasement et étirement du dessin, comme à la main : lancé vite, le corps s'étire (buste et tête allongés) ;
+    au choc, il s'écrase puis rebondit en s'étirant un peu avant de reprendre sa forme."""
+    frs = show.frames
+    P = np.array([fr["pose"].pelvis for fr in frs], float)
+    V = np.zeros(len(P))
+    V[1:] = np.linalg.norm(np.diff(P, axis=0), axis=1)
+    V = np.convolve(V, np.ones(5) / 5, mode="same")            # vitesse lissée (unités par image à 60 i/s)
+    hits = [(te, pos, force) for te, kind, pos, force in show.events if kind == "thud"]
+    for f, fr in enumerate(frs):
+        t = f / FPS
+        p = fr["pose"]
+        st = 1 + min(0.2, max(0.0, (V[f] - 6) * 0.012))        # étiré par la vitesse
+        for te, pos, force in hits:
+            dt = t - te
+            if 0 <= dt < 0.4 and v_len(v_sub(pos, p.pelvis)) < 220:
+                st -= 0.3 * force * math.exp(-dt * 10) * math.cos(dt * 22)   # écrasé, puis rebond
+        st = max(0.7, min(1.25, st))
+        fr["pose"] = replace(p, st=p.st * st, hsq=p.hsq * (1 + (st - 1) * 0.6))
+
+
 def smooth_motion(show, omega=0.3):
     """Amortisseur d'à-coups (« inertialisation ») : quand une articulation saute d'une image à l'autre,
     le corps garde son élan et rejoint la nouvelle pose en douceur (ressort critique, ~¼ s)."""
+    squash_stretch(show)
     Js = [build(fr["pose"]) for fr in show.frames]
     X = np.array([joint_points(J) for J in Js])               # (N, 13, 2)
     A = np.array([J["head_theta"] for J in Js], dtype=float)

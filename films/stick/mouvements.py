@@ -37,6 +37,8 @@ class P:
     hands: tuple = (None, None)
     expr: str = "neutre"
     emote: str = None
+    st: float = 1.0                                             # buste étiré / écrasé (rig souple)
+    hsq: float = 1.0                                            # tête étirée / écrasée
 
 
 REPOS = P()
@@ -144,6 +146,8 @@ def pose_at(clip, frame, F, u0=0.0, facing=1, g=(0.0, 1.0)):
         world = (wa[0] + (wb[0] - wa[0]) * eh, wa[1] + (wb[1] - wa[1]) * eh)
         hands.append(((arc[0] + world[0]) / 2, (arc[1] + world[1]) / 2))
     p.hands = hands
+    p.st = _lerp(a.st, b.st, e["pel"])
+    p.hsq = _lerp(a.hsq, b.hsq, e["head"])
     e = e["head"]
     em = b.emote if e >= 0.5 else a.emote
     p.emote = (em, (frame - f0) / FPS) if em else None
@@ -231,14 +235,15 @@ clip("genou", "Poser un genou à terre", K(
     (70, _repos(), "io")))
 
 _squat = replace(ACCROUPI, pel=(-8, 50), lean=30, head=-10, hands=(("e", -48, -40), ("e", -36, -46)),
-                 expr="decide")
+                 expr="decide", st=0.82, hsq=0.9)                    # ramassé, écrasé : il charge
 _push = P(pel=(2, HIP_H - 2), lean=-4, bend=0, head=-12, feet=((-8, 6), (14, 8)),
-          hands=(("e", -10, 72), ("e", 18, 72)), expr="decide")
+          hands=(("e", -10, 72), ("e", 18, 72)), expr="decide", st=1.2, hsq=1.12)   # détente : tout s'étire
 _tuck = P(pel=(0, 150), lean=6, bend=14, head=-6, feet=((-14, 96), (16, 104)),
           hands=(("e", -50, 34), ("e", 54, 40)), expr="joie")
 _reach_down = P(pel=(0, 104), lean=4, bend=10, head=4, feet=((-12, 18), (16, 22)),
                 hands=(("e", -56, 10), ("e", 56, 14)), expr="joie")
-_land = replace(ACCROUPI, pel=(-6, 50), lean=30, head=4, hands=(("e", -30, -40), ("e", 40, -42)), expr="joie")
+_land = replace(ACCROUPI, pel=(-6, 46), lean=30, head=4, hands=(("e", -30, -40), ("e", 40, -42)), expr="joie",
+                st=0.78, hsq=0.86)                                  # réception : écrasé
 clip("sauter", "Sauter : anticipation, élan, vol, réception", K(
     (0, _repos(), "io"),
     (7, _squat, "io"),                                         # anticipation : il se ramasse, bras en arrière
@@ -253,7 +258,7 @@ clip("sauter", "Sauter : anticipation, élan, vol, réception", K(
     (50, _repos(), "io")))
 
 _take = P(pel=(-6, HIP_H + 2), lean=-16, bend=-6, head=-16, feet=((-9, 0), (20, 0)),
-          hands=(("e", -58, 18), ("e", 60, 30)), expr="surpris", emote="!")
+          hands=(("e", -58, 18), ("e", 60, 30)), expr="surpris", emote="!", st=1.14, hsq=1.1)
 clip("sursaut", "Sursauter", K(
     (0, _repos(), "io"),
     (3, replace(REPOS, pel=(-2, HIP_H - 10), head=12, bend=20), "in"),   # micro-anticipation : il se tasse
@@ -337,11 +342,12 @@ _fall = P(pel=(-30, 40), lean=-50, bend=-6, head=-10, feet=((6, 0), (34, 26)),
           hands=(("e", -60, 0), ("e", 30, 60)), expr="peur")
 _sit = P(pel=(-34, 14), lean=-24, bend=10, head=-2, feet=((24, 0), (38, 10)),
          hands=(("s", -74, 0), ("s", -60, 0)), expr="etourdi", emote="etoiles")
+_sit_hit = replace(_sit, st=0.8, hsq=0.85)
 clip("tomber", "Tomber sur les fesses", K(
     (0, _repos(), "io"),
     (4, _trip, "out"),                                         # déséquilibre : il bascule en arrière
     (9, _fall, "in"),                                          # la chute accélère (pas de freinage)
-    (11, _sit, "lin"),                                         # choc
+    (11, _sit_hit, "lin"),                                     # choc : écrasé
     (13, replace(_sit, pel=(-34, 11), lean=-28), "out"),       # écrasement
     (17, _sit, "io"),
     (40, _sit, "io"),

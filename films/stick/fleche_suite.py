@@ -265,7 +265,8 @@ class Suite:
         top = self.tower_top
         fc = self.facing
         a = standing(F.CEIL, self.u, fc, expr="decide", gaze=F.CEIL.w(self.uT, top))
-        cr = standing(F.CEIL, self.u, fc, crouch=0.6, lean=15, expr="decide", gaze=F.CEIL.w(self.uT, top))
+        cr = standing(F.CEIL, self.u, fc, crouch=0.6, lean=15, expr="decide", gaze=F.CEIL.w(self.uT, top), st=0.85,
+                      hsq=0.9)
         on = standing(F.CEIL, self.uT, fc, crouch=0.5, lean=10, expr="joie", width=6)
         on.pelvis = v_add(on.pelvis, v_sub(F.CEIL.w(0, top), F.CEIL.w(0, 0)))
         on.feet = [F.CEIL.w(self.uT - 6, top), F.CEIL.w(self.uT + 6, top)]
@@ -304,7 +305,8 @@ class Suite:
         look.pelvis = v_add(look.pelvis, lift)
         look.feet = [v_add(q, lift) for q in look.feet]
         look.hands = F.swing_hands(look, [-4, 6])
-        cr = standing(F.CEIL, self.uT, fc, crouch=0.6, lean=8, expr="decide", gaze=grip[0], head=-26, width=6)
+        cr = standing(F.CEIL, self.uT, fc, crouch=0.6, lean=8, expr="decide", gaze=grip[0], head=-26, width=6,
+                      st=0.85, hsq=0.9)
         cr.pelvis = v_add(cr.pelvis, lift)
         cr.feet = [v_add(q, lift) for q in cr.feet]
         cr.hands = F.swing_hands(cr, [-40, -30])
@@ -407,7 +409,8 @@ class Suite:
             phi = down_phi(Fr)
             L = show.arrows[0]["L"] if show.arrows else L0
             fc = self.facing
-            cr = standing(Fr, u, fc, crouch=0.35 if soft else 0.7, lean=14, expr="surpris" if not proud else "joie")
+            cr = standing(Fr, u, fc, crouch=0.35 if soft else 0.7, lean=14, expr="surpris" if not proud else "joie",
+                          st=0.88 if soft else 0.78, hsq=0.92 if soft else 0.86)      # réception écrasée
             up = standing(Fr, u, fc, expr="joie" if not proud else "fier")
             if proud:
                 self.mark(t, rate=0.6, shot=("suivi", None, 2.2, 2.3, 0, 0)) if tau < DT / 2 else None
@@ -567,7 +570,7 @@ class Suite:
             gmag = G * L / L0
             if tau < DT / 2:
                 self.mark(t, rate=0.72, shot=("suivi", None, 1.35, 1.4, 0, 0) if flip else None)
-            cr = standing(Fr, u, self.facing, crouch=0.6, lean=12, expr="joie")
+            cr = standing(Fr, u, self.facing, crouch=0.6, lean=12, expr="joie", st=0.85, hsq=0.9)
             if tau < 0.3:
                 p = F.keyed(tau, [(0, standing(Fr, u, self.facing, expr="joie")), (0.3, cr)])
                 c = hold(show, p, phi, L)

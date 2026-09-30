@@ -24,7 +24,7 @@ HEAD_R = 28.0                    # tête ≈ un quart de la hauteur (comme la r�
 NECK = HEAD_R - 4                # haut du buste → centre de la tête (< HEAD_R : aucun trait de cou)
 HIP_H = 86.0                     # hauteur du bassin debout (genoux jamais verrouillés)
 TOP = SPINE + NECK + HEAD_R      # bassin → sommet du crâne
-LINE_W = 9.0
+LINE_W = 12.0                    # trait épais, comme la référence (~6 % de la hauteur)
 
 
 def v_add(*vs):
@@ -98,6 +98,10 @@ class Pose:
     emote: tuple = None
     g: tuple = (0.0, 1.0)                       # direction de la gravité (None = apesanteur) : où pendent les membres libres
     gaze: tuple = None                          # point du monde regardé (les yeux le suivent)
+    # déformations du dessin (rig souple) : le corps n'est pas un pantin à longueurs fixes
+    st: float = 1.0                             # étirement du buste (>1 étiré, <1 écrasé)
+    sway: float = 0.0                           # courbure du bas du dos (avec bend : dos en S)
+    hsq: float = 1.0                            # tête étirée (>1) ou écrasée (<1) le long du buste, aire conservée
 
 
 def lerp_pose(a, b, u):
@@ -115,7 +119,8 @@ def lerp_pose(a, b, u):
                    theta=a.theta + ((b.theta - a.theta + 180) % 360 - 180) * u,
                    bend=a.bend + (b.bend - a.bend) * u, head=a.head + (b.head - a.head) * u,
                    feet=pts(a.feet, b.feet, "legs"), hands=pts(a.hands, b.hands, "arms"),
-                   look=v_lerp(a.look, b.look, u))
+                   look=v_lerp(a.look, b.look, u), st=a.st + (b.st - a.st) * u, sway=a.sway + (b.sway - a.sway) * u,
+                   hsq=a.hsq + (b.hsq - a.hsq) * u)
 
 
 def _win(u, w):
@@ -168,7 +173,8 @@ def cascade(a, b, u, ease):
                    bend=a.bend + (b.bend - a.bend) * e["bend"] + curl,
                    head=a.head + (b.head - a.head) * e["head"],
                    feet=pts(a.feet, b.feet, "legs", e["feet"]), hands=pts(a.hands, b.hands, "arms", e["hands"]),
-                   look=v_lerp(a.look, b.look, e["head"]))
+                   look=v_lerp(a.look, b.look, e["head"]), st=a.st + (b.st - a.st) * e["pel"],
+                   sway=a.sway + (b.sway - a.sway) * e["lean"], hsq=a.hsq + (b.hsq - a.hsq) * e["head"])
 
 
 def pose_vec(p):
@@ -198,13 +204,14 @@ def build(p):
     u = up_vec(p.theta)
     f = v_mul(right_vec(p.theta), p.facing)
     # la colonne se courbe sur toute sa longueur (dos rond en C) : le bas plie un peu, le haut beaucoup
-    low_dir = up_vec(p.theta + 0.3 * p.bend * p.facing)
+    low_dir = up_vec(p.theta + (0.3 * p.bend + p.sway) * p.facing)
     neck_dir = up_vec(p.theta + p.bend * p.facing)
-    chest = v_add(p.pelvis, v_mul(low_dir, SPINE * 0.5))
-    neck = v_add(chest, v_mul(neck_dir, SPINE * 0.5))
+    S = SPINE * p.st                                           # le buste s'étire et s'écrase
+    chest = v_add(p.pelvis, v_mul(low_dir, S * 0.5))
+    neck = v_add(chest, v_mul(neck_dir, S * 0.5))
     head_theta = p.theta + (p.bend + p.head) * p.facing
-    head = v_add(neck, v_mul(up_vec(head_theta), NECK))
-    shoulder = v_add(chest, v_mul(neck_dir, SHOULDER - SPINE * 0.5))
+    head = v_add(neck, v_mul(up_vec(head_theta), NECK * p.hsq))
+    shoulder = v_add(chest, v_mul(neck_dir, SHOULDER * p.st - S * 0.5))
     legs, arms = [], []
     for i in range(2):
         if p.feet[i] is not None:
@@ -213,7 +220,7 @@ def build(p):
             tgt = free_limb(p.pelvis, p.theta, p.facing, 28 + 14 * i, 58)
         else:                                                  # pendent dans le sens de la gravité
             tgt = v_add(p.pelvis, v_mul(p.g, 70), v_mul(f, 6 if i else -6))
-        knee, foot = ik2(p.pelvis, tgt, THIGH, SHIN, f)
+        knee, foot = ik2(p.pelvis, tgt, THIGH, SHIN, f, stretch=1.25)   # jambes élastiques
         legs.append([p.pelvis, knee, foot])
     back_down = v_add(v_mul(f, -1), v_mul(u, -0.6))
     for i in range(2):
@@ -223,10 +230,10 @@ def build(p):
             tgt = free_limb(shoulder, p.theta, p.facing, 95 + 20 * i, 60)
         else:
             tgt = v_add(shoulder, v_mul(p.g, 76), v_mul(f, 24 if i else -20))
-        elbow, hand = ik2(shoulder, tgt, UPPER, FORE, back_down, stretch=1.15)
+        elbow, hand = ik2(shoulder, tgt, UPPER, FORE, back_down, stretch=1.3)   # bras élastiques
         arms.append([shoulder, elbow, hand])
     return {"pelvis": p.pelvis, "chest": chest, "neck": neck, "shoulder": shoulder, "head": head,
-            "head_theta": head_theta, "legs": legs, "arms": arms, "up": u, "fwd": f}
+            "head_theta": head_theta, "legs": legs, "arms": arms, "up": u, "fwd": f, "hsq": p.hsq}
 
 
 class Cape:
@@ -291,6 +298,19 @@ def smooth_path(path, pts):
         path.cubicTo(*c1, *c2, *p2)
 
 
+def head_shape(J, grow=0.0):
+    """Tête : un cercle, étiré ou écrasé le long du buste (l'aire reste la même)."""
+    k = J.get("hsq", 1.0)
+    rx, ry = (HEAD_R + grow) / math.sqrt(k), (HEAD_R + grow) * math.sqrt(k)
+    path = skia.Path()
+    path.addOval(skia.Rect(-rx, -ry, rx, ry))
+    m = skia.Matrix()
+    m.setRotate(J["head_theta"])
+    m.postTranslate(*J["head"])
+    path.transform(m)
+    return path
+
+
 def draw(c, p, t, cape=None, cape_color="violet", glow=1.0, alpha=255, screen_rot=0.0, J=None):
     """Dessine Éclat (coordonnées monde). J : articulations déjà calculées (lissées). Renvoie les articulations."""
     J = J or build(p)
@@ -324,12 +344,12 @@ def draw(c, p, t, cape=None, cape_color="violet", glow=1.0, alpha=255, screen_ro
         mid = v_lerp(J["pelvis"], J["neck"], 0.5)
         ctrl = v_add(v_sub(v_mul(J["chest"], 2.0), mid), v_mul(J["fwd"], p.bend * 0.25))
         path.quadTo(*ctrl, *J["neck"])
-    path.addCircle(*J["head"], HEAD_R)
+    path.addPath(head_shape(J))
     glow_all = skia.Path(path)
     glow_all.addPath(arms)
     c.drawPath(glow_all, _pen(CYAN, LINE_W * 1.8, 38 * glow * alpha / 255, glow=LINE_W * 0.6))   # halo discret : le trait reste net
     c.drawPath(path, _pen(CYAN, LINE_W, alpha))
-    c.drawCircle(*J["head"], HEAD_R - LINE_W / 2, _brush((0, 0, 0), alpha))
+    c.drawPath(head_shape(J, -LINE_W / 2), _brush((0, 0, 0), alpha))
     look = p.look
     if p.gaze is not None:                                     # les yeux visent le point regardé
         d = v_sub(p.gaze, J["head"])
