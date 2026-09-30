@@ -208,7 +208,7 @@ def walk(F, t, t0, t1, u0, u1, n, g, lean=10.0, **kw):
     speed = abs(ease_io(clamp01((t - t0) / (t1 - t0)) + 0.01) - s) / 0.01
     amt = min(1.0, speed * 1.4)
     # hauteur du bassin (bibliothèque) : contact, descente (le plus bas), passage, montée (le plus haut)
-    hk = (70.0, 65.0, 72.0, 75.5, 70.0)
+    hk = (68.5, 67.5, 69.0, 70.0, 68.5)                     # tête presque plate (mesuré sur la référence)
     x = v * 4
     i = min(int(x), 3)
     h_walk = hk[i] + (hk[i + 1] - hk[i]) * ease_io(x - i)

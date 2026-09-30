@@ -178,13 +178,30 @@ def clip(nom, titre, keys, duree=0):
     return c
 
 
-clip("repos", "Repos : le poids passe d'une jambe à l'autre", K(
+def _idle(du=0.0, lean=0.0, head=0.0, base=None):
+    b = base or REPOS
+    return replace(b, pel=(b.pel[0] + du, b.pel[1]), lean=b.lean + lean, head=b.head + head)
+
+
+# Repos mesuré sur la référence : immobile ~60 % du temps, mais par tenues COURTES (5 à 8 images) séparées de petits
+# ajustements rapides (2 images) — la tête, le poids, le buste. Jamais figé longtemps, jamais une dérive lente.
+clip("repos", "Repos : petits ajustements, tenues courtes", K(
     (0, REPOS, "io"),
-    (30, REPOS, "io"),
-    (42, POIDS_AVANT, "io"),
-    (78, POIDS_AVANT, "io"),
-    (90, REPOS, "io"),
-    (100, REPOS, "io")))
+    (7, REPOS, "io"),
+    (9, _idle(head=-4), "out"),
+    (16, _idle(head=-4), "io"),
+    (18, _idle(du=2, lean=1, head=-2), "out"),
+    (25, _idle(du=2, lean=1, head=-2), "io"),
+    (28, POIDS_AVANT, "out"),
+    (35, POIDS_AVANT, "io"),
+    (37, _idle(head=3, base=POIDS_AVANT), "out"),
+    (45, _idle(head=3, base=POIDS_AVANT), "io"),
+    (47, _idle(lean=-2, head=1, base=POIDS_AVANT), "out"),
+    (54, _idle(lean=-2, head=1, base=POIDS_AVANT), "io"),
+    (57, _idle(du=-1, head=-3), "out"),
+    (64, _idle(du=-1, head=-3), "io"),
+    (66, REPOS, "out"),
+    (74, REPOS, "io")))
 
 clip("reflechir", "Réfléchir : main au menton", K(
     (0, _repos(), "io"),
@@ -219,11 +236,11 @@ clip("ramasser", "Ramasser un objet", K(
     (4, replace(REPOS, head=18, expr="curieux"), "io"),       # il regarde l'objet
     (13, _crouch_grab, "io"),                                  # descend en pliant les genoux, pas le dos seul
     (19, _crouch_grab, "io"),                                  # tenue : il saisit
-    (23, replace(_crouch_grab, pel=(-4, 56), hands=(("e", 10, -40), ("s", 40, 16))), "io"),
-    (32, _up_hold, "out"),                                     # se relève d'un élan
+    (21, replace(_crouch_grab, pel=(-4, 52), hands=(("e", 10, -40), ("s", 40, 10))), "io"),
+    (31, _up_hold, "io"),                                      # se relève : accélère puis freine (~5 images, mesuré)
     (48, _up_hold, "io")))
 
-_kneel = P(pel=(-2.0, 50.0), lean=22.0, bend=18.0, head=-4.0, feet=((-50.0, 2.0), (34.0, 0.0)),
+_kneel = P(pel=(-2.0, 42.0), lean=24.0, bend=18.0, head=-4.0, feet=((-50.0, 2.0), (34.0, 0.0)),
            hands=(("e", 6, -46), ("e", 38, -42)), expr="decide")
 clip("genou", "Poser un genou à terre", K(
     (0, _repos(), "io"),
@@ -364,9 +381,9 @@ def cycle(kind, frame, F, u0=0.0, facing=1, g=(0.0, 1.0), expr="neutre"):
     montée (le plus haut), contact. Le pied d'appui ne glisse jamais ; le bassin monte et descend ;
     les bras balancent à l'opposé des jambes ; le buste penche dans le sens de la marche."""
     if kind == "marche":
-        n, stride, h_keys, lean, lift, arm = 12, 58.0, (70.0, 65.0, 72.0, 75.5), 6.0, 18.0, 34.0
+        n, stride, h_keys, lean, lift, arm = 8, 70.0, (68.8, 68.4, 68.9, 69.3), 6.0, 16.0, 30.0   # mesuré : pas 0,33 s, tête presque plate
     else:
-        n, stride, h_keys, lean, lift, arm = 7, 96.0, (62.0, 56.0, 71.0, 81.0), 26.0, 40.0, 60.0
+        n, stride, h_keys, lean, lift, arm = 7, 128.0, (60.0, 55.0, 68.0, 78.0), 28.0, 40.0, 60.0   # grandes foulées (mesuré)
     step = int(frame // n)
     ph = (frame % n) / n                                       # 0 contact · .25 descente · .5 passage · .75 montée
     base = u0 + step * stride
@@ -388,7 +405,8 @@ def cycle(kind, frame, F, u0=0.0, facing=1, g=(0.0, 1.0), expr="neutre"):
     if kind == "course" and 0.45 < ph:                          # phase de vol : les deux pieds quittent le sol
         k = (ph - 0.45) / 0.55
         feet[front] = (plant[front] - 10 * k, 30 * math.sin(math.pi * k))
-    p = Pose(F.w(pu, h), F.alpha + facing * (lean + 3 * math.sin(2 * math.pi * ph)), 10 + lean * 0.3, -4,
+    sway = 1.0 if kind == "marche" else 3.0                    # la tête reste presque à la même hauteur (mesuré)
+    p = Pose(F.w(pu, h), F.alpha + facing * (lean + sway * math.sin(2 * math.pi * ph)), 10 + lean * 0.3, -4,
              facing, [F.w(u, v) for u, v in feet], [None, None], expr=expr, g=g)
     if facing < 0:
         p.pelvis = F.w(2 * u0 - pu, h)

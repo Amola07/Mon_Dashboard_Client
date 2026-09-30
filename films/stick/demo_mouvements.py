@@ -26,7 +26,7 @@ def programme():
     prog = []
     for c in M.CLIPS:
         prog.append((c.titre, c.duree + PAUSE, lambda f, c=c: (M.pose_at(c, f, FLOOR), 0.0)))
-    prog.append(("Marche : contact, descente, passage, montée", 72,
+    prog.append(("Marche : contact, descente, passage, montée", 64,
                  lambda f: M.cycle("marche", f, FLOOR, expr="neutre")))
     prog.append(("Course : le corps penché, une phase de vol", 56,
                  lambda f: M.cycle("course", f, FLOOR, expr="decide")))
