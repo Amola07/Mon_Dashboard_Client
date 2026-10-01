@@ -172,9 +172,13 @@ def draw_orbe(c, t):
     c.restore()
 
 
+AVEC_ORBE = False                                           # l'Orbe bleue (désactivée pour cet épisode)
+
+
 def overlay(c, t):
-    """L'Orbe bleue + sous-titres (style de la chaîne) + compte à rebours de la dernière lumière."""
-    draw_orbe(c, t)
+    """Sous-titres (style de la chaîne) + compte à rebours de la dernière lumière (+ l'Orbe si activée)."""
+    if AVEC_ORBE:
+        draw_orbe(c, t)
     if T_VANISH <= t < T_LAST + 1.2:
         u = min(1.0, (t - T_VANISH) / (T_LAST - T_VANISH))
         s = int(math.ceil(500 * (1 - u)))
@@ -215,7 +219,9 @@ SR = E1.SR
 
 
 def soundtrack(path):
-    raw = subprocess.run(["ffmpeg", "-v", "error", "-i", VOIX, "-ac", "1", "-ar", str(SR), "-f", "s16le", "-"],
+    raw = subprocess.run(["ffmpeg", "-v", "error", "-i", VOIX, "-af",
+                          "highpass=f=70,acompressor=threshold=-26dB:ratio=3:attack=5:release=150:makeup=2,"
+                          "loudnorm=I=-15:TP=-2:LRA=7", "-ac", "1", "-ar", str(SR), "-f", "s16le", "-"],
                          capture_output=True).stdout
     voice = np.frombuffer(raw, np.int16).astype(float) / 32768
     n = int(DUR * SR)
@@ -253,10 +259,10 @@ def soundtrack(path):
     add(S("arrive") + 1.0, E1.sparkle(0.1))
     mus = E1.music(DUR)
     env = np.convolve(np.abs(mix), np.ones(int(0.15 * SR)) / int(0.15 * SR), mode="same")
-    duck = 1 - 0.55 * np.minimum(1, env / 0.05)
+    duck = 1 - 0.7 * np.minimum(1, env / 0.05)               # la musique s'efface davantage sous la voix
     tt = np.arange(n) / SR
     hole = np.clip(np.abs(tt - (S("eteint") + 0.6)) / 0.6, 0, 1)    # la musique se coupe quand le ciel s'éteint
-    out_ = mix + E1.soften(fx, 6) * 0.8 + mus * duck * hole
+    out_ = mix + E1.soften(fx, 6) * 0.6 + mus * 0.7 * duck * hole
     fade = np.ones(n)
     k = int(0.6 * SR)
     fade[-k:] = np.linspace(1, 0, k)
@@ -279,6 +285,7 @@ def render(out_path):
     burn(f"{tmp}/base.mp4", f"{tmp}/v.mp4")
     soundtrack(f"{tmp}/a.wav")
     subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", f"{tmp}/v.mp4", "-i", f"{tmp}/a.wav", "-c:v", "copy",
+                    "-af", "loudnorm=I=-14:TP=-1.5:LRA=9", "-ar", "48000",              # niveau visé par TikTok
                     "-c:a", "aac", "-b:a", "192k", "-shortest", "-movflags", "+faststart", out_path], check=True)
     have = [s[0] for s in SHOTS if os.path.exists(os.path.join(CLIPS, f"{s[0]}.mp4"))]
     print("plans présents :", " ".join(have))
