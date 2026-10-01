@@ -157,9 +157,11 @@ The wall of light sweeps across and past the Earth, leaving complete darkness be
 
 ## Plan 15 · 46,5 – 47,6 s (1,5 s) — « Et le ciel s'éteindrait. »
 
+*Le mieux : réutilise directement l'image du plan 02 et anime-la avec le prompt ci-dessous.*
+
 **Image**
 ```
-The same sunny blue wireframe city as in shot 02, red-orange sun in the sky. Glowing holographic wireframe style: luminous electric-blue line art on a deep navy background with subtle starry haze, one single bright red-orange accent, clean vector blueprint linework, soft glow, minimalist, cinematic, no text, no letters, vertical 9:16.
+A calm sunny city park drawn in blue blueprint lines, trees and benches, a bright red-orange wireframe sun shining high in the sky. Glowing holographic wireframe style: luminous electric-blue line art on a deep navy background with subtle starry haze, one single bright red-orange accent, clean vector blueprint linework, soft glow, minimalist, cinematic, no text, no letters, vertical 9:16.
 ```
 **Animation**
 ```
