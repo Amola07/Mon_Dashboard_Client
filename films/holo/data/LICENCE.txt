@@ -1,0 +1,4 @@
+humain.npz : maillage de base de MakeHuman (makehuman/data/3dobjs/base.obj, groupe « body » et yeux),
+publié sous licence CC0 1.0 Universal (domaine public) en septembre 2020 par Data Collection AB, Joel Palmius
+et Jonas Hauquier. Source : https://github.com/makehumancommunity/makehuman
+Converti en mètres, pieds posés au sol.
