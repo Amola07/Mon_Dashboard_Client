@@ -35,8 +35,8 @@ SHOTS = [
     ("07", 16.60, 20.30, 0.00, 1.0),
     ("08", 20.30, 25.20, 0.00, 1.6),   # le photon arrive sur Terre en fin de phrase
     ("09", 25.20, 31.20, 0.00, 1.0),
-    ("10", 31.20, 35.20, 5.90, 1.0),   # disparition sur « maintenant »
-    ("11", 35.20, 39.10, 0.00, 1.0),
+    ("10", 31.20, 34.60, 6.60, 1.0),   # flash de disparition (9,6 s du clip) sur « maintenant »
+    ("11", 34.60, 39.10, 0.00, 1.0),
     ("12", 39.10, 41.15, 0.00, 1.0),
     ("13", 41.15, 43.20, 0.80, 1.0),
     ("14", 43.20, 46.20, 2.20, 1.0),   # le mur de lumière passe la Terre sur « la dernière lumière arriverait »
@@ -49,7 +49,7 @@ SHOTS = [
     ("21", 75.20, 81.15, 0.00, 1.0),
     ("22", 81.15, DUR, 1.50, 1.0),     # gerbe de lumière sur « encore en train d'arriver », le Soleil se reforme
 ]
-T_VANISH = S("maint") + 0.25                                 # le Soleil disparaît (plan 10)
+T_VANISH = 34.2                                              # le Soleil disparaît (flash du plan 10)
 T_LAST = S("dern") + 0.2
 
 
