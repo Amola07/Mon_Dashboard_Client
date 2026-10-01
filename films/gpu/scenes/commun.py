@@ -24,6 +24,8 @@ def args(extra=None):
     p.add_argument("--engine", default="CYCLES", choices=["CYCLES", "EEVEE"])
     p.add_argument("--seed", type=int, default=1)
     p.add_argument("--still", type=int, default=0, help="n'image unique à rendre (0 = toute l'animation)")
+    p.add_argument("--debruitage", default="oidn", choices=["oidn", "optix", "aucun"],
+                   help="oidn : OpenImageDenoise (marche partout) ; optix : plus rapide mais dépend du pilote")
     for a, kw in (extra or {}).items():
         p.add_argument(a, **kw)
     return p.parse_args(argv)
@@ -67,13 +69,18 @@ def setup_render(sc, a, motion_blur=False):
                         for d in prefs.devices:
                             d.use = d.type == kind
                         sc.cycles.device = "GPU"
-                        sc.cycles.denoiser = "OPTIX" if kind == "OPTIX" else "OPENIMAGEDENOISE"
                         print(f"[rendu] GPU {kind} : {[d.name for d in gpus]}")
                         break
                 except TypeError:
                     continue
         except Exception as e:                             # pas de GPU : on rend sur le processeur
             print("[rendu] CPU", e)
+        # débruitage : OptiX échoue sur certains pilotes (ex. Kaggle) → OpenImageDenoise par défaut, sur le CPU
+        sc.cycles.use_denoising = a.debruitage != "aucun"
+        sc.cycles.denoiser = "OPTIX" if a.debruitage == "optix" else "OPENIMAGEDENOISE"
+        if hasattr(sc.cycles, "denoising_use_gpu"):
+            sc.cycles.denoising_use_gpu = False
+        print(f"[rendu] débruitage : {a.debruitage}")
     sc.render.use_motion_blur = motion_blur
     sc.render.motion_blur_shutter = 0.5
     sc.view_settings.view_transform = "AgX"

@@ -94,10 +94,16 @@ for i, (scene, secs, opts) in enumerate(PLANS, 1):
            f"--samples {samples} --res {res} {opts}")
     print(f"\n▶ {name} : {frames} images, {samples} échantillons")
     t0 = time.time()
-    p = subprocess.run(cmd, shell=True, capture_output=True, text=True)
-    log = (p.stdout + p.stderr).splitlines()
-    print("\n".join(l for l in log if "[rendu]" in l or "[calibrage]" in l or "Error" in l or "Traceback" in l))
-    n = len(glob.glob(f"{out_dir}/f_*.png"))
+    for essai, extra in enumerate(("", " --debruitage aucun")):   # plan B : sans débruitage si ça échoue
+        p = subprocess.run(cmd + extra, shell=True, capture_output=True, text=True)
+        log = (p.stdout + p.stderr).splitlines()
+        print("\n".join(l for l in log if "[rendu]" in l or "[calibrage]" in l or "Error" in l))
+        n = len(glob.glob(f"{out_dir}/f_*.png"))
+        if n >= frames:
+            break
+        print("   ⚠ échec, dernières lignes :\n   " + "\n   ".join(log[-6:]))
+        if essai == 0:
+            print("   → nouvel essai sans débruitage")
     print(f"   {n} images en {time.time() - t0:.0f} s")
     if n:
         subprocess.run(f"ffmpeg -y -v error -framerate 30 -i {out_dir}/f_%04d.png -c:v libx264 -pix_fmt yuv420p "
