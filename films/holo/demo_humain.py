@@ -25,8 +25,10 @@ def frame(c, t):
     ty = 0.9 + 0.35 * ease((t - 2.6) / 3.0)
     cam = Camera((dist * math.sin(ang), ty + 0.2, dist * math.cos(ang)), (0, ty, 0), fov=40)
     fr = Frame(cam)
-    grid_floor(fr, 0, size=3, step=0.3, a=0.3, fade=(2, 7))
-    HU.human(fr, (0, 0, 0), 0.0, 1.0, 1.0, beat_t=t, reveal=ease(t / 2.4) if t < 2.4 else 1.0)
+    grid_floor(fr, 0, size=3, step=0.3, a=0.25, fade=(2, 7))
+    HU.pedestal(fr, t)
+    HU.motes(fr, t)
+    HU.human(fr, (0, 0, 0), 0.0, 1.0, 1.0, beat_t=t, reveal=ease(t / 2.4) if t < 2.4 else 1.0, t=t)
     fr.compose(c, t, caption="Avec une dimension de plus, on pourrait voir ton cœur… sans jamais toucher ta peau.",
                cap_a=ease((t - 2.6) / 0.5))
     if t < 0.25:
