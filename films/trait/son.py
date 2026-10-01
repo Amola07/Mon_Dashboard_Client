@@ -148,6 +148,28 @@ def shimmer(dur=2.0, f=220, amp=0.05, seed=2):
     return y * env * amp
 
 
+def shepard(dur, rate=0.25, amp=0.1, f_low=40.0, octaves=7, center=220.0, width=1.1, accel=0.0):
+    """Son de Shepard : des octaves qui montent sans fin (illusion de chute / de vertige infini).
+    rate : octaves par seconde (négatif = descend) ; accel : la montée s'accélère avec le temps."""
+    tt = _t(dur)
+    pos = rate * tt + 0.5 * accel * tt * tt              # position en octaves
+    y = np.zeros_like(tt)
+    for k in range(octaves):
+        o = (k + pos) % octaves
+        f = f_low * 2 ** o
+        w = np.exp(-((np.log2(f / center)) / width) ** 2)  # cloche sur l'échelle des octaves
+        ph = 2 * np.pi * np.cumsum(f) / SR
+        y += w * (np.sin(ph) + 0.2 * np.sin(2 * ph))
+    env = np.minimum(1, tt / 0.8)
+    return lowpass(y, 1800) * env * amp
+
+
+def glide_tone(freq_curve, amp_curve, vib=0.0):
+    """Note dont la hauteur et le volume suivent des courbes échantillonnées (une valeur par échantillon)."""
+    ph = 2 * np.pi * np.cumsum(freq_curve) / SR
+    return (np.sin(ph) + 0.35 * np.sin(2 * ph) + 0.12 * np.sin(3 * ph)) * amp_curve
+
+
 # ------------------------------------------------------------------------------------------------ mixage
 class Mix:
     def __init__(self, dur):
