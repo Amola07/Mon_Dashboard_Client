@@ -2,3 +2,6 @@ humain.npz : maillage de base de MakeHuman (makehuman/data/3dobjs/base.obj, grou
 publié sous licence CC0 1.0 Universal (domaine public) en septembre 2020 par Data Collection AB, Joel Palmius
 et Jonas Hauquier. Source : https://github.com/makehumancommunity/makehuman
 Converti en mètres, pieds posés au sol.
+
+rig.npz : squelette « default » et poids de peau de MakeHuman (data/rigs/default.mhskel et default_weights.mhw),
+licence CC0 1.0 (Data Collection AB, Joel Palmius, Jonas Hauquier), simplifiés en 21 os.

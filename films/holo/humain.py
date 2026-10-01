@@ -81,8 +81,91 @@ def _slices(axis, step, lo, hi, V=None, T=None, N=None):
     return np.concatenate(segs), np.concatenate(nrm)
 
 
-SEG_H, NRM_H = _slices(1, 0.02, 0.01, 1.71)
-SEG_V, NRM_V = _slices(0, 0.04, -0.5, 0.5)
+def _slice_refs(axis, step, lo, hi):
+    """Comme _slices, mais chaque extrémité est mémorisée comme (sommet i, sommet j, u) : les tranches restent
+    collées au corps quand il se déforme (marche)."""
+    P = V0[TRI]
+    c = P[:, :, axis]
+    out = []
+    for k in np.arange(lo, hi, step):
+        s_ = c - k
+        sign = s_ > 0
+        cross = np.where(sign.any(1) & ~sign.all(1))[0]
+        if not len(cross):
+            continue
+        T, sk = TRI[cross], s_[cross]
+        e = []
+        for i, j in ((0, 1), (1, 2), (2, 0)):
+            m = (sk[:, i] > 0) != (sk[:, j] > 0)
+            u = sk[:, i] / np.where(m, sk[:, i] - sk[:, j], 1.0)
+            e.append((T[:, i], T[:, j], u, m))
+        ma = e[0][3]
+        mb = e[0][3] & e[1][3]
+        a_ = [np.where(ma, e[0][k_], e[1][k_]) for k_ in range(3)]
+        b_ = [np.where(mb, e[1][k_], e[2][k_]) for k_ in range(3)]
+        out.append(np.stack([a_[0], a_[1], b_[0], b_[1]], 1).astype(np.int64))
+        out[-1] = (out[-1], np.stack([a_[2], b_[2]], 1), cross)
+    idx = np.concatenate([o[0] for o in out])
+    uu = np.concatenate([o[1] for o in out])
+    tri = np.concatenate([o[2] for o in out])
+    return idx, uu, tri
+
+
+def _segs_from(V, ref):
+    idx, uu, _ = ref
+    a = V[idx[:, 0]] + (V[idx[:, 1]] - V[idx[:, 0]]) * uu[:, :1]
+    b = V[idx[:, 2]] + (V[idx[:, 3]] - V[idx[:, 2]]) * uu[:, 1:]
+    return np.stack([a, b], 1)
+
+
+REF_H = _slice_refs(1, 0.02, 0.01, 1.71)
+REF_V = _slice_refs(0, 0.04, -0.5, 0.5)
+SEG_H, NRM_H = _segs_from(V0, REF_H), TN[REF_H[2]]
+SEG_V, NRM_V = _segs_from(V0, REF_V), TN[REF_V[2]]
+
+# ------------------------------------------------------------------------------------------------ squelette (marche)
+_R = np.load(os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "rig.npz"))
+BONES = [str(n) for n in _R["names"]]
+PARENT = _R["parent"]
+PIVOT = _R["piv"]
+_nb = _D["v"].shape[0]
+WEIGHTS = np.zeros((len(V0), len(BONES)))
+WEIGHTS[:_nb] = _R["w"]
+WEIGHTS[_nb:, BONES.index("neck01")] = 1.0                 # la tête lisse suit le cou
+
+
+def rot(axis, deg):
+    a = math.radians(deg)
+    c, s_ = math.cos(a), math.sin(a)
+    if axis == "x":
+        return np.array([[1, 0, 0], [0, c, -s_], [0, s_, c]])
+    if axis == "y":
+        return np.array([[c, 0, s_], [0, 1, 0], [-s_, 0, c]])
+    return np.array([[c, -s_, 0], [s_, c, 0], [0, 0, 1]])
+
+
+def skin(rots, root_t=(0, 0, 0)):
+    """rots : {os: matrice 3×3 (axes du repos)}. Renvoie (sommets déformés, transformations 4×4 par os)."""
+    G = []
+    for b, name in enumerate(BONES):
+        Rb = rots.get(name, np.eye(3))
+        L = np.eye(4)
+        L[:3, :3] = Rb
+        L[:3, 3] = PIVOT[b] - Rb @ PIVOT[b]
+        if PARENT[b] < 0:
+            T = np.eye(4)
+            T[:3, 3] = root_t
+            G.append(T @ L)
+        else:
+            G.append(G[PARENT[b]] @ L)
+    G = np.array(G)
+    Vd = np.zeros_like(V0)
+    for b in range(len(BONES)):
+        w = WEIGHTS[:, b]
+        m = w > 1e-4
+        if m.any():
+            Vd[m] += w[m, None] * (V0[m] @ G[b, :3, :3].T + G[b, :3, 3])
+    return Vd, G
 
 _E = {}
 for qi, q in enumerate(Q):
@@ -200,16 +283,32 @@ def motes(fr, t, pos=(0, 0, 0), scale=1.0, a=1.0):
             c.drawCircle(x, y, 1.6, skia.Paint(AntiAlias=True, Color=skia.Color(190, 230, 255, int(170 * a * k))))
 
 
-def human(fr, pos=(0, 0, 0), yaw=0.0, scale=1.0, a=1.0, heart=True, beat_t=0.0, reveal=1.0, t=0.0, scan=True):
+def human(fr, pos=(0, 0, 0), yaw=0.0, scale=1.0, a=1.0, heart=True, beat_t=0.0, reveal=1.0, t=0.0, scan=True,
+          pose=None):
     """Dessine l'humain. reveal (0→1) : apparition de bas en haut, comme un scanner."""
     if a <= 0.004:
         return
     top = 1.75 * reveal
     cl = _cam_local(fr, pos, yaw, scale)
+    if pose is None:
+        V, G = V0, None
+        tc, segsets = TC, ((SEG_H, NRM_H, 0.9, 1.3), (SEG_V, NRM_V, 0.5, 1.0))
+        qn, qc = QN, QC
+    else:
+        V, G = pose
+        tp = V[TRI]
+        tn = np.cross(tp[:, 1] - tp[:, 0], tp[:, 2] - tp[:, 0])
+        tn /= np.linalg.norm(tn, axis=1, keepdims=True) + 1e-12
+        tc = tp.mean(1)
+        segsets = ((_segs_from(V, REF_H), tn[REF_H[2]], 0.9, 1.3), (_segs_from(V, REF_V), tn[REF_V[2]], 0.5, 1.0))
+        qv = V[Q]
+        qn = np.cross(qv[:, 2] - qv[:, 0], qv[:, 3] - qv[:, 1])
+        qn /= np.linalg.norm(qn, axis=1, keepdims=True) + 1e-12
+        qc = qv.mean(1)
     cc = fr.layers["c"].getCanvas()
     # voile lumineux : triangles projetés, très transparents
-    tri_ok = TC[:, 1] <= top
-    pts, z = fr.cam.project(_xf(V0[TRI[tri_ok]].reshape(-1, 3), pos, yaw, scale))
+    tri_ok = tc[:, 1] <= top
+    pts, z = fr.cam.project(_xf(V[TRI[tri_ok]].reshape(-1, 3), pos, yaw, scale))
     if len(z) and (z > 0.05).all():
         verts = skia.Vertices.MakeCopy(skia.Vertices.kTriangles_VertexMode,
                                        [skia.Point(float(x), float(y)) for x, y in pts])
@@ -217,7 +316,7 @@ def human(fr, pos=(0, 0, 0), yaw=0.0, scale=1.0, a=1.0, heart=True, beat_t=0.0, 
                                           BlendMode=skia.BlendMode.kPlus))
     # tranches : avant vives, arrière estompées
     yb = (t * 0.32) % 2.2 - 0.2                            # bande de balayage
-    for segs, nrm, base_a, w in ((SEG_H, NRM_H, 0.9, 1.3), (SEG_V, NRM_V, 0.5, 1.0)):
+    for segs, nrm, base_a, w in segsets:
         keep = segs[:, :, 1].max(1) <= top
         s, n = segs[keep], nrm[keep]
         mid = s.mean(1)
@@ -229,9 +328,9 @@ def human(fr, pos=(0, 0, 0), yaw=0.0, scale=1.0, a=1.0, heart=True, beat_t=0.0, 
             if band.any():
                 cc.drawPath(_segs_path(fr, _xf(s[band & front], pos, yaw, scale)), _paint(CYAN_HI, a * 0.55, w + 0.3))
     # silhouette
-    facing = ((cl - QC) * QN).sum(1) > 0
+    facing = ((cl - qc) * qn).sum(1) > 0
     sil = facing[EFACES[:, 0]] != facing[EFACES[:, 1]]
-    es = V0[EDGES[sil]]
+    es = V[EDGES[sil]]
     es = es[es[:, :, 1].max(1) <= top]
     cc.drawPath(_segs_path(fr, _xf(es, pos, yaw, scale)), _paint(CYAN_HI, a, 2.1))
     if reveal < 1.0:                                       # anneau du scanner pendant l'apparition
@@ -240,7 +339,12 @@ def human(fr, pos=(0, 0, 0), yaw=0.0, scale=1.0, a=1.0, heart=True, beat_t=0.0, 
     if heart and reveal > 0.85:
         ph = (beat_t * 1.2) % 1.0                          # « boum-boum »
         beat = 1 + 0.1 * math.exp(-((ph - 0.05) / 0.04) ** 2) + 0.06 * math.exp(-((ph - 0.22) / 0.04) ** 2)
-        hp = _xf(HEART_POS[None], pos, yaw, scale)[0]
+        if G is not None:                                  # le cœur suit la poitrine
+            Gc = G[BONES.index("spine02")]
+            hxf = lambda q_: q_ @ Gc[:3, :3].T + Gc[:3, 3]
+        else:
+            hxf = lambda q_: q_
+        hp = _xf(hxf(HEART_POS[None]), pos, yaw, scale)[0]
         sc_, z_ = fr.cam.project(hp[None])
         if z_[0] > 0.05:                                   # lueur rouge sur la poitrine
             rr = fr.cam.focal / z_[0] * 0.16 * scale
@@ -249,5 +353,5 @@ def human(fr, pos=(0, 0, 0), yaw=0.0, scale=1.0, a=1.0, heart=True, beat_t=0.0, 
                 MaskFilter=skia.MaskFilter.MakeBlur(skia.kNormal_BlurStyle, rr * 0.5)))
         rc = fr.layers["r"].getCanvas()
         for segs, al, w in ((HEART_SEGS, 1.0, 1.6), (HEART_SEGS_V, 0.45, 1.1)):
-            pts3 = HEART_POS + segs * beat
+            pts3 = hxf((HEART_POS + segs * beat).reshape(-1, 3)).reshape(-1, 2, 3)
             rc.drawPath(_segs_path(fr, _xf(pts3, pos, yaw, scale)), _paint(RED, a * al, w))
