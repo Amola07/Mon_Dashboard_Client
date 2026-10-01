@@ -1,0 +1,3 @@
+Bonhomme bâton : « 2D StickMan Rig v2 », Blend Swap n° 79370 (https://www.blendswap.com/blends/view/79370),
+licence Creative Commons Attribution 3.0 (CC BY 3.0). L'auteur doit être crédité dans chaque vidéo qui l'utilise
+(par exemple dans la description TikTok). stickman_rig.npz contient la géométrie extraite de ce fichier.
