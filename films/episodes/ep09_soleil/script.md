@@ -1,34 +1,34 @@
-# Épisode 9 — « Si le Soleil disparaissait maintenant, il te resterait 8 minutes »
+# Épisode 9 — « Le Soleil pourrait disparaître à cet instant… et tu ne remarquerais RIEN »
 
 Durée visée : 40 à 45 s. Principe : le spectateur vit l'expérience à la 2e personne, chaque phrase est pire que la
 précédente (escalade), et la fin retourne la situation (la vie continue… sans nous). Un événement visuel dès la
 première image, une surprise par seconde pendant les 5 premières secondes, une fin qui boucle.
 
-## Texte à générer (ElevenLabs, balises d'émotion)
+## Texte à générer (ElevenLabs, balises d'émotion) — version retenue (texte de l'auteur, resserré)
 
 ```
-[urgent] Si le Soleil disparaissait maintenant, il te resterait huit minutes. [short pause] [sarcastic] Et tu les passerais sûrement à scroller.
+[mysterious] Le Soleil pourrait disparaître à cet instant… [short pause] et pendant plus de huit minutes, tu ne remarquerais absolument RIEN.
 
-[whispers] Pas d'alerte. Pas de bruit. [short pause] Le ciel resterait bleu.
+[calm] Tu continuerais à voir sa lumière. Tu continuerais à vivre normalement. [whispers] Tu pourrais même être en train de regarder le ciel… sans savoir que le Soleil n'existe déjà plus.
 
-[tense] Puis, d'un coup… [dramatic pause] la nuit. [short pause] Et pas n'importe laquelle : la Lune s'éteindrait aussi. Elle ne brillait que grâce à lui.
+[intrigued] Et la raison va complètement changer ta façon de regarder le ciel.
 
-[serious] La Terre lâcherait son orbite, et filerait tout droit dans le noir. À trente kilomètres par seconde.
+[serious] La lumière du Soleil met environ huit minutes et vingt secondes pour atteindre la Terre. [short pause] Quand tu le regardes, tu ne le vois pas tel qu'il est maintenant… mais tel qu'il était il y a plus de huit minutes.
 
-[calm] Le premier jour… tu ne sentirais presque rien. Le sol garde la chaleur. [short pause] [ominous] Une semaine plus tard : moins vingt degrés. Partout. [short pause] Un an plus tard : moins soixante-dix.
+[tense] Alors imaginons qu'il disparaisse… exactement maintenant.
 
-[amazed] Les océans gèleraient… mais seulement en surface. [slowly] Dessous, sous des centaines de mètres de glace, l'eau resterait liquide, chauffée par le cœur de la Terre.
+[calm] Ici, rien ne changerait. Le ciel resterait lumineux. Les oiseaux continueraient de voler. Les gens continueraient leur journée.
 
-[mysterious] Et tout au fond, près des sources volcaniques, des créatures qui n'ont jamais vu le Soleil… [whispers] ne remarqueraient rien.
+[tense] Puis, soudain… [dramatic pause] la dernière lumière arriverait. [whispers] Et le ciel s'éteindrait.
 
-[thoughtful] La vie continuerait. [short pause] Juste… pas la nôtre.
+[intrigued] Mais ce n'est pas tout. [short pause] Sa gravité, elle aussi, voyage à la vitesse de la lumière. Pendant ces huit minutes, la Terre continuerait de tourner… autour d'un Soleil qui n'existe plus.
 
-[whispers] Il te reste huit minutes.
+[amazed] Et c'est ça qui est fascinant : quand tu regardes le ciel, tu regardes le passé. [short pause] Le Soleil a huit minutes de retard. La Lune, à peu près une seconde. [slowly] Et certaines étoiles que tu vois sont peut-être déjà mortes… leur dernière lumière n'a simplement pas fini son voyage.
+
+[thoughtful] Alors la prochaine fois que tu lèveras les yeux, souviens-toi : [short pause] le ciel n'est pas une fenêtre sur le présent. [whispers] C'est une fenêtre sur le passé… qui est encore en train d'arriver.
 ```
 
-Conseil voix : « Si le Soleil disparaissait maintenant, il te resterait huit minutes » démarre à 0:00, sans
-silence avant ; « Et tu les passerais sûrement à scroller » avec un sourire dans la voix (le spectateur est
-justement en train de scroller : c'est le crochet).
+Durée estimée : 70 à 80 s. La première phrase démarre à 0:00, sans silence avant.
 
 ## Ce que fait l'Orbe (animation, rien à lire)
 
