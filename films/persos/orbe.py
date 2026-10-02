@@ -43,6 +43,7 @@ class Etat:
     cible: tuple = None                  # point montré par le rayon de lumière (coordonnées locales)
     humeur_mix: float = 1.0              # transition de couleur vers la nouvelle humeur (0..1)
     humeur_avant: str = "calme"
+    levres: tuple = None                 # forme de bouche synchronisée sur la voix (films.persos.levres)
 
 
 def rgb(c, a=255):
@@ -161,6 +162,22 @@ def bouche(c, t, e):
         c.drawPath(p, P(white, stroke=7))
     elif ex == "surpris":
         c.drawCircle(0, 56, 9, P(white, stroke=6))
+    elif ex == "parle" and e.levres is not None:
+        w, h, dents, langue = e.levres
+        y0 = 62
+        if h < 6:                                         # lèvres fermées : un trait
+            c.drawRoundRect(skia.Rect(-w / 2, y0 - 2.5, w / 2, y0 + 2.5), 3, 3, P(white))
+        else:
+            rr = skia.RRect.MakeRectXY(skia.Rect(-w / 2, y0 - h / 2, w / 2, y0 + h / 2), min(w, h) / 2, min(w, h) / 2)
+            c.drawRRect(rr, P((40, 12, 70)))                 # intérieur de la bouche
+            c.save()
+            c.clipRRect(rr, doAntiAlias=True)
+            if dents > 0.3:
+                c.drawRect(skia.Rect(-w / 2, y0 - h / 2, w / 2, y0 - h / 2 + 6 * dents), P(white, 230))
+            if langue > 0.3:
+                c.drawOval(skia.Rect(-w * 0.32, y0 + h * 0.05, w * 0.32, y0 + h * 0.75), P((255, 120, 160), int(220 * langue)))
+            c.restore()
+            c.drawRRect(rr, P(white, stroke=5.5))
     elif ex == "parle":
         o = 5 + 14 * abs(math.sin(t * 13)) * (0.6 + 0.4 * math.sin(t * 3.1))
         c.drawRoundRect(skia.Rect(-12, 50 - o / 2, 12, 50 + o / 2), 8, 8, P(white))
@@ -201,7 +218,7 @@ def draw_orbe(c, t, e, parle_pulse=True):
     # respiration / pulsation de la parole / écrasement au changement d'émotion
     pulse = 0.015 * math.sin(t * 2.4)
     if e.expr == "parle" and parle_pulse:
-        pulse += 0.025 * abs(math.sin(t * 13))
+        pulse += (0.0006 * e.levres[1]) if e.levres is not None else 0.025 * abs(math.sin(t * 13))
     sq = 0.08 * math.exp(-e.age * 8) * math.cos(e.age * 28)
     if e.expr == "surpris":
         sq -= 0.08 * math.exp(-e.age * 5)
