@@ -1,46 +1,56 @@
-# Épisode 13 — « Tout ce qu'on t'a appris en maths à l'école est faux »
+# Épisode 13 — « En CP, ta maîtresse t'a menti »
 
-Format : cinq « mensonges » numérotés, chacun ouvert par une affirmation que tout le monde croit, puis renversé
-en quelques phrases. Pas d'explication de cours : juste assez pour que ce soit vrai et vérifiable. Fin ouverte, sans
-morale. ≈ 390 mots → ≈ 2 min 50 à 135 mots/min.
+Angle créateur : pas une liste de faits, mais un **souvenir que tout le monde a** (la classe, la maîtresse, le tableau)
+qui devient une **enquête**. Chaque année d'école cache un mensonge, corrigé l'année suivante → le spectateur
+comprend le schéma et veut savoir **jusqu'où ça va**. Escalade jusqu'à 1 + 1 = 2 (300 pages pour le prouver) puis Gödel :
+même les maths ne peuvent pas tout prouver. Boucles ouvertes à chaque transition, appât à commentaires au milieu,
+fin ouverte. ≈ 400 mots → ≈ 2 min 55.
 
 ## Texte à générer (ElevenLabs)
 
 ```
-Tout ce qu'on t'a appris en maths à l'école est faux. Pas un peu faux. Faux.
+En CP, ta maîtresse t'a dit qu'on ne pouvait pas faire trois moins cinq. Elle t'a menti. Et ce n'était que le premier mensonge.
 
-Tes professeurs le savaient. Mais ils t'ont menti. Pour ton bien.
+Parce qu'en cinquième, on t'a présenté les nombres négatifs. Trois moins cinq, ça fait moins deux. Ça avait toujours existé. On ne te l'avait juste pas dit.
 
-Premier mensonge. Zéro virgule neuf, neuf, neuf… à l'infini, c'est plus petit que un. Tout le monde le croit. C'est faux. Divise un par trois : zéro virgule trois, trois, trois… Multiplie par trois : zéro virgule neuf, neuf, neuf… Et un tiers fois trois, ça fait un. Ce ne sont pas deux nombres très proches. C'est le même nombre. Écrit de deux façons.
+En CE2, on t'a dit que sept divisé par deux, c'était impossible. Trois, et il reste un. Deux ans plus tard : trois virgule cinq. Encore un mensonge.
 
-Deuxième mensonge. La somme des angles d'un triangle fait toujours cent quatre-vingts degrés. Pars du pôle Nord. Descends tout droit jusqu'à l'équateur. Tourne à angle droit. Avance d'un quart du tour de la Terre. Tourne encore à angle droit, et remonte au pôle. Tu viens de tracer un triangle. Trois angles droits. Deux cent soixante-dix degrés.
+Tu vois le schéma ? Chaque année, l'école t'interdit quelque chose. Et l'année d'après, elle le rend possible.
 
-Troisième mensonge. Deux droites parallèles ne se croisent jamais. Regarde un globe. Deux méridiens partent de l'équateur, parfaitement parallèles. Ils se croisent au pôle. Tous.
+Alors regarde bien ce qu'on t'a présenté comme absolument vrai.
 
-Quatrième mensonge. La racine carrée d'un nombre négatif n'existe pas. Pourtant, chaque fois que ton téléphone capte un signal, il calcule avec. Les ingénieurs l'appellent i. Sans elle, pas de Wi-Fi. Pas d'électricité dans ta maison. Pas d'avion.
+Un triangle, ses angles font toujours cent quatre-vingts degrés. Sauf sur la Terre. Pars du pôle Nord, descends jusqu'à l'équateur, tourne, longe-le, tourne encore, remonte. Trois angles droits. Deux cent soixante-dix degrés. Et pourtant, c'est un vrai triangle.
 
-Cinquième mensonge. Le plus troublant. L'infini, c'est l'infini. Il n'y a rien de plus grand. En 1874, un mathématicien allemand, Georg Cantor, a prouvé le contraire. Il existe un infini plus grand que celui des nombres entiers. Puis un autre, encore plus grand. Et ainsi de suite. Sans fin. Des infinis d'infinis.
+La racine carrée d'un nombre négatif n'existe pas. Elle existe. Elle s'appelle i. Et en ce moment même, ton téléphone l'utilise des millions de fois par seconde pour capter ce que tu regardes.
 
-Ses collègues l'ont traité de fou. Il a fini ses jours dans une clinique psychiatrique.
+Et l'infini ? L'infini, c'est l'infini. Faux. En 1874, Georg Cantor prouve qu'il existe des infinis plus grands que d'autres. Une infinité d'infinis. Ses collègues le traitent de charlatan. Il finit sa vie dans une clinique psychiatrique.
 
-Aujourd'hui, ses travaux sont enseignés dans toutes les universités du monde.
+D'ailleurs, toi, tu crois que zéro virgule neuf, neuf, neuf à l'infini, c'est égal à un ? Écris oui ou non. On en reparle.
 
-Alors pourquoi on ne t'a rien dit ?
+Bon. Mais il reste au moins une chose sûre. Un plus un égale deux.
 
-Parce qu'à l'école, on t'apprend les règles du jeu. Pas le jeu.
+En 1910, deux mathématiciens ont voulu le prouver. Vraiment le prouver. À partir de rien. Il leur a fallu plus de trois cents pages.
 
-Et le jeu… est beaucoup plus étrange que ça.
+Et vingt ans plus tard, un jeune logicien autrichien, Kurt Gödel, a démontré quelque chose de bien pire.
+
+Il existera toujours des vérités… que personne ne pourra jamais prouver.
+
+Pas parce qu'on n'est pas assez intelligents.
+
+Parce que c'est impossible.
 ```
 
 ## Vérification des faits
-- 0,999… = 1 : égalité exacte dans les nombres réels (démonstration par 1/3 × 3 ; aussi série géométrique).
-- Triangle sphérique pôle – équateur – équateur : trois angles de 90°, somme 270° (géométrie sphérique, excès sphérique).
-- Méridiens : perpendiculaires à l'équateur, donc localement parallèles entre eux, et ils se croisent aux pôles. Sur la
-  sphère, les « droites » (grands cercles) se coupent toujours : il n'existe pas de parallèles.
-- Nombres complexes (i² = −1) : utilisés en traitement du signal (radio, Wi-Fi, téléphonie), en électricité alternative
-  (impédance), en aérodynamique (transformation de Joukowski, écoulements).
-- Cantor : diagonale et non-dénombrabilité des réels publiés en 1874 puis 1891 ; théorème de Cantor (infinis toujours
-  plus grands). Hostilité de Kronecker notamment ; dépressions et hospitalisations répétées ; mort en 1918 dans la
-  clinique psychiatrique de Halle (Halle Nervenklinik).
-- « Ils t'ont menti pour ton bien » : formule d'accroche ; à l'école on simplifie (géométrie euclidienne, réels), ce qui
-  n'est pas faux dans son cadre — le texte le dit à la fin (« les règles du jeu »).
+- CP : la soustraction « plus grand moins plus petit » ; les entiers relatifs arrivent au collège (5e).
+- Division euclidienne avec reste (cycle 3) puis quotients décimaux (CM1-CM2, 6e).
+- Triangle sphérique pôle – équateur – équateur : 3 × 90° = 270° (géométrie sphérique).
+- Nombres complexes : au lycée (option maths expertes) ; utilisés en traitement du signal (modulation, Wi-Fi, 4G/5G :
+  transformée de Fourier, constellations IQ), calculés en continu par le modem du téléphone.
+- Cantor : 1874 (non-dénombrabilité des réels), 1891 (argument diagonal) ; hostilité de Kronecker (« corrupteur de la
+  jeunesse », « charlatan » souvent cités) ; mort en 1918 à la clinique psychiatrique de Halle.
+- 0,999… = 1 : vrai (appât à commentaires, la réponse est donnée dans l'épisode suivant ou en réponse aux commentaires).
+- Russell et Whitehead, Principia Mathematica, vol. I (1910) : la proposition ✱54.43 (page 379 de la 1re éd.) prépare
+  1 + 1 = 2 ; « plus de trois cents pages » est exact.
+- Gödel, 1931, premier théorème d'incomplétude : dans tout système cohérent assez riche pour l'arithmétique, il existe
+  des énoncés vrais non démontrables dans ce système. « Jeune » : il a 25 ans. « Autrichien » : né en Autriche-Hongrie
+  (Brno), à Vienne à l'époque. « Vingt ans plus tard » : 1910 → 1931.
