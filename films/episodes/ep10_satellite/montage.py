@@ -47,14 +47,39 @@ SEG = [("Des milliers de satellites tournent au-dessus de vous.", 0.00, 2.32), (
        ("Alors souvenez-vous.", 68.48, 69.35), ("Il y a, au-dessus de vous…", 69.76, 71.13),
        ("une machine qui tombe depuis des années…", 71.44, 73.62), ("et qui ne touchera jamais le sol.", 74.08, 76.12)]
 
-# (plan, début, fin, départ dans le clip, vitesse) — coupes dans les silences
-SHOTS = [("01", 0.00, 2.75, 0.0, 1.0), ("02", 2.75, 7.10, 0.0, 1.0), ("03", 7.10, 11.40, 0.0, 1.0),
-         ("04", 11.40, 15.60, 0.0, 1.0), ("05", 15.60, 23.00, 0.0, 1.0), ("06", 23.00, 26.30, 0.0, 1.0),
-         ("07", 26.30, 29.00, 0.0, 1.0), ("08", 29.00, 34.40, 0.0, 1.0), ("09", 34.40, 37.65, 0.0, 1.0),
-         ("10", 37.65, 43.70, 0.0, 1.0), ("11", 43.70, 47.30, 0.0, 1.0), ("12", 47.30, 49.65, 0.0, 1.0),
-         ("13", 49.65, 53.90, 0.0, 1.0), ("14", 53.90, 57.95, 0.0, 1.0), ("15", 57.95, 60.05, 0.0, 1.0),
-         ("16", 60.05, 64.00, 0.0, 1.0), ("17", 64.00, 68.30, 0.0, 1.0), ("18", 68.30, 71.30, 0.0, 1.0),
-         ("19", 71.30, DUR, 0.0, 1.0)]
+# (plan, début, fin, départ dans le clip, vitesse) — chaque action calée sur son mot (analyse image par image)
+SHOTS = [("01", 0.00, 2.75, 0.0, 1.0), ("02", 2.75, 7.10, 0.0, 1.3), ("03", 7.10, 11.40, 0.0, 1.0),
+         ("04", 11.40, 15.60, 0.0, 1.0),
+         ("05", 15.60, 23.00, 0.0, 1.3),
+         ("06", 23.00, 26.30, 0.3, 1.6),   # le satellite boucle le tour sur « une chute sans fin »
+         ("07", 26.30, 29.00, 0.0, 1.0),
+         ("08", 29.00, 34.40, 0.0, 1.7),   # 1er tir → retombe près ; 2e tir sur « Tiré plus fort » → retombe loin
+         ("09", 34.40, 37.65, 0.2, 2.5),   # tir sur « Tiré assez fort », tour complet sur « il fait le tour »
+         ("10", 37.65, 43.70, 0.0, 1.5),
+         ("11", 43.70, 47.30, 0.3, 2.4),   # s'écrase sur « il retombe », s'échappe sur « il s'en va »
+         ("12", 47.30, 49.65, 0.0, 1.0), ("13", 49.65, 53.90, 0.0, 1.0), ("14", 53.90, 57.95, 0.0, 1.0),
+         ("15", 57.95, 60.05, 0.0, 1.0),
+         ("16", 60.05, 64.00, 0.0, 1.2),   # le moteur s'éteint sur « plus besoin de moteur »
+         ("17", 64.00, 68.30, 0.0, 0.32),  # seulement le début (avant que la Terre devienne photographique)
+         ("18", 68.30, 71.30, 0.0, 1.0),
+         ("19", 71.30, DUR, 0.0, 1.6)]     # les orbites apparaissent jusqu'à la fin
+
+# recadrage : on garde le haut de l'image (87,5 %) → le filigrane du coin bas droit sort du cadre
+SCALE = ("crop=trunc(iw*0.876/2)*2:trunc(ih*0.875/2)*2:(iw-trunc(iw*0.876/2)*2)/2:0,"
+         "scale=1080:1920:flags=lanczos,unsharp=5:5:0.6:5:5:0.0,fps=30")
+
+
+def shot_file(tmp, plan, t0, t1, start, speed):
+    out = f"{tmp}/s{plan}.mp4"
+    n = int(round(t1 * 30)) - int(round(t0 * 30))
+    src = os.path.join(HERE, "clips", f"{plan}.mp4")
+    d = float(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", src],
+                             capture_output=True, text=True).stdout)
+    pad = max(0.0, start + (t1 - t0) * speed - d + 0.1)
+    vf = f"setpts=(PTS-STARTPTS)/{speed},{SCALE},tpad=stop_mode=clone:stop_duration={pad / speed + 0.2:.2f}"
+    subprocess.run(["ffmpeg", "-y", "-v", "error", "-ss", f"{start}", "-i", src, "-an", "-vf", vf, "-frames:v", str(n),
+                    "-c:v", "libx264", "-crf", "16", "-pix_fmt", "yuv420p", out], check=True)
+    return out
 
 
 def overlay(c, t):
@@ -112,7 +137,7 @@ def render(out_path):
     M9.CLIPS = os.path.join(HERE, "clips")
     M9.overlay = overlay
     tmp = tempfile.mkdtemp()
-    parts = [M9.shot_file(tmp, *s) for s in SHOTS]
+    parts = [shot_file(tmp, *s) for s in SHOTS]
     with open(f"{tmp}/list.txt", "w") as f:
         f.writelines(f"file '{p}'\n" for p in parts)
     subprocess.run(["ffmpeg", "-y", "-v", "error", "-f", "concat", "-safe", "0", "-i", f"{tmp}/list.txt", "-c", "copy",
