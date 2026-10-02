@@ -49,6 +49,58 @@ def analyse(audio, start=0.0, dur=None):
     return cues
 
 
+def enveloppe(audio, start=0.0, dur=None, rate=100):
+    """Volume de la voix (0–1) échantillonné à `rate` Hz : attaque rapide, relâchement doux."""
+    cmd = ["ffmpeg", "-nostdin", "-v", "error", "-ss", str(start), "-i", audio]
+    if dur:
+        cmd += ["-t", str(dur)]
+    raw = subprocess.run(cmd + ["-ac", "1", "-ar", "16000", "-f", "s16le", "-"], capture_output=True).stdout
+    x = np.frombuffer(raw, np.int16).astype(np.float64) / 32768
+    hop = 16000 // rate
+    n = len(x) // hop
+    # énergie dans la bande de la voix (les plosives sourdes et le souffle comptent peu)
+    rms = np.sqrt((x[: n * hop].reshape(n, hop) ** 2).mean(1))
+    db = 20 * np.log10(rms + 1e-6)
+    voiced = db[db > db.max() - 40]
+    lo, hi = np.percentile(voiced, 25), np.percentile(voiced, 99)
+    v = np.clip((db - lo) / (hi - lo), 0, 1)                # normalisé sur la voix elle-même : suit les syllabes
+    out = np.zeros(n)
+    for i in range(1, n):                                   # attaque 20 ms, relâchement 70 ms
+        a = 0.6 if v[i] > out[i - 1] else 0.13
+        out[i] = out[i - 1] + a * (v[i] - out[i - 1])
+    return out, rate
+
+
+class Synchro:
+    """Bouche pilotée par deux sources : l'ouverture suit le volume de la voix (ce que l'œil juge en premier),
+    la forme (largeur, arrondi, dents, langue) suit les phonèmes de Rhubarb ; les consonnes m/b/p ferment la bouche."""
+
+    def __init__(self, audio, start=0.0, dur=None, avance=0.045):
+        self.cues = analyse(audio, start, dur)
+        self.env, self.rate = enveloppe(audio, start, dur)
+        self.avance = avance                                # la bouche anticipe légèrement le son
+
+    def __call__(self, t):
+        t = t + self.avance
+        w, h, dents, langue = bouche_a(self.cues, t, blend=0.05)
+        i = min(len(self.env) - 1, max(0, int(t * self.rate)))
+        v = self.env[i]
+        cur = cue_a(self.cues, t)
+        if v < 0.08 or cur == "X":                           # silence : lèvres fermées
+            return (w, 4.0, 0, 0)
+        if cur == "A":                                      # m, b, p : fermeture brève (moins franche si la voix
+            return (w, 4.0 + 9.0 * max(0.0, v - 0.5), 0, 0)  # reste forte : Rhubarb confond parfois avec n)
+        hmax = {"B": 22, "G": 16, "F": 30, "E": 46, "C": 44, "H": 42, "D": 60}.get(cur, 40)
+        hh = 6 + (hmax - 6) * (0.35 + 0.65 * v)
+        return (w * (0.9 + 0.15 * v), hh, dents, langue)
+
+
+def cue_a(cues, t):
+    times = [c[0] for c in cues]
+    i = int(np.searchsorted(times, t, side="right")) - 1
+    return cues[i][1] if i >= 0 else "X"
+
+
 def bouche_a(cues, t, blend=0.06):
     """Forme de bouche à l'instant t, avec un fondu de `blend` secondes vers chaque nouvelle forme."""
     if not cues:

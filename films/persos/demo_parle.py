@@ -18,7 +18,7 @@ from films.persos.orbe import H, W, Etat, P, draw_orbe, rgb
 
 def main():
     voix, t0, dur, out = sys.argv[1], float(sys.argv[2]), float(sys.argv[3]), sys.argv[4]
-    cues = LV.analyse(voix, t0, dur)
+    sync = LV.Synchro(voix, t0, dur)
     subs = MI.groups([(txt, a - t0, b - t0) for txt, a, b in SEG if t0 <= a < t0 + dur])
     surpris = [(6.24 - t0, 8.9 - t0)]                      # « quelque chose qui ne devrait pas être là »
     tmp = tempfile.mkdtemp()
@@ -33,7 +33,7 @@ def main():
             [skia.Point(0, 0), skia.Point(0, H)], [rgb((22, 20, 44)), rgb((40, 26, 70)), rgb((18, 30, 60))])))
         c.drawCircle(200, 300, 400, P((120, 80, 255), 40, blur=120))
         c.drawCircle(900, 1500, 450, P((60, 200, 255), 35, blur=140))
-        forme = LV.bouche_a(cues, t)
+        forme = sync(t)
         e = Etat(expr="parle", age=t, levres=forme)
         if any(a <= t < b for a, b in surpris):
             e.humeur_avant, e.humeur_mix = "calme", 1.0
