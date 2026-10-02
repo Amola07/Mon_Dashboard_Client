@@ -42,7 +42,7 @@ Structure commune (détail dans la transcription de « La batterie ») :
 5. **Listes numérotées** (« Première anomalie… Cinquième anomalie »).
 6. **Danger ou enjeu** au milieu (explosion, surveillance).
 7. **Nom technique donné tard** (BMS, fingerprinting acoustique).
-8. **Fin** : « Alors la prochaine fois que tu… souviens-toi » + **répétitions rythmées** (« Il te lit. Il te comprend. Il te prédit. ») + question ou chute qui renvoie au début.
+8. **Fin** : ouverte, qui garde le mystère (pas de « souviens-toi », pas de morale, ne pas tout expliquer) + **répétitions rythmées** (« Il te lit. Il te comprend. Il te prédit. ») + question ou chute qui renvoie au début.
 - Tutoiement, phrases déclaratives, aucune pause dramatique écrite.
 
 ## 4. Image
