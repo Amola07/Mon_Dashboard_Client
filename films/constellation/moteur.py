@@ -166,26 +166,26 @@ class Frame:
         for k in range(1, LEVELS):
             if self.buf[k].any():
                 s = 1.5 * 2 ** (k - 1) * 0.6
-                img += cv2.GaussianBlur(self.buf[k], (0, 0), s)
+                img += _blur(self.buf[k], s)
         img = cv2.GaussianBlur(img, (0, 0), 0.55)
         if trail is not None:                               # persistance : l'image précédente s'estompe
             prev = trail.get("prev")
             if prev is not None:
                 img = np.maximum(img, prev * trail.get("k", 0.5))
             trail["prev"] = img
-        glow = (cv2.GaussianBlur(img, (0, 0), 4) * 0.5 + cv2.GaussianBlur(img, (0, 0), 16) * 0.35 +
-                cv2.GaussianBlur(img, (0, 0), 48) * 0.3 + cv2.GaussianBlur(img, (0, 0), 120) * 0.15)
+        glow = (_blur(img, 4) * 0.5 + _blur(img, 16) * 0.35 + _blur(img, 48) * 0.3 + _blur(img, 120) * 0.15)
         img = img + glow * bloom
-        for (cx, cy), st, ln in self.ray_src:               # rayons : flou radial de la partie brillante
-            bright = np.maximum(img - 0.15, 0)
-            acc = np.zeros_like(img)
+        for (cx, cy), st, ln in self.ray_src:               # rayons : flou radial (calculé au quart de la taille)
+            q = 4
+            bright = cv2.resize(np.maximum(img - 0.15, 0), (W // q, H // q), interpolation=cv2.INTER_AREA)
+            acc = np.zeros_like(bright)
             nst = 12
             for i in range(nst):
                 sc = 1.0 + ln * i / nst
-                M = np.array([[sc, 0, cx * (1 - sc)], [0, sc, cy * (1 - sc)]], np.float32)
+                M = np.array([[sc, 0, cx / q * (1 - sc)], [0, sc, cy / q * (1 - sc)]], np.float32)
                 M = cv2.invertAffineTransform(M)
-                acc += cv2.warpAffine(bright, M, (W, H), flags=cv2.INTER_LINEAR) * (1 - i / nst)
-            img = img + acc * (st / nst)
+                acc += cv2.warpAffine(bright, M, (W // q, H // q), flags=cv2.INTER_LINEAR) * (1 - i / nst)
+            img = img + cv2.resize(acc, (W, H), interpolation=cv2.INTER_LINEAR) * (st / nst)
         x = img * exposure
         if tone == "aces":
             out = (x * (2.51 * x + 0.03)) / (x * (2.43 * x + 0.59) + 0.14)
@@ -197,13 +197,40 @@ class Frame:
                 M = np.array([[sc, 0, W / 2 * (1 - sc)], [0, sc, H / 2 * (1 - sc)]], np.float32)
                 out[:, :, ch] = cv2.warpAffine(np.ascontiguousarray(out[:, :, ch]), M, (W, H), flags=cv2.INTER_LINEAR)
         if vignette:
-            yy, xx = np.ogrid[:H, :W]
-            rr = ((xx - W / 2) / (W / 2)) ** 2 * 0.6 + ((yy - H / 2) / (H / 2)) ** 2
-            out *= (1 - vignette * np.clip(rr - 0.25, 0, 1.2))[:, :, None].astype(np.float32)
+            out *= _vignette(vignette)
         if grain:
-            rng = np.random.default_rng(seed)
-            out += rng.standard_normal((H, W, 1)).astype(np.float32) * grain * (0.2 + out.mean(2, keepdims=True))
+            out += _grain(seed) * grain * (0.2 + out.mean(2, keepdims=True))
         return (np.clip(out, 0, 1) ** (1 / 1.05) * 255).astype(np.uint8)
+
+
+_CACHE = {}
+
+
+def _blur(img, sigma):
+    """Flou gaussien ; les grands rayons sont calculés en basse résolution (même rendu, bien plus rapide)."""
+    if sigma < 6:
+        return cv2.GaussianBlur(img, (0, 0), sigma)
+    q = 2 if sigma < 20 else (4 if sigma < 60 else 8)
+    h, w = img.shape[:2]
+    small = cv2.resize(img, (w // q, h // q), interpolation=cv2.INTER_AREA)
+    small = cv2.GaussianBlur(small, (0, 0), sigma / q)
+    return cv2.resize(small, (w, h), interpolation=cv2.INTER_LINEAR)
+
+
+def _vignette(v):
+    key = ("vig", v)
+    if key not in _CACHE:
+        yy, xx = np.ogrid[:H, :W]
+        rr = ((xx - W / 2) / (W / 2)) ** 2 * 0.6 + ((yy - H / 2) / (H / 2)) ** 2
+        _CACHE[key] = (1 - v * np.clip(rr - 0.25, 0, 1.2))[:, :, None].astype(np.float32)
+    return _CACHE[key]
+
+
+def _grain(seed):
+    if "grain" not in _CACHE:
+        rng = np.random.default_rng(0)
+        _CACHE["grain"] = [rng.standard_normal((H, W, 1)).astype(np.float32) for _ in range(6)]
+    return _CACHE["grain"][seed % 6]
 
 
 def flow(P, t, amp=0.3, freq=0.05, speed=0.4, seed=0):
