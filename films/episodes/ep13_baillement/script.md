@@ -1,4 +1,4 @@
-# Épisode 13 — « Pourquoi le bâillement est-il contagieux ? »
+# Épisode 13 — « Pourquoi on bâille quand quelqu'un d'autre bâille ? »
 
 Ton documentaire scientifique : narration à la troisième personne, faits datés et attribués, aucune adresse directe au
 spectateur. Progression : le phénomène, ses lois étranges (proximité, âge, espèces, personnalité), l'hypothèse
@@ -7,7 +7,7 @@ réfutée, l'hypothèse actuelle, et la question qui reste ouverte. ≈ 330 mots
 ## Texte à générer (ElevenLabs)
 
 ```
-Pourquoi le bâillement est-il contagieux ?
+Pourquoi on bâille quand quelqu'un d'autre bâille ?
 
 Il suffit de voir quelqu'un bâiller. Ou de l'entendre. Chez environ la moitié des adultes, le réflexe se déclenche en quelques minutes.
 
