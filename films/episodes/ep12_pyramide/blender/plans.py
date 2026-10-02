@@ -76,6 +76,16 @@ def p01(n):
     nt.links.new(lw.outputs["Facing"], mul.inputs[0]); nt.links.new(mul.outputs[0], s.inputs[0]); nt.links.new(s.outputs[0], e.inputs[1])
     nt.links.new(e.outputs[0], ad.inputs[0]); nt.links.new(t.outputs[0], ad.inputs[1]); nt.links.new(ad.outputs[0], o.inputs[0])
     N.sphere((0, 0, -R), R * 1.012, m, seg=96)
+    grid = N.emit(BLUE, 1.2)
+    for lat in range(60, 90, 3):
+        r_ = R * math.cos(math.radians(lat)) + 0.02
+        z_ = R * math.sin(math.radians(lat)) - R + 0.02
+        N.line([(r_ * math.cos(a), r_ * math.sin(a), z_) for a in [i / 96 * 2 * math.pi for i in range(96)]], 0.04, grid, cyclic=True)
+    for k in range(24):
+        a = k / 24 * 2 * math.pi
+        pts = [((R + 0.02) * math.cos(math.radians(l)) * math.cos(a), (R + 0.02) * math.cos(math.radians(l)) * math.sin(a),
+                (R + 0.02) * math.sin(math.radians(l)) - R) for l in range(55, 91, 2)]
+        N.line(pts, 0.04, grid)
     # le Nil : ligne de lumières sur la surface, du sud (Assouan) au delta
     nile = N.emit(BLUE_HI, 6)
     pts = []
@@ -137,7 +147,7 @@ def p03(n):
     scan = N.line([(-a, -0.8, 0), (a, -0.8, 0)], 0.5, N.emit(BLUE_HI, 8))
     N.keys(scan, "location", [(1, (0, 0, 0)), (int(n * 0.6), (0, 0, h))])
     # plaque de détecteur sous la coupe
-    det = N.emit(BLUE, 2)
+    det = N.emit(BLUE, 0.6)
     for i in range(-6, 7):
         N.line([(i * 6, -12, -14), (i * 6, 12, -14)], 0.3, det)
         N.line([(-36, i * 2, -14), (36, i * 2, -14)], 0.3, det)
@@ -159,7 +169,7 @@ def p04(n):
     N.light(((N.VOID0 + N.VOID1) / 2) + Vector((3, 0, 0)), (1, 0.1, 0.05), 0)
     N.stars(400, 3000)
     cam, tgt = N.camera(30, (330, -40, 60), (0, -4, 50))
-    N.keys(cam, "location", [(1, (330, -40, 60)), (int(n * 0.45), (330, -40, 60)), (n, (120, -14, 46))])
+    N.keys(cam, "location", [(1, (330, -40, 60)), (int(n * 0.45), (330, -40, 60)), (n, (200, -14, 46))])
     N.keys(tgt, "location", [(1, (0, -4, 50)), (n, (0, -12, 44))])
 
 
@@ -225,7 +235,7 @@ def p07(n):
     s = N.HALF * t / N.HEIGHT + 0.4
     cap = [(-s, -s, h - t), (s, -s, h - t), (s, s, h - t), (-s, s, h - t), (0, 0, h + 0.2)]
     N.mesh(cap, [(0, 1, 4), (1, 2, 4), (2, 3, 4), (3, 0, 4)], gold, name="pyramidion")
-    N.key_strength(gold, [(1, 0), (int(n * 0.75), 0), (int(n * 0.9), 25)])
+    N.key_strength(gold, [(1, 0), (int(n * 0.75), 0), (int(n * 0.9), 5)])
     N.light((40, -40, h + 10), (1, 0.7, 0.3), 0)
     N.ground(grid=40, extent=900)
     N.stars(900, 3000)
@@ -525,8 +535,8 @@ def p13(n):
     N.keys(boat, "location", [(1, (-25, 0, 0)), (n, (5, 0, 0))])
     N.line([(-6000, 3000, 0), (6000, 3000, 0)], 40, N.emit(ORANGE, 5))
     N.stars(500, 4000, zmin=0.2)
-    cam, tgt = N.camera(26, (-28, -24, 6), (-22, 0, 2))
-    N.keys(cam, "location", [(1, (-28, -24, 6)), (n, (0, -22, 6))])
+    cam, tgt = N.camera(24, (-26, -15, 3), (-22, 0, 2))
+    N.keys(cam, "location", [(1, (-26, -15, 3)), (n, (2, -14, 3))])
     N.keys(tgt, "location", [(1, (-24, 0, 2)), (n, (4, 0, 2))])
 
 
@@ -594,21 +604,22 @@ def p16(n):
     cor = N.emit(BLUE_HI, 5)
     cx = x1 - 1.1
     N.outline_box(cx - 0.525, cx + 0.525, y0 - 9, y0, 0, 1.2, 0.02, cor)
-    N.box(x0, x1, y0 - 0.02, y0, 0, KH, N.glass())
     hole = N.box(cx - 0.525, cx + 0.525, y0 - 0.05, y0 + 0.03, 0, 1.2, N.emit((0, 0, 0), 0))
     s_edge = N.emit(BLUE_HI, 6)
     grp, lines = sarcophagus((x0 + 2.2, 0, 0), s_edge)
     red = N.emit(RED, 0)
-    _, rl = sarcophagus((0, 0, 0), red, grp)
-    for o in [ob for ob in grp.children if ob.type == "MESH"]:
-        pass
+    rg, rl = sarcophagus((0, 0, 0), red, grp)
+    for o in rl:
+        N.visible(o, [(1, False), (int(n * 0.58), True)])
+    for o in [c for c in rg.children if c.type == "MESH"]:
+        o.hide_render = True
     N.keys(grp, "location", [(1, (x0 + 2.2, 0, 0)), (int(n * 0.3), (cx, 0.2, 0))])
     N.keys(grp, "rotation_euler", [(1, (0, 0, 0)), (int(n * 0.3), (0, 0, math.radians(90)))])
     N.keys(grp, "location", [(int(n * 0.3), (cx, 0.2, 0)), (int(n * 0.6), (cx, y0 + 1.0, 0))])
     N.key_strength(red, [(1, 0), (int(n * 0.58), 0), (int(n * 0.66), 12)])
     N.key_strength(s_edge, [(int(n * 0.58), 6), (int(n * 0.66), 0.5)])
     N.stars(300, 400)
-    cam, tgt = N.camera(24, (x1 + 2.5, y0 - 5.5, 3.6), (cx - 1.2, y0 + 0.8, 0.4))
+    cam, tgt = N.camera(22, (x1 + 3.0, y0 - 6.5, 8.0), (-0.5, 0.0, 0.0))
 
 
 # ---------------------------------------------------------------- 17 — posé pendant la construction, puis muré
@@ -745,9 +756,9 @@ def p20(n):
     queens_chamber()
     root = N.empty("conduit", (0, QD / 2, 1.5), (SH, 0, 0))
     shaft(root, 25)
-    N.light((0, QD / 2 - 0.6, 1.9), (0.8, 0.88, 1.0), 4)
+    N.light((1.5, -1.0, 3.5), (0.8, 0.88, 1.0), 25)
     cam, tgt = N.camera(20, (0, QD / 2 - 1.0, 1.5), (0, QD / 2 + 3, 1.5 + 3 * math.tan(SH)))
-    N.keys(cam, "location", [(1, (0, QD / 2 - 0.9, 1.5)), (n, (0, QD / 2 + 0.6, 1.5 + 0.6 * math.tan(SH) * 0.95))])
+    N.keys(cam, "location", [(1, (0, QD / 2 - 2.0, 1.55)), (n, (0, QD / 2 + 0.6, 1.5 + 0.6 * math.tan(SH) * 0.95))])
     N.keys(tgt, "location", [(1, (0, QD / 2 + 3, 1.5 + 0.5)), (n, (0, QD / 2 + 4, 1.5 + 4 * math.tan(SH)))])
 
 
@@ -769,7 +780,7 @@ def robot(parent, lights=True):
     for x in (-0.035, 0.035):
         N.sphere((x, 0.195, 0.0), 0.012, hl, rb, seg=8)
     if lights:
-        s = N.spot((0, 0.21, 0), (0.85, 0.9, 1.0), 6, angle_deg=55, parent=rb)
+        s = N.spot((0, 0.21, 0), (0.85, 0.9, 1.0), 1.5, angle_deg=55, parent=rb)
         s.rotation_euler = (math.radians(-90), 0, 0)
     N.line([(0, -0.19, -0.07), (0, -30, -0.07)], 0.002, N.emit(BLUE, 0.8), rb)
     return rb
@@ -845,7 +856,7 @@ def p23(n):
     cam, tgt = N.camera(30, (0, 0, 0), (0, 0, 0))
     cam.parent = root; tgt.parent = root
     tgt.location = (0, 6.5, 0)
-    N.keys(cam, "location", [(1, (0.03, 5.62, 0.035)), (fh + 6, (0.0, 5.75, 0.0)), (n, (0.0, 6.03, 0.0))])
+    N.keys(cam, "location", [(1, (0.06, 5.5, 0.05)), (fh + 6, (0.0, 5.75, 0.0)), (n, (0.0, 6.03, 0.0))])
     N.keys(hl, "location", [(1, (0.03, 5.62, 0.035)), (fh + 6, (0.0, 5.75, 0.0)), (n, (0.0, 6.03, 0.0))])
 
 
@@ -920,13 +931,13 @@ def joint_wall(gap, golden=False):
 @plan("25")
 def p25(n):
     joint_wall(0.03)
-    cable = N.line([(0.6, -1.6, -1.1), (0.25, -0.8, -0.45), (0.05, -0.25, -0.06), (0.0, -0.05, 0.0), (0, 0.0, 0), (0, 1.2, 0)], 0.006, N.emit(BLUE, 1.5))
+    cable = N.line([(0.6, -1.6, -1.1), (0.25, -0.8, -0.45), (0.05, -0.25, -0.06), (0.0, -0.05, 0.0), (0, 0.0, 0), (0, 1.2, 0)], 0.008, N.emit(BLUE_HI, 4))
     N.keys(cable, "location", [(1, (0, -0.7, 0)), (n, (0, 0.0, 0))])
     tip = N.sphere((0, 0, 0), 0.008, N.emit((0.9, 0.95, 1.0), 30), seg=8)
     tl = N.light((0, 0, 0), (0.85, 0.9, 1.0), 0.6)
     for o in (tip, tl):
         N.keys(o, "location", [(1, (0, 0.5, 0)), (n, (0, 1.2, 0))])
-    hl = N.spot((1.2, -2.5, 0.8), (0.85, 0.9, 1.0), 300, angle_deg=25)
+    hl = N.spot((1.2, -2.5, 0.8), (0.85, 0.9, 1.0), 80, angle_deg=25)
     N.aim(hl, (0, 0, 0))
     cam, tgt = N.camera(30, (0.9, -2.4, 0.5), (0, 0.1, 0))
     N.keys(cam, "location", [(1, (0.9, -2.4, 0.5)), (n, (0.45, -1.3, 0.25))])
@@ -1083,12 +1094,12 @@ def p32(n):
         ang = rnd.uniform(math.radians(20), math.radians(160))
         d = 900 + rnd.expovariate(1 / 2500)
         x, y = d * math.cos(ang), d * math.sin(ang) - 300
-        s = rnd.uniform(1.5, 4)
+        s = rnd.uniform(1.0, 2.5)
         b = len(verts)
         verts += [(x - s, y - s, 0.5), (x + s, y - s, 0.5), (x + s, y + s, 0.5), (x - s, y + s, 0.5)]
         faces.append((b, b + 1, b + 2, b + 3))
     N.mesh(verts, faces, city, name="ville")
-    for i in range(30):
+    for i in range(0):
         ang = rnd.uniform(math.radians(25), math.radians(155))
         N.line([(900 * math.cos(ang), 900 * math.sin(ang) - 300, 0.6), (9000 * math.cos(ang), 9000 * math.sin(ang) - 300, 0.6)], 1.2, city2)
     N.stars(500, 20000, zmin=0.15)

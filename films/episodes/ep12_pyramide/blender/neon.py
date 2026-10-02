@@ -310,8 +310,8 @@ def ground(size=4000, z=0.0, mat=None, parent=None, grid=0.0, extent=None):
         gm = emit(BLUE, 0.35)
         k = -e
         while k <= e:
-            line([(k, -e, z + 0.02), (k, e, z + 0.02)], grid * 0.012, gm, parent)
-            line([(-e, k, z + 0.02), (e, k, z + 0.02)], grid * 0.012, gm, parent)
+            line([(k, -e, z + 0.02), (k, e, z + 0.02)], grid * 0.004, gm, parent)
+            line([(-e, k, z + 0.02), (e, k, z + 0.02)], grid * 0.004, gm, parent)
             k += grid
     return o
 
