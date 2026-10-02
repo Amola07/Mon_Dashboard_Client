@@ -13,7 +13,7 @@
 
 Style d'écriture repris des références : vouvoiement, phrases déclaratives très courtes, triades
 (« sans moteur, sans carburant, sans… »), sentences-chocs (« La vitesse est la clé. »), un bloc par fonction,
-ton de documentaire neutre, fin « Souvenez-vous ». Texte original. Durée estimée : 2 min 30 à 3 min.
+ton de documentaire neutre, fin « Souvenez-vous ». Texte original. Durée estimée : 1 min 05 à 1 min 15 (juste au-dessus du seuil d'une minute).
 
 ## Texte à générer (ElevenLabs — balises sobres, voix de narrateur posée)
 
@@ -28,35 +28,13 @@ ton de documentaire neutre, fin « Souvenez-vous ». Texte original. Durée esti
 
 Newton l'avait compris il y a plus de trois cents ans. Un boulet tiré du haut d'une montagne retombe plus loin. Tiré plus fort, encore plus loin. Tiré assez fort, il fait le tour de la planète.
 
-[calm] La vitesse est la clé. Vingt-huit mille kilomètres-heure à quatre cents kilomètres d'altitude. Un tour de la Terre en quatre-vingt-dix minutes. Trop lent, il retombe. Trop rapide, il s'en va. [short pause] Pas de marge. Pas de deuxième chance.
+[calm] La vitesse est la clé. Vingt-huit mille kilomètres-heure. Un tour de la Terre en quatre-vingt-dix minutes. Trop lent, il retombe. Trop rapide, il s'en va. [short pause] Pas de marge. Pas de deuxième chance.
 
-La gravité ne s'arrête pas là-haut. À quatre cents kilomètres, elle garde presque toute sa force. Les astronautes ne sont pas en apesanteur. Ils tombent avec leur station. Ensemble. Au même rythme.
+La gravité ne s'arrête pas là-haut. Elle garde presque toute sa force. Les astronautes ne sont pas en apesanteur. Ils tombent avec leur station. Ensemble. Au même rythme.
 
-[serious] Mettre un satellite en orbite, c'est un tir de précision. La fusée le monte. Puis elle le pousse à l'horizontale. Puis elle le lâche. [short pause] Une erreur de quelques mètres par seconde, et la mission est perdue.
+[calm] Et une fois lancé, plus besoin de moteur. Rien ne le freine. Pas d'air. Pas de frottement. Il tombe seul, pendant des années.
 
-[calm] Une fois là-haut, plus besoin de moteur. Rien ne le freine. Pas d'air. Pas de frottement. Il tourne seul, pendant des années.
-
-Chaque satellite a un métier.
-
-Les satellites de communication sont des relais. Ils captent un signal. Ils l'amplifient. Ils le renvoient de l'autre côté du globe. Une vidéo, un appel, un paiement. En quelques fractions de seconde.
-
-Les satellites d'observation regardent. En infrarouge. En radar. De jour comme de nuit. À travers les nuages. Ils voient les forêts brûler, les glaces fondre, les villes grandir.
-
-Les satellites météo surveillent l'atmosphère. Les nuages. Les vents. La température des océans. Ils voient les tempêtes naître des jours avant qu'elles n'arrivent.
-
-[intrigued] Et puis il y a le GPS. [short pause] Des horloges atomiques en orbite. Chacune envoie l'heure exacte. Votre téléphone mesure le retard de chaque signal. Quatre satellites suffisent pour savoir où vous êtes.
-
-[serious] Mais là-haut, le temps ne passe pas à la même vitesse. Einstein l'avait prédit. Sans correction, votre position dériverait de dix kilomètres par jour. [short pause] Chaque fois que vous suivez un itinéraire, vous utilisez la relativité.
-
-[mysterious] Certains satellites semblent immobiles. À trente-six mille kilomètres, ils tournent exactement à la vitesse de la Terre. Ils restent au-dessus du même point. Toujours. [short pause] C'est vers eux que pointent les paraboles.
-
-[calm] Un satellite doit tout supporter. Les vibrations du décollage. Le vide. Les radiations. Plus de deux cents degrés d'écart entre l'ombre et le soleil. Sans réparation. Sans entretien. Pendant quinze ans.
-
-[ominous] Puis vient la fin. Le carburant s'épuise. Le satellite ne peut plus corriger sa trajectoire. Il s'éteint. [short pause] Mais il continue de tourner.
-
-Autour de la Terre, des millions de débris filent plus vite qu'une balle. Un boulon peut détruire un satellite. Une collision peut en provoquer des milliers d'autres. Une réaction en chaîne.
-
-[thoughtful] Alors souvenez-vous. Quand vous regardez la météo. Quand vous suivez un itinéraire. Quand vous appelez quelqu'un à l'autre bout du monde. [short pause] Il y a, au-dessus de vous, une machine qui tombe depuis des années… [whispers] et qui ne touchera jamais le sol.
+[thoughtful] Alors souvenez-vous. Il y a, au-dessus de vous, une machine qui tombe depuis des années… [whispers] et qui ne touchera jamais le sol.
 ```
 
 Conseil voix : narrateur calme et régulier, sans emphase excessive ; « Parce qu'ils tombent. » détaché, juste après
