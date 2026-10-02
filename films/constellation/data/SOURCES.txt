@@ -1,2 +1,3 @@
 terre.npz : extrait de Natural Earth (domaine public, naturalearthdata.com) — côtes 1:10m, terres et fleuves 1:50m, villes.
 humain_mh.npz : maillage de base et poids de peau de MakeHuman (CC0, makehumancommunity.org), découpé et mis à l'échelle.
+humain_qt_male.npz, humain_qt_female.npz : Universal Base Characters [Standard] de Quaternius (CC0, quaternius.com), convertis.

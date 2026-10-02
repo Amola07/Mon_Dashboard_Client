@@ -18,6 +18,7 @@ from films.constellation import corps as K
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "data", "humain_mh.npz")
+DATA = os.path.join(HERE, "data")
 
 # segment : (os CMU début, os CMU fin, côté de référence, os MakeHuman (tête, queue) pour le repos, os MH pondérés)
 SEG = {
@@ -47,6 +48,13 @@ for s, S in (("L", "Left"), ("R", "Right")):
                          ["toe"]),
     })
 NAMES = list(SEG)
+PARENT = {"bassin": None, "poitrine": "bassin", "cou": "poitrine", "tete": "cou"}
+for _s in ("L", "R"):
+    PARENT.update({f"clavicule.{_s}": "poitrine", f"bras.{_s}": f"clavicule.{_s}", f"avantbras.{_s}": f"bras.{_s}",
+                   f"main.{_s}": f"avantbras.{_s}", f"cuisse.{_s}": "bassin", f"jambe.{_s}": f"cuisse.{_s}",
+                   f"pied.{_s}": f"jambe.{_s}", f"orteils.{_s}": f"pied.{_s}"})
+TOPO = ["bassin", "poitrine", "cou", "tete"] + [f"{p}.{_s}" for _s in ("L", "R") for p in
+                                              ("clavicule", "bras", "avantbras", "main", "cuisse", "jambe", "pied", "orteils")]
 
 
 def _segment_of(bone):
@@ -125,8 +133,8 @@ def _frames(d, side):
 
 
 class Humain:
-    def __init__(self, n=30000, seed=0):
-        d = np.load(OUT)
+    def __init__(self, n=30000, seed=0, modele="mh"):
+        d = np.load(os.path.join(DATA, f"humain_{modele}.npz"))
         V, Fc, W = d["v"].astype(np.float64), d["f"], d["w"].astype(np.float64)
         A, B, C = V[Fc[:, 0]], V[Fc[:, 1]], V[Fc[:, 2]]
         area = np.linalg.norm(np.cross(B - A, C - A), axis=1)
@@ -143,26 +151,43 @@ class Humain:
         self.ia = [K.J[SEG[k][0]] for k in NAMES]
         self.ib = [K.J[SEG[k][1]] for k in NAMES]
         self.low = np.array([SEG[k][2] == "bas" for k in NAMES])
+        self.order = [NAMES.index(k) for k in TOPO]
+        self.hips_rest = self.rest_a[NAMES.index("bassin")]
+        fk = [NAMES.index(k) for k in NAMES if k.startswith(("pied", "orteils"))]
+        self.feet = self.w[:, fk].sum(1) > 0.5
 
     def points(self, P):
-        """P : articulations CMU (28, 3) d'une image → nuage (n, 3)."""
+        """P : articulations CMU (28, 3) d'une image → nuage (n, 3).
+        Les directions des os viennent de la capture ; les longueurs et points d'attache restent ceux du modèle
+        (chaîne parent → enfant), donc le corps ne se déchire pas quand ses proportions diffèrent de la capture."""
         a, b = P[self.ia], P[self.ib]
         sl = P[K.J["LeftUpLeg"]] - P[K.J["RightUpLeg"]]
         su = P[K.J["LeftArm"]] - P[K.J["RightArm"]]
         side = np.where(self.low[:, None], sl, su)
         F1 = _frames(b - a, side)
         R = F1 @ np.transpose(self.F0, (0, 2, 1))           # (S, 3, 3)
-        # position : la tête de chaque segment suit l'articulation CMU (le bassin fixe l'ensemble)
+        head = np.zeros((len(NAMES), 3))
+        for k in self.order:
+            p = PARENT[NAMES[k]]
+            if p is None:
+                head[k] = P[K.J["Hips"]] + (self.rest_a[k] - self.hips_rest)
+            else:
+                j = NAMES.index(p)
+                head[k] = head[j] + R[j] @ (self.rest_a[k] - self.rest_a[j])
         out = np.zeros_like(self.rest)
         for k in range(len(NAMES)):
             wk = self.w[:, k]
             m = wk > 1e-3
             if not m.any():
                 continue
-            q = (self.rest[m] - self.rest_a[k]) @ R[k].T + a[k]
-            out[m] += q * wk[m, None]
+            out[m] += ((self.rest[m] - self.rest_a[k]) @ R[k].T + head[k]) * wk[m, None]
+        # pieds au sol comme dans la capture
+        foot_cmu = P[[K.J["LeftToeBase"], K.J["RightToeBase"], K.J["LeftFoot"], K.J["RightFoot"]], 2].min()
+        out[:, 2] += foot_cmu - self.foot_rest_gap(out)
         return out
 
+    def foot_rest_gap(self, out):
+        return np.percentile(out[self.feet, 2], 1) if self.feet.any() else 0.0
 
 if __name__ == "__main__":
     build(sys.argv[1])
