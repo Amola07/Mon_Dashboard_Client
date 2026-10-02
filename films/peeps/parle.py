@@ -123,6 +123,22 @@ def bouche(c, w, h, dents, langue):
     c.drawPath(p, ink)
 
 
+def sous_titre(c, t, subs, y=H * 0.84, size=50):
+    """Sous-titres à l'encre foncée (le fond de ce style est clair)."""
+    cur = None
+    for k, (txt, a, b) in enumerate(subs):
+        nxt = subs[k + 1][1] if k + 1 < len(subs) else b + 0.6
+        if a - 0.03 <= t < min(nxt, b + 0.6):
+            cur = txt
+    if not cur:
+        return
+    f = skia.Font(MI.F_SUB, size)
+    while f.measureText(cur) > W - 120 and size > 30:
+        size -= 2
+        f = skia.Font(MI.F_SUB, size)
+    c.drawString(cur, W / 2 - f.measureText(cur) / 2, y, f, skia.Paint(AntiAlias=True, Color=skia.Color(*INK)))
+
+
 def main():
     voix, t0, dur, out = sys.argv[1], float(sys.argv[2]), float(sys.argv[3]), sys.argv[4]
     from films.episodes.ep12_pyramide.montage import SEG
@@ -153,7 +169,7 @@ def main():
         tilt = 2.2 * math.sin(t * 0.9) + 2.0 * (e - slow)
         nod = 10 * (e - slow)
         peep.draw(c, (W - peep.size) / 2, 330, face, sync(t), tilt=tilt, nod=nod, breath=0.006 * math.sin(t * 1.6))
-        MI.draw_sub(c, t, subs)
+        sous_titre(c, t, subs)
         enc.stdin.write(arr.tobytes())
     enc.stdin.close()
     enc.wait()
