@@ -1,315 +1,426 @@
-# Épisode 12 — « Ce que cache encore la Grande Pyramide » : prompts
-Style néon sombre validé, personnages en verre sombre là où la scène en demande, aucun texte dans les images, couleurs de sens (rouge = mystère/inconnu, or = chiffres, orange = cuivre). Quand il y a une **Image de fin**, utilise le mode « première et dernière image ». Nomme les clips `01.mp4`, `02.mp4`…
+# Épisode 12 — « Ce que cache encore la Grande Pyramide » : prompts v2 (découpage réalisateur)
 
-## Plan 01 · 0,0 – 6,1 s — « En 2017, des physiciens ont envoyé des particules venues de l'espace à travers la Grande Pyramide. »
+- **Deux rendus** : *réaliste* pour les scènes (Égypte ancienne reconstituée, chercheurs, robot), toujours sombre avec un liseré bleu électrique et une seule lumière chaude ; *hologramme néon* uniquement pour les vues en coupe (plans 04, 16, 28).
+- **Aucun texte** dans les images.
+- **Image de fin** présente → mode « première et dernière image ».
+- Nomme les clips `01.mp4`, `02.mp4`…
+
+## Plan 01 · 0,0 – 3,1 s — « En 2017, des physiciens ont envoyé des particules venues de l'espace »
+*Intention : Ouvrir sur l'échelle cosmique : la particule vient de l'espace, le spectateur ne sait pas encore où elle va.*
 
 **Image**
 ```
-Two physicists, people shown as elegant figures made of dark translucent glass with glowing blue outlines, faceless, standing at the foot of the Great Pyramid of Giza at night, looking at a glowing detector plate on the ground, the pyramid outlined in electric blue, thin vertical lines of cosmic particles falling from the sky through the pyramid, no text, no letters, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no logos, no watermark, vertical 9:16 portrait format.
+View from high above the Earth at night, the curved dark edge of the planet, the Nile valley in Egypt visible as a thin line of city lights, in the upper atmosphere a cascade of very thin vertical streaks of pale blue light (cosmic ray muons) falling straight down toward Egypt, photorealistic cinematic film still, historically accurate reconstruction, low key lighting, the frame mostly deep black, light only from the sources described, a thin cool electric blue moonlight rim light on the edges of the subjects, one single warm accent light, real textures (rough limestone, polished red granite, skin, linen, dust), 35mm anamorphic lens, shallow depth of field, subtle film grain, ultra detailed, no fantasy elements, no text, no letters, no logos, no watermark, vertical 9:16 portrait format.
 ```
 **Animation**
 ```
-Thin glowing lines of cosmic particles rain down from the sky and pass straight through the pyramid into the detector, which lights up. The action starts immediately and is clearly finished within 3 seconds. Static camera unless stated, subject centered and in frame, no text, no logo, no watermark.
+The thin streaks of light rain down toward the Nile valley, the camera tilts down and follows them toward the ground. The action starts immediately and lasts about 3 seconds. Realistic, physically plausible motion, no morphing, faces, hands and objects stay consistent, keep the same lighting and colors, no text, no logo, no watermark.
 ```
 
-## Plan 02 · 6,1 – 9,3 s — « Et ils ont vu quelque chose qui ne devrait pas être là. »
+## Plan 02 · 3,1 – 6,1 s — « à travers la Grande Pyramide. »
+*Intention : La particule touche la pyramide et la traverse : on découvre que la pierre devient « transparente ».*
 
 **Image**
 ```
-Over-the-shoulder view of a physicist, people shown as elegant figures made of dark translucent glass with glowing blue outlines, faceless, looking at a floating holographic screen showing the cross-section of a pyramid, the screen mostly dark, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no logos, no watermark, vertical 9:16 portrait format.
+The Great Pyramid of Giza at night seen from the desert at a low angle, massive and black against a starry sky, its stepped limestone blocks lit only by a cold blue moonlight rim, very thin vertical streaks of pale blue light falling from the sky and entering the stone, photorealistic cinematic film still, historically accurate reconstruction, low key lighting, the frame mostly deep black, light only from the sources described, a thin cool electric blue moonlight rim light on the edges of the subjects, one single warm accent light, real textures (rough limestone, polished red granite, skin, linen, dust), 35mm anamorphic lens, shallow depth of field, subtle film grain, ultra detailed, no fantasy elements, no text, no letters, no logos, no watermark, vertical 9:16 portrait format.
 ```
 **Image de fin**
 ```
-Over-the-shoulder view of a physicist, people shown as elegant figures made of dark translucent glass with glowing blue outlines, faceless, looking at a floating holographic screen showing the cross-section of a pyramid, a large glowing red elongated shape appearing inside the pyramid on the screen, the physicist leaning back, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no logos, no watermark, vertical 9:16 portrait format.
+The Great Pyramid of Giza at night from the same low angle, now semi-transparent like a ghostly X-ray, its inner corridors and chambers visible as faint blue lines inside the stone, photorealistic cinematic film still, historically accurate reconstruction, low key lighting, the frame mostly deep black, light only from the sources described, a thin cool electric blue moonlight rim light on the edges of the subjects, one single warm accent light, real textures (rough limestone, polished red granite, skin, linen, dust), 35mm anamorphic lens, shallow depth of field, subtle film grain, ultra detailed, no fantasy elements, no text, no letters, no logos, no watermark, vertical 9:16 portrait format.
 ```
 **Animation**
 ```
-A large glowing red elongated shape slowly appears inside the pyramid on the screen, the physicist leans back in surprise. The action starts immediately and is clearly finished within 3 seconds. Static camera unless stated, subject centered and in frame, no text, no logo, no watermark.
+The thin streaks of light pass straight through the stone, and the pyramid gradually turns semi-transparent, revealing its inner corridors. The action starts immediately and lasts about 3 seconds. Realistic, physically plausible motion, no morphing, faces, hands and objects stay consistent, keep the same lighting and colors, no text, no logo, no watermark.
 ```
 
-## Plan 03 · 9,3 – 14,1 s — « Un vide. Long d'au moins trente mètres. Au cœur de la pyramide. »
-
-**Image**
-```
-X-ray cut-away side view of the Great Pyramid, its inner corridors drawn in thin blue lines, a long empty hollow space in its heart glowing red, no text, no letters, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no logos, no watermark, vertical 9:16 portrait format.
-```
-**Animation**
-```
-Slow push-in toward the red hollow space in the heart of the pyramid, which pulses softly once. The action starts immediately and is clearly finished within 3 seconds. Static camera unless stated, subject centered and in frame, no text, no logo, no watermark.
-```
-
-## Plan 04 · 14,1 – 18,1 s — « Personne ne l'a jamais ouvert. Personne ne sait ce qu'il contient. »
+## Plan 03 · 6,1 – 9,3 s — « Et ils ont vu quelque chose qui ne devrait pas être là. »
+*Intention : Réaction humaine : le chercheur voit l'anomalie avant nous, on lit la surprise sur son corps.*
 
 **Image**
 ```
-Inside a massive wall of dark glass stone blocks, a sealed empty cavity glowing faint red from within, no opening, no door, no text, no letters, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no logos, no watermark, vertical 9:16 portrait format.
-```
-**Animation**
-```
-Camera slowly moves along the sealed wall toward the cavity, the faint red glow inside flickers like something is there. The action starts immediately and is clearly finished within 3 seconds. Static camera unless stated, subject centered and in frame, no text, no logo, no watermark.
-```
-
-## Plan 05 · 18,1 – 24,6 s — « Tu crois qu'on connaît tout de la Grande Pyramide ? Elle a quatre mille cinq cents ans. Et elle n'a pas fini de nous surprendre. »
-
-**Image**
-```
-The Great Pyramid of Giza alone in the desert at night, seen from the ground, huge and majestic, a starry black sky, a few small tourists people shown as elegant figures made of dark translucent glass with glowing blue outlines, faceless, looking up at it, no text, no letters, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no logos, no watermark, vertical 9:16 portrait format.
-```
-**Animation**
-```
-Very slow camera tilt up along the face of the pyramid toward its summit, the tourists stay still. The action starts immediately and is clearly finished within 3 seconds. Static camera unless stated, subject centered and in frame, no text, no logo, no watermark.
-```
-
-## Plan 06 · 24,6 – 29,3 s — « Première énigme. Deux millions trois cent mille blocs. Vingt ans de chantier. »
-
-**Image**
-```
-An empty desert plateau at night with the square base outline of a pyramid traced in blue light on the ground, no text, no letters, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no logos, no watermark, vertical 9:16 portrait format.
+Over-the-shoulder shot of a physicist in his forties wearing a dusty work jacket and a headlamp, sitting in a dark field tent at night at the foot of the pyramid, a laptop screen showing a grainy blue density map of the pyramid's interior, the screen the only light on his face, photorealistic cinematic film still, historically accurate reconstruction, low key lighting, the frame mostly deep black, light only from the sources described, a thin cool electric blue moonlight rim light on the edges of the subjects, one single warm accent light, real textures (rough limestone, polished red granite, skin, linen, dust), 35mm anamorphic lens, shallow depth of field, subtle film grain, ultra detailed, no fantasy elements, no text, no letters, no logos, no watermark, vertical 9:16 portrait format.
 ```
 **Image de fin**
 ```
-A huge pyramid made of countless glowing glass stone blocks standing on the desert plateau at night, no text, no letters, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no logos, no watermark, vertical 9:16 portrait format.
+Same shot, on the laptop screen a bright red elongated shape has appeared in the middle of the density map, the physicist has leaned toward the screen, his hand frozen above the keyboard, photorealistic cinematic film still, historically accurate reconstruction, low key lighting, the frame mostly deep black, light only from the sources described, a thin cool electric blue moonlight rim light on the edges of the subjects, one single warm accent light, real textures (rough limestone, polished red granite, skin, linen, dust), 35mm anamorphic lens, shallow depth of field, subtle film grain, ultra detailed, no fantasy elements, no text, no letters, no logos, no watermark, vertical 9:16 portrait format.
 ```
 **Animation**
 ```
-Glass stone blocks fly in and stack themselves layer by layer very fast until the full pyramid is built. The action starts immediately and is clearly finished within 3 seconds. Static camera unless stated, subject centered and in frame, no text, no logo, no watermark.
+A bright red elongated shape slowly appears on the density map, the physicist leans toward the screen and freezes, his hand stopping above the keyboard. The action starts immediately and lasts about 3 seconds. Realistic, physically plausible motion, no morphing, faces, hands and objects stay consistent, keep the same lighting and colors, no text, no logo, no watermark.
 ```
 
-## Plan 07 · 29,3 – 32,9 s — « Ça fait un bloc posé toutes les deux minutes. Jour et nuit ? »
+## Plan 04 · 9,3 – 14,1 s — « Un vide. Long d'au moins trente mètres. Au cœur de la pyramide. »
+*Intention : On montre exactement où : la Grande Galerie et, au-dessus, le vide rouge qui se dessine sur toute sa longueur.*
 
 **Image**
 ```
-A single glass stone block in the foreground, behind it a large glowing clock face, half of the background showing a sun, half showing a moon, no text, no letters, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no logos, no watermark, vertical 9:16 portrait format.
+X-ray side cut-away of the Great Pyramid of Giza: the long steep Grand Gallery rising through the middle, the King's chamber above its top, and directly above the Grand Gallery a long empty inclined cavity glowing deep red, the only red element in the frame, dark minimal cinematic 3D render, mostly pure black frame, the pyramid made of dark translucent glass defined by bright electric blue glowing edges with a soft neon glow, its inner corridors and chambers drawn as thin glowing blue lines, deep shadows, high contrast, clean, scientific visualization, Unreal Engine 5 style, no light rays, no particles everywhere, no text, no letters, no numbers, no logos, no watermark, vertical 9:16 portrait format.
 ```
 **Animation**
 ```
-The clock hands spin fast, the block slides into place, the sun and moon swap places. The action starts immediately and is clearly finished within 3 seconds. Static camera unless stated, subject centered and in frame, no text, no logo, no watermark.
+The red cavity draws itself from one end to the other along its full length, then the camera pushes slowly in toward it. The action starts immediately and lasts about 5 seconds. Realistic, physically plausible motion, no morphing, faces, hands and objects stay consistent, keep the same lighting and colors, no text, no logo, no watermark.
 ```
 
-## Plan 08 · 32,9 – 37,7 s — « Personne n'a jamais retrouvé comment ils montaient les derniers, à plus de cent mètres de haut. »
+## Plan 05 · 14,1 – 18,1 s — « Personne ne l'a jamais ouvert. Personne ne sait ce qu'il contient. »
+*Intention : Concrétiser l'inaccessible : un mur de blocs sans aucune ouverture, et une lueur derrière un joint.*
 
 **Image**
 ```
-The unfinished flat top of a pyramid under construction high above the desert at night, a group of workers people shown as elegant figures made of dark translucent glass with glowing blue outlines, faceless, pulling a big stone block with ropes at the very edge, a dizzying drop below, no text, no letters, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no logos, no watermark, vertical 9:16 portrait format.
+Inside the pyramid, total darkness, a wall of huge rough limestone blocks with tight joints and no opening at all, a flashlight beam grazing the stone surface from the left, dust in the beam, a faint red glow leaking through one hairline joint between two blocks, photorealistic cinematic film still, historically accurate reconstruction, low key lighting, the frame mostly deep black, light only from the sources described, a thin cool electric blue moonlight rim light on the edges of the subjects, one single warm accent light, real textures (rough limestone, polished red granite, skin, linen, dust), 35mm anamorphic lens, shallow depth of field, subtle film grain, ultra detailed, no fantasy elements, no text, no letters, no logos, no watermark, vertical 9:16 portrait format.
 ```
 **Animation**
 ```
-The workers pull on the ropes, the block slides slightly up the edge, the camera slowly pulls back to reveal the huge height. The action starts immediately and is clearly finished within 3 seconds. Static camera unless stated, subject centered and in frame, no text, no logo, no watermark.
+The flashlight beam sweeps slowly along the wall and stops on the joint, where the faint red glow flickers once. The action starts immediately and lasts about 4 seconds. Realistic, physically plausible motion, no morphing, faces, hands and objects stay consistent, keep the same lighting and colors, no text, no logo, no watermark.
 ```
 
-## Plan 09 · 37,7 – 42,0 s — « Deuxième énigme. Au cœur de la pyramide, la chambre du roi. »
+## Plan 06 · 18,1 – 20,4 s — « Tu crois qu'on connaît tout de la Grande Pyramide ? »
+*Intention : Le monde moderne, familier : la pyramide comme décor touristique banal.*
 
 **Image**
 ```
-X-ray cut-away side view of the Great Pyramid with thin blue corridors, a small rectangular room high in its center glowing brighter, no text, no letters, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no logos, no watermark, vertical 9:16 portrait format.
+The Great Pyramid of Giza at night lit by the cold blue floodlights of the sound and light show, in the foreground a crowd of modern tourists seen from behind as dark silhouettes, several raising glowing smartphones to photograph it, photorealistic cinematic film still, historically accurate reconstruction, low key lighting, the frame mostly deep black, light only from the sources described, a thin cool electric blue moonlight rim light on the edges of the subjects, one single warm accent light, real textures (rough limestone, polished red granite, skin, linen, dust), 35mm anamorphic lens, shallow depth of field, subtle film grain, ultra detailed, no fantasy elements, no text, no letters, no logos, no watermark, vertical 9:16 portrait format.
 ```
 **Animation**
 ```
-Camera dives through the side of the pyramid toward the glowing room, which lights up. The action starts immediately and is clearly finished within 3 seconds. Static camera unless stated, subject centered and in frame, no text, no logo, no watermark.
+Tourists take photos, phone screens flash, the camera slowly rises over their heads toward the pyramid. The action starts immediately and lasts about 3 seconds. Realistic, physically plausible motion, no morphing, faces, hands and objects stay consistent, keep the same lighting and colors, no text, no logo, no watermark.
 ```
 
-## Plan 10 · 42,0 – 46,4 s — « Son plafond est fait de poutres de granit. Jusqu'à quatre-vingts tonnes chacune. »
-
-**Image**
-```
-Low angle view inside a dark granite chamber, looking up at a ceiling made of nine colossal granite beams side by side, outlined in blue, one beam glowing gold, no text, no letters, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no logos, no watermark, vertical 9:16 portrait format.
-```
-**Animation**
-```
-Slow upward tilt along the massive ceiling beams, one beam glows gold. The action starts immediately and is clearly finished within 3 seconds. Static camera unless stated, subject centered and in frame, no text, no logo, no watermark.
-```
-
-## Plan 11 · 46,4 – 49,2 s — « Venues d'une carrière à huit cents kilomètres. »
+## Plan 07 · 20,4 – 24,6 s — « Elle a quatre mille cinq cents ans. Et elle n'a pas fini de nous surprendre. »
+*Intention : Remonter le temps : les touristes disparaissent, la pyramide retrouve son revêtement blanc poli et son sommet doré d'origine.*
 
 **Image**
 ```
-Dark map of Egypt with the Nile river as a glowing blue line, a small glowing point at Aswan in the south and a small pyramid icon at Giza in the north, no text, no letters, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no logos, no watermark, vertical 9:16 portrait format.
-```
-**Animation**
-```
-A glowing gold line travels along the Nile from Aswan in the south to the pyramid in the north. The action starts immediately and is clearly finished within 3 seconds. Static camera unless stated, subject centered and in frame, no text, no logo, no watermark.
-```
-
-## Plan 12 · 49,2 – 53,6 s — « Et hissées à quarante mètres du sol. Sans poulie. Sans roue. »
-
-**Image**
-```
-Many workers people shown as elegant figures made of dark translucent glass with glowing blue outlines, faceless, hauling a colossal granite beam up a steep earth ramp with ropes, high above the ground at night, no text, no letters, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no logos, no watermark, vertical 9:16 portrait format.
-```
-**Animation**
-```
-The workers pull together on the ropes, the colossal beam slides up the ramp a little. The action starts immediately and is clearly finished within 3 seconds. Static camera unless stated, subject centered and in frame, no text, no logo, no watermark.
-```
-
-## Plan 13 · 53,6 – 57,3 s — « Troisième énigme. Dans cette chambre, un sarcophage. »
-
-**Image**
-```
-A dark empty granite chamber, in its center a single stone sarcophagus outlined in blue, lit by one small cyan light, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no logos, no watermark, vertical 9:16 portrait format.
-```
-**Animation**
-```
-Slow push-in toward the sarcophagus in the dark chamber. The action starts immediately and is clearly finished within 3 seconds. Static camera unless stated, subject centered and in frame, no text, no logo, no watermark.
-```
-
-## Plan 14 · 57,3 – 61,4 s — « Vide. Sans couvercle. Et trop large pour passer par les couloirs. »
-
-**Image**
-```
-Top view of an open empty stone sarcophagus with no lid, next to the narrow entrance of a corridor, a red measuring line showing the sarcophagus is wider than the corridor, no text, no letters, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no logos, no watermark, vertical 9:16 portrait format.
-```
-**Animation**
-```
-The red measuring line extends across the sarcophagus then across the narrow corridor, showing it does not fit. The action starts immediately and is clearly finished within 3 seconds. Static camera unless stated, subject centered and in frame, no text, no logo, no watermark.
-```
-
-## Plan 15 · 61,4 – 65,7 s — « Il a été posé là pendant la construction… puis tout a été bâti autour. »
-
-**Image**
-```
-Workers people shown as elegant figures made of dark translucent glass with glowing blue outlines, faceless, placing a stone sarcophagus on an open construction platform at night, no walls around it yet, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no logos, no watermark, vertical 9:16 portrait format.
+The Great Pyramid of Giza at night lit by blue floodlights, a crowd of modern tourists with smartphones in the foreground, photorealistic cinematic film still, historically accurate reconstruction, low key lighting, the frame mostly deep black, light only from the sources described, a thin cool electric blue moonlight rim light on the edges of the subjects, one single warm accent light, real textures (rough limestone, polished red granite, skin, linen, dust), 35mm anamorphic lens, shallow depth of field, subtle film grain, ultra detailed, no fantasy elements, no text, no letters, no logos, no watermark, vertical 9:16 portrait format.
 ```
 **Image de fin**
 ```
-A stone sarcophagus inside a closed granite chamber, the walls and ceiling now built all around it, no workers, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no logos, no watermark, vertical 9:16 portrait format.
+The Great Pyramid of Giza as it looked 4,500 years ago at night, intact and perfectly smooth, covered in polished white Tura limestone casing glowing under the moon, a small gilded capstone at its summit catching the only warm light, empty desert around, no people, photorealistic cinematic film still, historically accurate reconstruction, low key lighting, the frame mostly deep black, light only from the sources described, a thin cool electric blue moonlight rim light on the edges of the subjects, one single warm accent light, real textures (rough limestone, polished red granite, skin, linen, dust), 35mm anamorphic lens, shallow depth of field, subtle film grain, ultra detailed, no fantasy elements, no text, no letters, no logos, no watermark, vertical 9:16 portrait format.
 ```
 **Animation**
 ```
-Time-lapse: the workers vanish while granite walls and the ceiling rise and close around the sarcophagus. The action starts immediately and is clearly finished within 3 seconds. Static camera unless stated, subject centered and in frame, no text, no logo, no watermark.
+Time rewinds: the tourists fade away, the rough steps of the pyramid are covered by smooth polished white casing from bottom to top, and a gilded capstone appears and catches the light at the summit. The action starts immediately and lasts about 4 seconds. Realistic, physically plausible motion, no morphing, faces, hands and objects stay consistent, keep the same lighting and colors, no text, no logo, no watermark.
 ```
 
-## Plan 16 · 65,7 – 68,4 s — « Le corps du pharaon ? Jamais retrouvé. »
+## Plan 08 · 24,6 – 29,3 s — « Première énigme. Deux millions trois cent mille blocs. Vingt ans de chantier. »
+*Intention : Montrer l'énormité du chantier : vue aérienne, des milliers d'ouvriers, la pyramide à moitié construite.*
 
 **Image**
 ```
-Close-up of an empty open stone sarcophagus, above it the faint ghostly outline of a pharaoh with a royal headdress made of thin blue light, no text, no letters, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no logos, no watermark, vertical 9:16 portrait format.
+Aerial view at dusk of the construction site of the Great Pyramid of Giza around 2560 BC: the pyramid half built with a flat unfinished top, mud-brick construction ramps, thousands of tiny ancient Egyptian workers, bare-chested men with short dark hair, white linen kilts, sweat on the skin hauling blocks on wooden sledges, rows of limestone blocks waiting, the Nile with cargo barges in the background, last orange light on the horizon, the rest in deep blue shadow, photorealistic cinematic film still, historically accurate reconstruction, low key lighting, the frame mostly deep black, light only from the sources described, a thin cool electric blue moonlight rim light on the edges of the subjects, one single warm accent light, real textures (rough limestone, polished red granite, skin, linen, dust), 35mm anamorphic lens, shallow depth of field, subtle film grain, ultra detailed, no fantasy elements, no text, no letters, no logos, no watermark, vertical 9:16 portrait format.
 ```
 **Animation**
 ```
-The ghostly outline of the pharaoh slowly fades away, leaving the sarcophagus empty. The action starts immediately and is clearly finished within 3 seconds. Static camera unless stated, subject centered and in frame, no text, no logo, no watermark.
+Slow aerial drift around the site, thousands of workers move, sledges advance, and the pyramid grows by several layers in a time-lapse. The action starts immediately and lasts about 5 seconds. Realistic, physically plausible motion, no morphing, faces, hands and objects stay consistent, keep the same lighting and colors, no text, no logo, no watermark.
 ```
 
-## Plan 17 · 68,4 – 74,5 s — « Quatrième énigme. Deux conduits minuscules partent d'une autre chambre. Vingt centimètres de large. »
-
-**Image**
-```
-X-ray cut-away of the Great Pyramid, a lower chamber with two very thin shafts rising diagonally from its walls into the stone, glowing blue, no text, no letters, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no logos, no watermark, vertical 9:16 portrait format.
-```
-**Animation**
-```
-Light travels up the two thin shafts from the chamber into the dark stone. The action starts immediately and is clearly finished within 3 seconds. Static camera unless stated, subject centered and in frame, no text, no logo, no watermark.
-```
-
-## Plan 18 · 74,5 – 79,0 s — « En 1993, un robot s'y glisse. Au bout de soixante mètres, »
+## Plan 09 · 29,3 – 32,9 s — « Ça fait un bloc posé toutes les deux minutes. Jour et nuit ? »
+*Intention : Un seul bloc, une seule équipe : on ressent le poids et la cadence. Le jour devient nuit, les torches s'allument.*
 
 **Image**
 ```
-Inside a tiny narrow square stone shaft, a small tracked robot with a bright headlight crawling upward, no text, no letters, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no logos, no watermark, vertical 9:16 portrait format.
-```
-**Animation**
-```
-The small robot crawls forward up the narrow shaft, its headlight sweeping the stone walls. The action starts immediately and is clearly finished within 3 seconds. Static camera unless stated, subject centered and in frame, no text, no logo, no watermark.
-```
-
-## Plan 19 · 79,0 – 83,2 s — « il tombe sur une petite porte de pierre. Avec deux poignées de cuivre. »
-
-**Image**
-```
-At the end of a narrow stone shaft, a small stone slab door with two tiny copper handles glowing orange, lit by a robot headlight, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no logos, no watermark, vertical 9:16 portrait format.
-```
-**Animation**
-```
-The robot headlight reaches the small stone door, the two copper handles catch the light and glow orange. The action starts immediately and is clearly finished within 3 seconds. Static camera unless stated, subject centered and in frame, no text, no logo, no watermark.
-```
-
-## Plan 20 · 83,2 – 88,2 s — « En 2002, on perce la porte. Derrière… une deuxième porte. »
-
-**Image**
-```
-A small stone slab door with two copper handles at the end of a narrow shaft, a thin drill touching its center, no text, no letters, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no logos, no watermark, vertical 9:16 portrait format.
+Close shot of a team of twenty ancient Egyptian workers, bare-chested men with short dark hair, white linen kilts, sweat on the skin pulling a large limestone block on a wooden sledge with thick papyrus ropes, one man in front pouring water from a clay jar onto the sand to make it slide, golden sunset light, photorealistic cinematic film still, historically accurate reconstruction, low key lighting, the frame mostly deep black, light only from the sources described, a thin cool electric blue moonlight rim light on the edges of the subjects, one single warm accent light, real textures (rough limestone, polished red granite, skin, linen, dust), 35mm anamorphic lens, shallow depth of field, subtle film grain, ultra detailed, no fantasy elements, no text, no letters, no logos, no watermark, vertical 9:16 portrait format.
 ```
 **Image de fin**
 ```
-Through a small round hole in a stone slab, a camera view showing a short empty space and behind it a second stone door glowing faint red, no text, no letters, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no logos, no watermark, vertical 9:16 portrait format.
+Same team pulling the same kind of block on a wooden sledge, now at night, lit only by burning torches held on poles, blue night sky, deep shadows, photorealistic cinematic film still, historically accurate reconstruction, low key lighting, the frame mostly deep black, light only from the sources described, a thin cool electric blue moonlight rim light on the edges of the subjects, one single warm accent light, real textures (rough limestone, polished red granite, skin, linen, dust), 35mm anamorphic lens, shallow depth of field, subtle film grain, ultra detailed, no fantasy elements, no text, no letters, no logos, no watermark, vertical 9:16 portrait format.
 ```
 **Animation**
 ```
-The drill pierces the stone door, the camera pushes through the hole and reveals a second stone door behind. The action starts immediately and is clearly finished within 3 seconds. Static camera unless stated, subject centered and in frame, no text, no logo, no watermark.
+The team heaves, the sledge slides forward, the man pours water on the sand, the sky darkens from sunset to night and torches ignite. The action starts immediately and lasts about 4 seconds. Realistic, physically plausible motion, no morphing, faces, hands and objects stay consistent, keep the same lighting and colors, no text, no logo, no watermark.
 ```
 
-## Plan 21 · 88,2 – 94,0 s — « Cinquième énigme. En 2023, une caméra est glissée dans une fissure de la façade nord. »
+## Plan 10 · 32,9 – 37,7 s — « Personne n'a jamais retrouvé comment ils montaient les derniers, à plus de cent mètres de haut. »
+*Intention : Le vertige : quelques ouvriers minuscules au sommet, puis le recul qui révèle le vide en dessous.*
 
 **Image**
 ```
-Two scientists people shown as elegant figures made of dark translucent glass with glowing blue outlines, faceless, standing on the north face of the Great Pyramid next to huge chevron-shaped stones, slipping a thin glowing cable camera into a narrow crack, no text, no letters, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no logos, no watermark, vertical 9:16 portrait format.
+The narrow unfinished summit platform of the Great Pyramid of Giza more than one hundred meters above the desert at night, a few ancient Egyptian workers, bare-chested men with short dark hair, white linen kilts, sweat on the skin using long wooden levers to raise a limestone block at the very edge, torchlight on their bodies, a dizzying drop behind them, photorealistic cinematic film still, historically accurate reconstruction, low key lighting, the frame mostly deep black, light only from the sources described, a thin cool electric blue moonlight rim light on the edges of the subjects, one single warm accent light, real textures (rough limestone, polished red granite, skin, linen, dust), 35mm anamorphic lens, shallow depth of field, subtle film grain, ultra detailed, no fantasy elements, no text, no letters, no logos, no watermark, vertical 9:16 portrait format.
 ```
 **Animation**
 ```
-The scientists slowly push the glowing cable deeper into the crack, the cable light disappears inside. The action starts immediately and is clearly finished within 3 seconds. Static camera unless stated, subject centered and in frame, no text, no logo, no watermark.
+The workers push down on the levers and the block lifts slightly, then the camera pulls back fast and far, revealing the enormous height and the tiny desert below. The action starts immediately and lasts about 5 seconds. Realistic, physically plausible motion, no morphing, faces, hands and objects stay consistent, keep the same lighting and colors, no text, no logo, no watermark.
 ```
 
-## Plan 22 · 94,0 – 99,9 s — « Elle révèle un couloir caché. Neuf mètres. Vide. Scellé depuis quatre mille cinq cents ans. »
+## Plan 11 · 37,7 – 42,0 s — « Deuxième énigme. Au cœur de la pyramide, la chambre du roi. »
+*Intention : Entrer dans la pyramide : la Grande Galerie réelle, ses murs en encorbellement, et en haut la petite porte noire de la chambre du roi.*
 
 **Image**
 ```
-Inside a hidden empty stone corridor with a pointed gable ceiling of large leaning stones, seen through a small camera light, no text, no letters, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no logos, no watermark, vertical 9:16 portrait format.
+Inside the Grand Gallery of the Great Pyramid: a steep ascending corridor 47 meters long, its walls of smooth limestone stepping inward in seven corbelled layers up to a narrow ceiling 8.6 meters high, a single oil lamp at the top revealing the small low dark doorway to the King's chamber, photorealistic cinematic film still, historically accurate reconstruction, low key lighting, the frame mostly deep black, light only from the sources described, a thin cool electric blue moonlight rim light on the edges of the subjects, one single warm accent light, real textures (rough limestone, polished red granite, skin, linen, dust), 35mm anamorphic lens, shallow depth of field, subtle film grain, ultra detailed, no fantasy elements, no text, no letters, no logos, no watermark, vertical 9:16 portrait format.
 ```
 **Animation**
 ```
-The camera light slowly moves forward through the empty corridor, revealing dust and stone. The action starts immediately and is clearly finished within 3 seconds. Static camera unless stated, subject centered and in frame, no text, no logo, no watermark.
+The camera glides slowly up the Grand Gallery toward the small dark doorway at the top, the lamp flame flickers. The action starts immediately and lasts about 4 seconds. Realistic, physically plausible motion, no morphing, faces, hands and objects stay consistent, keep the same lighting and colors, no text, no logo, no watermark.
 ```
 
-## Plan 23 · 99,9 – 103,1 s — « Il ne mène nulle part. Ou pas encore. »
+## Plan 12 · 42,0 – 46,4 s — « Son plafond est fait de poutres de granit. Jusqu'à quatre-vingts tonnes chacune. »
+*Intention : Le poids au-dessus de nos têtes : contre-plongée sur les 9 poutres de granit rouge.*
 
 **Image**
 ```
-The end of a hidden stone corridor, a blank stone wall, a thin line of faint red light seeping from a crack at its base, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no logos, no watermark, vertical 9:16 portrait format.
+Inside the King's chamber of the Great Pyramid: walls of polished red Aswan granite blocks, low angle looking straight up at the flat ceiling made of nine colossal red granite beams laid side by side, each as long as a bus, a warm torch light from below grazing them, photorealistic cinematic film still, historically accurate reconstruction, low key lighting, the frame mostly deep black, light only from the sources described, a thin cool electric blue moonlight rim light on the edges of the subjects, one single warm accent light, real textures (rough limestone, polished red granite, skin, linen, dust), 35mm anamorphic lens, shallow depth of field, subtle film grain, ultra detailed, no fantasy elements, no text, no letters, no logos, no watermark, vertical 9:16 portrait format.
 ```
 **Animation**
 ```
-Slow push-in toward the blank wall, the faint red light at its base pulses once. The action starts immediately and is clearly finished within 3 seconds. Static camera unless stated, subject centered and in frame, no text, no logo, no watermark.
+Slow upward tilt along the ceiling beams while the torch light runs across them, revealing their enormous size. The action starts immediately and lasts about 4 seconds. Realistic, physically plausible motion, no morphing, faces, hands and objects stay consistent, keep the same lighting and colors, no text, no logo, no watermark.
 ```
 
-## Plan 24 · 103,1 – 108,7 s — « Et ce grand vide de trente mètres, juste au-dessus de la galerie principale ? Les scientifiques savent où il est. »
+## Plan 13 · 46,4 – 49,2 s — « Venues d'une carrière à huit cents kilomètres. »
+*Intention : Le voyage : une poutre de granit sur une barge, descendant le Nil.*
 
 **Image**
 ```
-X-ray cut-away of the Great Pyramid, a long tall inclined gallery glowing blue, and right above it a long empty hollow space glowing red, no text, no letters, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no logos, no watermark, vertical 9:16 portrait format.
+A huge red granite beam lying on a large wooden cargo barge on the Nile in ancient Egypt, dozens of rowers, palm trees on the dark banks, twilight, the river reflecting the last light, photorealistic cinematic film still, historically accurate reconstruction, low key lighting, the frame mostly deep black, light only from the sources described, a thin cool electric blue moonlight rim light on the edges of the subjects, one single warm accent light, real textures (rough limestone, polished red granite, skin, linen, dust), 35mm anamorphic lens, shallow depth of field, subtle film grain, ultra detailed, no fantasy elements, no text, no letters, no logos, no watermark, vertical 9:16 portrait format.
 ```
 **Animation**
 ```
-The gallery lights up from bottom to top, then the red hollow space above it glows brighter. The action starts immediately and is clearly finished within 3 seconds. Static camera unless stated, subject centered and in frame, no text, no logo, no watermark.
+The barge glides down the Nile, oars dip in rhythm, the camera tracks alongside it. The action starts immediately and lasts about 3 seconds. Realistic, physically plausible motion, no morphing, faces, hands and objects stay consistent, keep the same lighting and colors, no text, no logo, no watermark.
 ```
 
-## Plan 25 · 108,7 – 114,7 s — « Ils connaissent sa taille. Mais aucune caméra, aucun robot, aucun être humain n'y est jamais entré. »
+## Plan 14 · 49,2 – 53,6 s — « Et hissées à quarante mètres du sol. Sans poulie. Sans roue. »
+*Intention : L'effort humain brut : cent hommes, des cordes, un traîneau de bois sous la poutre.*
 
 **Image**
 ```
-Scientists people shown as elegant figures made of dark translucent glass with glowing blue outlines, faceless, standing around a floating holographic 3D model of the pyramid with a red hollow space inside, a small camera, a small robot and a human figure placed in front of it, all outside, no text, no letters, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no logos, no watermark, vertical 9:16 portrait format.
+A colossal red granite beam on a wooden sledge being dragged up a steep mud-brick ramp on the side of the half-built pyramid, about a hundred ancient Egyptian workers, bare-chested men with short dark hair, white linen kilts, sweat on the skin pulling thick papyrus ropes, an overseer with a wooden staff shouting, torchlight, the ground far below, photorealistic cinematic film still, historically accurate reconstruction, low key lighting, the frame mostly deep black, light only from the sources described, a thin cool electric blue moonlight rim light on the edges of the subjects, one single warm accent light, real textures (rough limestone, polished red granite, skin, linen, dust), 35mm anamorphic lens, shallow depth of field, subtle film grain, ultra detailed, no fantasy elements, no text, no letters, no logos, no watermark, vertical 9:16 portrait format.
 ```
 **Animation**
 ```
-The camera, the robot and the human figure fade away one after another, only the red hollow space remains. The action starts immediately and is clearly finished within 3 seconds. Static camera unless stated, subject centered and in frame, no text, no logo, no watermark.
+The workers pull together, ropes tighten, the sledge and the beam move up the ramp a few centimeters, dust falls. The action starts immediately and lasts about 4 seconds. Realistic, physically plausible motion, no morphing, faces, hands and objects stay consistent, keep the same lighting and colors, no text, no logo, no watermark.
 ```
 
-## Plan 26 · 114,7 – 120,8 s — « Une chambre. Fermée depuis l'époque des pharaons. Au cœur du monument le plus étudié de la planète. »
+## Plan 15 · 53,6 – 57,3 s — « Troisième énigme. Dans cette chambre, un sarcophage. »
+*Intention : Retour dans la chambre du roi : le vrai sarcophage, seul, contre le mur ouest.*
 
 **Image**
 ```
-The Great Pyramid at night seen from far away, with a tiny glowing red point deep inside its heart, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no logos, no watermark, vertical 9:16 portrait format.
+Inside the King's chamber of the Great Pyramid, red granite walls in darkness, against the far wall a single rectangular red granite sarcophagus with no lid and one chipped corner, lit by one warm torch beam from the side, photorealistic cinematic film still, historically accurate reconstruction, low key lighting, the frame mostly deep black, light only from the sources described, a thin cool electric blue moonlight rim light on the edges of the subjects, one single warm accent light, real textures (rough limestone, polished red granite, skin, linen, dust), 35mm anamorphic lens, shallow depth of field, subtle film grain, ultra detailed, no fantasy elements, no text, no letters, no logos, no watermark, vertical 9:16 portrait format.
 ```
 **Animation**
 ```
-Camera dives slowly toward the pyramid and through its stone face toward the tiny red point. The action starts immediately and is clearly finished within 3 seconds. Static camera unless stated, subject centered and in frame, no text, no logo, no watermark.
+The torch flame flickers, the camera pushes slowly toward the sarcophagus. The action starts immediately and lasts about 4 seconds. Realistic, physically plausible motion, no morphing, faces, hands and objects stay consistent, keep the same lighting and colors, no text, no logo, no watermark.
 ```
 
-## Plan 27 · 120,8 – 125,2 s — « Qu'est-ce qu'ils ont voulu cacher… là où personne ne devait jamais regarder ? »
+## Plan 16 · 57,3 – 61,4 s — « Vide. Sans couvercle. Et trop large pour passer par les couloirs. »
+*Intention : La preuve visuelle : la silhouette du sarcophage glisse vers l'entrée du couloir et ne passe pas.*
 
 **Image**
 ```
-A massive sealed stone wall deep inside the pyramid, a thin crack of warm golden light shining from behind it, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no logos, no watermark, vertical 9:16 portrait format.
+X-ray cut-away of the King's chamber of the Great Pyramid of Giza, the rectangular sarcophagus drawn in glowing blue lines, next to the narrow entrance of the ascending corridor drawn in blue, dark minimal cinematic 3D render, mostly pure black frame, the pyramid made of dark translucent glass defined by bright electric blue glowing edges with a soft neon glow, its inner corridors and chambers drawn as thin glowing blue lines, deep shadows, high contrast, clean, scientific visualization, Unreal Engine 5 style, no light rays, no particles everywhere, no text, no letters, no numbers, no logos, no watermark, vertical 9:16 portrait format.
 ```
 **Animation**
 ```
-Slow push-in toward the crack of golden light, which flickers once, then everything fades to black. The action starts immediately and is clearly finished within 3 seconds. Static camera unless stated, subject centered and in frame, no text, no logo, no watermark.
+The glowing sarcophagus slides toward the narrow corridor entrance and stops against it, its edges turning red where it does not fit. The action starts immediately and lasts about 4 seconds. Realistic, physically plausible motion, no morphing, faces, hands and objects stay consistent, keep the same lighting and colors, no text, no logo, no watermark.
+```
+
+## Plan 17 · 61,4 – 65,7 s — « Il a été posé là pendant la construction… puis tout a été bâti autour. »
+*Intention : On remonte au chantier : le sarcophage déposé à ciel ouvert, puis les murs qui se referment.*
+
+**Image**
+```
+ancient Egyptian workers, bare-chested men with short dark hair, white linen kilts, sweat on the skin lowering a red granite sarcophagus with ropes onto an open-air stone platform at the unfinished top of the pyramid at night, torchlight, no walls around it yet, stars above, photorealistic cinematic film still, historically accurate reconstruction, low key lighting, the frame mostly deep black, light only from the sources described, a thin cool electric blue moonlight rim light on the edges of the subjects, one single warm accent light, real textures (rough limestone, polished red granite, skin, linen, dust), 35mm anamorphic lens, shallow depth of field, subtle film grain, ultra detailed, no fantasy elements, no text, no letters, no logos, no watermark, vertical 9:16 portrait format.
+```
+**Image de fin**
+```
+The same red granite sarcophagus now enclosed in a finished dark chamber of red granite walls and a flat granite ceiling, no people, a single torch, photorealistic cinematic film still, historically accurate reconstruction, low key lighting, the frame mostly deep black, light only from the sources described, a thin cool electric blue moonlight rim light on the edges of the subjects, one single warm accent light, real textures (rough limestone, polished red granite, skin, linen, dust), 35mm anamorphic lens, shallow depth of field, subtle film grain, ultra detailed, no fantasy elements, no text, no letters, no logos, no watermark, vertical 9:16 portrait format.
+```
+**Animation**
+```
+Time-lapse: the workers vanish, red granite walls and ceiling beams rise and close around the sarcophagus until it is sealed in darkness. The action starts immediately and lasts about 4 seconds. Realistic, physically plausible motion, no morphing, faces, hands and objects stay consistent, keep the same lighting and colors, no text, no logo, no watermark.
+```
+
+## Plan 18 · 65,7 – 68,4 s — « Le corps du pharaon ? Jamais retrouvé. »
+*Intention : Visage de Khéops, puis il disparaît : l'absence devient visible.*
+
+**Image**
+```
+Profile portrait of the pharaoh Khufu in darkness, wearing the blue and gold striped nemes headdress with a golden cobra on the brow and a braided false beard, eyes closed, lit by a single warm torch, photorealistic cinematic film still, historically accurate reconstruction, low key lighting, the frame mostly deep black, light only from the sources described, a thin cool electric blue moonlight rim light on the edges of the subjects, one single warm accent light, real textures (rough limestone, polished red granite, skin, linen, dust), 35mm anamorphic lens, shallow depth of field, subtle film grain, ultra detailed, no fantasy elements, no text, no letters, no logos, no watermark, vertical 9:16 portrait format.
+```
+**Animation**
+```
+The pharaoh's face slowly dissolves into fine golden dust that drifts away into the darkness, leaving only black. The action starts immediately and lasts about 3 seconds. Realistic, physically plausible motion, no morphing, faces, hands and objects stay consistent, keep the same lighting and colors, no text, no logo, no watermark.
+```
+
+## Plan 19 · 68,4 – 72,8 s — « Quatrième énigme. Deux conduits minuscules partent d'une autre chambre. »
+*Intention : La chambre de la reine : plafond en chevron, niche, et le petit trou carré dans le mur.*
+
+**Image**
+```
+Inside the Queen's chamber of the Great Pyramid: bare limestone walls, a pointed gabled ceiling, a tall stepped niche in one wall, and on the opposite wall a tiny dark square opening low in the stone, lit by a single flashlight, photorealistic cinematic film still, historically accurate reconstruction, low key lighting, the frame mostly deep black, light only from the sources described, a thin cool electric blue moonlight rim light on the edges of the subjects, one single warm accent light, real textures (rough limestone, polished red granite, skin, linen, dust), 35mm anamorphic lens, shallow depth of field, subtle film grain, ultra detailed, no fantasy elements, no text, no letters, no logos, no watermark, vertical 9:16 portrait format.
+```
+**Animation**
+```
+The flashlight beam moves across the wall and lands on the tiny square opening, then the camera pushes in toward it. The action starts immediately and lasts about 4 seconds. Realistic, physically plausible motion, no morphing, faces, hands and objects stay consistent, keep the same lighting and colors, no text, no logo, no watermark.
+```
+
+## Plan 20 · 72,8 – 74,6 s — « Vingt centimètres de large. »
+*Intention : L'échelle : une main humaine devant l'ouverture, elle passe à peine.*
+
+**Image**
+```
+Close-up of a human hand reaching toward a tiny dark square shaft opening in a limestone wall, the opening barely wider than the hand, flashlight, photorealistic cinematic film still, historically accurate reconstruction, low key lighting, the frame mostly deep black, light only from the sources described, a thin cool electric blue moonlight rim light on the edges of the subjects, one single warm accent light, real textures (rough limestone, polished red granite, skin, linen, dust), 35mm anamorphic lens, shallow depth of field, subtle film grain, ultra detailed, no fantasy elements, no text, no letters, no logos, no watermark, vertical 9:16 portrait format.
+```
+**Animation**
+```
+The hand slides into the opening and stops, the fingers barely fitting. The action starts immediately and lasts about 3 seconds. Realistic, physically plausible motion, no morphing, faces, hands and objects stay consistent, keep the same lighting and colors, no text, no logo, no watermark.
+```
+
+## Plan 21 · 74,6 – 79,0 s — « En 1993, un robot s'y glisse. Au bout de soixante mètres, »
+*Intention : Le robot réel de 1993 : petit engin à chenilles qui disparaît dans le conduit.*
+
+**Image**
+```
+Inside a tiny steep square limestone shaft, a small 1990s tracked robot about forty centimeters long with caterpillar tracks pressing on floor and ceiling, two small headlights and a trailing cable, seen from behind as it climbs into darkness, photorealistic cinematic film still, historically accurate reconstruction, low key lighting, the frame mostly deep black, light only from the sources described, a thin cool electric blue moonlight rim light on the edges of the subjects, one single warm accent light, real textures (rough limestone, polished red granite, skin, linen, dust), 35mm anamorphic lens, shallow depth of field, subtle film grain, ultra detailed, no fantasy elements, no text, no letters, no logos, no watermark, vertical 9:16 portrait format.
+```
+**Animation**
+```
+The small robot crawls up the steep shaft away from the camera, its cable unspooling, its headlights fading into the darkness. The action starts immediately and lasts about 4 seconds. Realistic, physically plausible motion, no morphing, faces, hands and objects stay consistent, keep the same lighting and colors, no text, no logo, no watermark.
+```
+
+## Plan 22 · 79,0 – 83,2 s — « il tombe sur une petite porte de pierre. Avec deux poignées de cuivre. »
+*Intention : Vue caméra du robot, comme les vraies images de 1993 : la dalle et ses deux tiges de cuivre vert-de-gris.*
+
+**Image**
+```
+Robot camera point of view at the end of a narrow limestone shaft: a small smooth limestone slab blocking the way, two small corroded copper pins with green patina sticking out of it, lit by the robot headlights, slight 1990s video look, photorealistic cinematic film still, historically accurate reconstruction, low key lighting, the frame mostly deep black, light only from the sources described, a thin cool electric blue moonlight rim light on the edges of the subjects, one single warm accent light, real textures (rough limestone, polished red granite, skin, linen, dust), 35mm anamorphic lens, shallow depth of field, subtle film grain, ultra detailed, no fantasy elements, no text, no letters, no logos, no watermark, vertical 9:16 portrait format.
+```
+**Animation**
+```
+The robot slowly approaches the slab, the headlights get brighter and the two copper pins glint. The action starts immediately and lasts about 4 seconds. Realistic, physically plausible motion, no morphing, faces, hands and objects stay consistent, keep the same lighting and colors, no text, no logo, no watermark.
+```
+
+## Plan 23 · 83,2 – 88,2 s — « En 2002, on perce la porte. Derrière… une deuxième porte. »
+*Intention : La révélation qui ne révèle rien : on perce, on regarde… une autre porte.*
+
+**Image**
+```
+Robot point of view: a thin metal drill bit pressing into the center of a small limestone slab with two copper pins, stone dust, headlights, photorealistic cinematic film still, historically accurate reconstruction, low key lighting, the frame mostly deep black, light only from the sources described, a thin cool electric blue moonlight rim light on the edges of the subjects, one single warm accent light, real textures (rough limestone, polished red granite, skin, linen, dust), 35mm anamorphic lens, shallow depth of field, subtle film grain, ultra detailed, no fantasy elements, no text, no letters, no logos, no watermark, vertical 9:16 portrait format.
+```
+**Image de fin**
+```
+Camera view through a small round hole drilled in a limestone slab: a small empty space and, a few centimeters behind, a second rough stone slab blocking the shaft, photorealistic cinematic film still, historically accurate reconstruction, low key lighting, the frame mostly deep black, light only from the sources described, a thin cool electric blue moonlight rim light on the edges of the subjects, one single warm accent light, real textures (rough limestone, polished red granite, skin, linen, dust), 35mm anamorphic lens, shallow depth of field, subtle film grain, ultra detailed, no fantasy elements, no text, no letters, no logos, no watermark, vertical 9:16 portrait format.
+```
+**Animation**
+```
+The drill pierces the slab, the camera pushes through the small hole and reveals a second stone slab behind it. The action starts immediately and lasts about 5 seconds. Realistic, physically plausible motion, no morphing, faces, hands and objects stay consistent, keep the same lighting and colors, no text, no logo, no watermark.
+```
+
+## Plan 24 · 88,2 – 90,7 s — « Cinquième énigme. En 2023, »
+*Intention : La façade nord réelle : les énormes chevrons de calcaire au-dessus de l'entrée d'origine.*
+
+**Image**
+```
+The north face of the Great Pyramid of Giza at night, low angle on the original entrance, above it the huge pair of leaning limestone beams forming a double chevron, two scientists in helmets on a scaffold next to it with headlamps, photorealistic cinematic film still, historically accurate reconstruction, low key lighting, the frame mostly deep black, light only from the sources described, a thin cool electric blue moonlight rim light on the edges of the subjects, one single warm accent light, real textures (rough limestone, polished red granite, skin, linen, dust), 35mm anamorphic lens, shallow depth of field, subtle film grain, ultra detailed, no fantasy elements, no text, no letters, no logos, no watermark, vertical 9:16 portrait format.
+```
+**Animation**
+```
+The camera rises slowly toward the chevron stones, the scientists' headlamps sweep over them. The action starts immediately and lasts about 3 seconds. Realistic, physically plausible motion, no morphing, faces, hands and objects stay consistent, keep the same lighting and colors, no text, no logo, no watermark.
+```
+
+## Plan 25 · 90,7 – 94,0 s — « une caméra est glissée dans une fissure de la façade nord. »
+*Intention : Le geste précis : un câble fin glissé dans un joint entre deux blocs.*
+
+**Image**
+```
+Close-up of a gloved hand feeding a thin black endoscope cable with a tiny light at its tip into a narrow joint between two huge limestone blocks, headlamp light, photorealistic cinematic film still, historically accurate reconstruction, low key lighting, the frame mostly deep black, light only from the sources described, a thin cool electric blue moonlight rim light on the edges of the subjects, one single warm accent light, real textures (rough limestone, polished red granite, skin, linen, dust), 35mm anamorphic lens, shallow depth of field, subtle film grain, ultra detailed, no fantasy elements, no text, no letters, no logos, no watermark, vertical 9:16 portrait format.
+```
+**Animation**
+```
+The cable slides into the joint, its tip light disappears inside. The action starts immediately and lasts about 3 seconds. Realistic, physically plausible motion, no morphing, faces, hands and objects stay consistent, keep the same lighting and colors, no text, no logo, no watermark.
+```
+
+## Plan 26 · 94,0 – 99,9 s — « Elle révèle un couloir caché. Neuf mètres. Vide. Scellé depuis quatre mille cinq cents ans. »
+*Intention : Vue endoscope : un couloir intact, toit en chevron, poussière jamais touchée.*
+
+**Image**
+```
+Endoscope camera view inside a hidden corridor in the Great Pyramid: a pointed gable ceiling of large leaning limestone beams, rough walls, an untouched dusty floor, the far end lost in darkness, a ring of cold white light from the camera, photorealistic cinematic film still, historically accurate reconstruction, low key lighting, the frame mostly deep black, light only from the sources described, a thin cool electric blue moonlight rim light on the edges of the subjects, one single warm accent light, real textures (rough limestone, polished red granite, skin, linen, dust), 35mm anamorphic lens, shallow depth of field, subtle film grain, ultra detailed, no fantasy elements, no text, no letters, no logos, no watermark, vertical 9:16 portrait format.
+```
+**Animation**
+```
+The camera glides slowly forward through the empty corridor, a few dust motes float in the light. The action starts immediately and lasts about 6 seconds. Realistic, physically plausible motion, no morphing, faces, hands and objects stay consistent, keep the same lighting and colors, no text, no logo, no watermark.
+```
+
+## Plan 27 · 99,9 – 103,1 s — « Il ne mène nulle part. Ou pas encore. »
+*Intention : Le cul-de-sac : un mur, et un souffle d'air qui fait bouger la poussière vers un interstice.*
+
+**Image**
+```
+The end of a hidden limestone corridor: a blank stone wall in the endoscope light, a tiny dark gap at the bottom between two blocks, photorealistic cinematic film still, historically accurate reconstruction, low key lighting, the frame mostly deep black, light only from the sources described, a thin cool electric blue moonlight rim light on the edges of the subjects, one single warm accent light, real textures (rough limestone, polished red granite, skin, linen, dust), 35mm anamorphic lens, shallow depth of field, subtle film grain, ultra detailed, no fantasy elements, no text, no letters, no logos, no watermark, vertical 9:16 portrait format.
+```
+**Animation**
+```
+The light reaches the wall and stops, a faint draft pulls a few dust motes toward the tiny dark gap at the bottom. The action starts immediately and lasts about 3 seconds. Realistic, physically plausible motion, no morphing, faces, hands and objects stay consistent, keep the same lighting and colors, no text, no logo, no watermark.
+```
+
+## Plan 28 · 103,1 – 107,0 s — « Et ce grand vide de trente mètres, juste au-dessus de la galerie principale ? »
+*Intention : Retour au plan scientifique du début : on comprend enfin où est le vide.*
+
+**Image**
+```
+X-ray side cut-away of the Great Pyramid of Giza, the Grand Gallery glowing bright blue, and directly above it a long inclined cavity glowing deep red, dark minimal cinematic 3D render, mostly pure black frame, the pyramid made of dark translucent glass defined by bright electric blue glowing edges with a soft neon glow, its inner corridors and chambers drawn as thin glowing blue lines, deep shadows, high contrast, clean, scientific visualization, Unreal Engine 5 style, no light rays, no particles everywhere, no text, no letters, no numbers, no logos, no watermark, vertical 9:16 portrait format.
+```
+**Animation**
+```
+The camera slowly orbits around the pyramid, the Grand Gallery lights up from bottom to top, then the red cavity glows brighter. The action starts immediately and lasts about 4 seconds. Realistic, physically plausible motion, no morphing, faces, hands and objects stay consistent, keep the same lighting and colors, no text, no logo, no watermark.
+```
+
+## Plan 29 · 107,0 – 110,0 s — « Les scientifiques savent où il est. Ils connaissent sa taille. »
+*Intention : Les chercheurs autour du modèle : ils savent, mais ne peuvent pas y aller.*
+
+**Image**
+```
+A dark room, four scientists standing around a floating holographic model of the Great Pyramid, their faces lit blue from below, a red elongated cavity glowing inside the hologram, photorealistic cinematic film still, historically accurate reconstruction, low key lighting, the frame mostly deep black, light only from the sources described, a thin cool electric blue moonlight rim light on the edges of the subjects, one single warm accent light, real textures (rough limestone, polished red granite, skin, linen, dust), 35mm anamorphic lens, shallow depth of field, subtle film grain, ultra detailed, no fantasy elements, no text, no letters, no logos, no watermark, vertical 9:16 portrait format.
+```
+**Animation**
+```
+One scientist turns the hologram with his hand, the red cavity rotates into view, the others lean in. The action starts immediately and lasts about 3 seconds. Realistic, physically plausible motion, no morphing, faces, hands and objects stay consistent, keep the same lighting and colors, no text, no logo, no watermark.
+```
+
+## Plan 30 · 110,0 – 114,7 s — « Mais aucune caméra, aucun robot, aucun être humain n'y est jamais entré. »
+*Intention : On lève les yeux dans la Grande Galerie : le vide est juste là, derrière ce plafond.*
+
+**Image**
+```
+Inside the Grand Gallery of the Great Pyramid looking straight up at the narrow corbelled limestone ceiling 8.6 meters high, a flashlight beam pointing up at the top stones, total darkness beyond, photorealistic cinematic film still, historically accurate reconstruction, low key lighting, the frame mostly deep black, light only from the sources described, a thin cool electric blue moonlight rim light on the edges of the subjects, one single warm accent light, real textures (rough limestone, polished red granite, skin, linen, dust), 35mm anamorphic lens, shallow depth of field, subtle film grain, ultra detailed, no fantasy elements, no text, no letters, no logos, no watermark, vertical 9:16 portrait format.
+```
+**Animation**
+```
+The flashlight beam climbs up the corbelled walls to the ceiling stones, the camera pushes up toward the stone until the frame turns black. The action starts immediately and lasts about 5 seconds. Realistic, physically plausible motion, no morphing, faces, hands and objects stay consistent, keep the same lighting and colors, no text, no logo, no watermark.
+```
+
+## Plan 31 · 114,7 – 117,6 s — « Une chambre. Fermée depuis l'époque des pharaons. »
+*Intention : Le moment où on a scellé : un ouvrier pousse le dernier bloc, la torche s'éteint.*
+
+**Image**
+```
+Two ancient Egyptian workers, bare-chested men with short dark hair, white linen kilts, sweat on the skin sliding a last limestone block into an opening in a wall by torchlight, a priest with shaved head and white linen robe watching in the background, photorealistic cinematic film still, historically accurate reconstruction, low key lighting, the frame mostly deep black, light only from the sources described, a thin cool electric blue moonlight rim light on the edges of the subjects, one single warm accent light, real textures (rough limestone, polished red granite, skin, linen, dust), 35mm anamorphic lens, shallow depth of field, subtle film grain, ultra detailed, no fantasy elements, no text, no letters, no logos, no watermark, vertical 9:16 portrait format.
+```
+**Animation**
+```
+The block slides into place and closes the opening, the torch flame shrinks and goes out, darkness. The action starts immediately and lasts about 3 seconds. Realistic, physically plausible motion, no morphing, faces, hands and objects stay consistent, keep the same lighting and colors, no text, no logo, no watermark.
+```
+
+## Plan 32 · 117,6 – 120,8 s — « Au cœur du monument le plus étudié de la planète. »
+*Intention : Recul total : la pyramide et, derrière, les lumières du Caire moderne.*
+
+**Image**
+```
+The Great Pyramid of Giza at night seen from a drone, behind it the endless lights of modern Cairo spreading to the horizon, photorealistic cinematic film still, historically accurate reconstruction, low key lighting, the frame mostly deep black, light only from the sources described, a thin cool electric blue moonlight rim light on the edges of the subjects, one single warm accent light, real textures (rough limestone, polished red granite, skin, linen, dust), 35mm anamorphic lens, shallow depth of field, subtle film grain, ultra detailed, no fantasy elements, no text, no letters, no logos, no watermark, vertical 9:16 portrait format.
+```
+**Animation**
+```
+The drone pulls back slowly and rises, the pyramid becomes small against the immense city. The action starts immediately and lasts about 3 seconds. Realistic, physically plausible motion, no morphing, faces, hands and objects stay consistent, keep the same lighting and colors, no text, no logo, no watermark.
+```
+
+## Plan 33 · 120,8 – 125,2 s — « Qu'est-ce qu'ils ont voulu cacher… là où personne ne devait jamais regarder ? »
+*Intention : Dernière image : on s'approche d'un joint entre deux blocs, une lueur dorée au fond… puis le noir.*
+
+**Image**
+```
+Extreme close-up of the joint between two huge ancient limestone blocks inside the pyramid, rough stone, a torch light grazing it, a very faint warm golden glint deep inside the joint, photorealistic cinematic film still, historically accurate reconstruction, low key lighting, the frame mostly deep black, light only from the sources described, a thin cool electric blue moonlight rim light on the edges of the subjects, one single warm accent light, real textures (rough limestone, polished red granite, skin, linen, dust), 35mm anamorphic lens, shallow depth of field, subtle film grain, ultra detailed, no fantasy elements, no text, no letters, no logos, no watermark, vertical 9:16 portrait format.
+```
+**Animation**
+```
+Very slow push-in into the joint toward the golden glint, which flickers once, then everything fades to black. The action starts immediately and lasts about 4 seconds. Realistic, physically plausible motion, no morphing, faces, hands and objects stay consistent, keep the same lighting and colors, no text, no logo, no watermark.
 ```
