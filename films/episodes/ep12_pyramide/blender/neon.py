@@ -229,7 +229,7 @@ def pyramid(parent=None, courses=36, glass_mat=None, edge=None, course_mat=None,
         course_mat = course_mat or emit(BLUE, 1.0)
         for k in range(1, courses):
             z = h * k / courses
-            s = a * (1 - z / h) + 0.05
+            s = a * (1 - z / h) + r_course * 2 + 0.3
             cl.append(line([(-s, -s, z), (s, -s, z), (s, s, z), (-s, s, z)], r_course, course_mat, parent, cyclic=True))
     return solid, edges, cl
 
@@ -300,10 +300,20 @@ def stars(n=500, radius=1500, seed=3, parent=None, zmin=0.05):
     return mesh(verts, faces, m, parent, "etoiles")
 
 
-def ground(size=4000, z=0.0, mat=None, parent=None):
+def ground(size=4000, z=0.0, mat=None, parent=None, grid=0.0, extent=None):
+    """Sol sombre ; grid > 0 ajoute un quadrillage discret (pas en mètres) pour ancrer la scène."""
     mat = mat or glass(tint=(0.002, 0.004, 0.01), rough=0.35, name="sol")
     s = size / 2
-    return mesh([(-s, -s, z), (s, -s, z), (s, s, z), (-s, s, z)], [(0, 1, 2, 3)], mat, parent, "sol")
+    o = mesh([(-s, -s, z), (s, -s, z), (s, s, z), (-s, s, z)], [(0, 1, 2, 3)], mat, parent, "sol")
+    if grid:
+        e = extent or s
+        gm = emit(BLUE, 0.35)
+        k = -e
+        while k <= e:
+            line([(k, -e, z + 0.02), (k, e, z + 0.02)], grid * 0.012, gm, parent)
+            line([(-e, k, z + 0.02), (e, k, z + 0.02)], grid * 0.012, gm, parent)
+            k += grid
+    return o
 
 
 def reveal_emit(rgb, strength, axis="Z", name="revele"):

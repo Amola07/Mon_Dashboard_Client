@@ -166,7 +166,7 @@ def p04(n):
 # ---------------------------------------------------------------- 05 — personne ne l'a jamais ouvert
 @plan("05")
 def p05(n):
-    N.blocks_wall(-6, 6, -3, 5, 0.0, bw=1.6, bh=1.0, edge=N.emit(BLUE, 0.7), seed=4)
+    N.blocks_wall(-6, 6, -3, 5, 0.0, bw=1.6, bh=1.0, edge=N.emit(BLUE, 0.5), face=N.glass(tint=(0.03, 0.04, 0.06), rough=0.55), seed=4)
     redl = N.emit(RED, 0)
     seam = N.line([(1.2, -0.01, 0.95), (2.6, -0.01, 0.95)], 0.02, redl)
     N.key_strength(redl, [(1, 2.5), (int(n * 0.55), 2.5), (int(n * 0.65), 9), (int(n * 0.75), 3), (n, 5)])
@@ -201,11 +201,11 @@ def giza(courses=40, gl=None):
 @plan("06")
 def p06(n):
     giza()
-    N.ground()
+    N.ground(grid=40, extent=900)
     N.stars(900, 3000)
-    cam, tgt = N.camera(26, (330, -520, 6), (0, 0, 70))
-    N.keys(cam, "location", [(1, (330, -520, 6)), (n, (300, -480, 60))])
-    N.keys(tgt, "location", [(1, (-20, 40, 60)), (n, (-20, 40, 80))])
+    cam, tgt = N.camera(24, (150, -300, 4), (0, 0, 70))
+    N.keys(cam, "location", [(1, (150, -300, 4)), (n, (140, -280, 40))])
+    N.keys(tgt, "location", [(1, (-10, 20, 75)), (n, (-10, 20, 85))])
 
 
 # ---------------------------------------------------------------- 07 — 4 500 ans : le revêtement d'origine réapparaît
@@ -216,7 +216,7 @@ def p07(n):
     for m in cmats:
         N.key_strength(m, [(1, 1.0), (int(n * 0.2), 1.0), (int(n * 0.8), 0.05)])
     a, h = N.HALF + 0.3, N.HEIGHT + 0.3
-    casing = N.reveal_emit((0.55, 0.7, 1.0), 0.35, "Z", "revetement")
+    casing = N.reveal_emit((0.55, 0.7, 1.0), 0.07, "Z", "revetement")
     V = [(-a, -a, 0), (a, -a, 0), (a, a, 0), (-a, a, 0), (0, 0, h)]
     N.mesh(V, [(0, 1, 4), (1, 2, 4), (2, 3, 4), (3, 0, 4)], casing, name="revetement")
     N.key_reveal(casing, [(1, -1), (int(n * 0.15), -1), (int(n * 0.8), h - 9)])
@@ -227,10 +227,10 @@ def p07(n):
     N.mesh(cap, [(0, 1, 4), (1, 2, 4), (2, 3, 4), (3, 0, 4)], gold, name="pyramidion")
     N.key_strength(gold, [(1, 0), (int(n * 0.75), 0), (int(n * 0.9), 25)])
     N.light((40, -40, h + 10), (1, 0.7, 0.3), 0)
-    N.ground()
+    N.ground(grid=40, extent=900)
     N.stars(900, 3000)
-    cam, tgt = N.camera(30, (300, -480, 60), (-20, 40, 80))
-    N.keys(cam, "location", [(1, (300, -480, 60)), (n, (250, -400, 75))])
+    cam, tgt = N.camera(26, (140, -280, 40), (-10, 20, 85))
+    N.keys(cam, "location", [(1, (140, -280, 40)), (n, (120, -250, 50))])
     N.keys(tgt, "location", [(1, (-20, 40, 80)), (n, (0, 0, 95))])
 
 
@@ -268,10 +268,10 @@ def p08(n):
         N.outline_box(x, x + 3, y, y + 3, 0, 2.5, 0.12, bm)
     N.line([(-2000, -900, 0.5), (2000, -1100, 0.5)], 3, N.emit(BLUE_HI, 4))
     N.line([(-3000, 2500, 0), (3000, 2500, 0)], 12, N.emit(ORANGE, 6))      # dernière lueur à l'horizon
-    N.ground()
+    N.ground(grid=20, extent=700)
     N.stars(400, 3000, zmin=0.25)
-    cam, tgt = N.camera(24, (420, -420, 260), (0, 0, 40))
-    N.keys(cam, "location", [(1, (420, -420, 260)), (n, (520, -260, 230))])
+    cam, tgt = N.camera(22, (300, -300, 150), (20, -20, 30))
+    N.keys(cam, "location", [(1, (300, -300, 150)), (n, (370, -170, 140))])
 
 
 # ---------------------------------------------------------------- 09 — un bloc toutes les deux minutes, jour et nuit
@@ -292,11 +292,11 @@ def p09(n):
     for x in (-0.4, -0.15, 0.15, 0.4):
         N.line([(x, 1.2, 0.3), (x * 3, 12, 1.1)], 0.015, rope, grp)
     N.keys(grp, "location", [(1, (0, -1.2, 0)), (n, (0, 1.2, 0))])
-    water = N.emit((0.3, 0.85, 1.0), 4)
-    wl = N.line([(0, -6, 0.01), (0, 14, 0.01)], 0.35, water)
+    water = N.emit((0.3, 0.85, 1.0), 1.2)
+    wl = N.line([(0, -6, 0.01), (0, 14, 0.01)], 0.5, water)
     wl.scale = (1, 1, 0.05)
     N.draw(wl, 1, n, 0.3, 1.0)
-    N.ground(400)
+    N.ground(400, grid=2, extent=30)
     sun_m = N.emit(ORANGE, 8)
     sun = N.sphere((0, 300, 30), 14, sun_m)
     N.keys(sun, "location", [(1, (40, 300, 30)), (n, (70, 300, -20))])
@@ -310,8 +310,8 @@ def p09(n):
         o.data.energy = 0; o.data.keyframe_insert("energy", frame=int(n * 0.5))
         o.data.energy = 140; o.data.keyframe_insert("energy", frame=int(n * 0.8))
     st = N.stars(600, 1500, zmin=0.1)
-    cam, tgt = N.camera(28, (-5.5, -4.5, 1.2), (0, 0.5, 0.7))
-    N.keys(cam, "location", [(1, (-5.5, -4.5, 1.2)), (n, (-5.0, -2.5, 1.3))])
+    cam, tgt = N.camera(24, (-3.6, -3.0, 1.0), (0, 0.5, 0.7))
+    N.keys(cam, "location", [(1, (-3.6, -3.0, 1.0)), (n, (-3.4, -1.2, 1.1))])
     N.keys(tgt, "location", [(1, (0, -0.5, 0.7)), (n, (0, 1.5, 0.7))])
 
 
@@ -346,10 +346,10 @@ def p10(n):
     for x in (-0.5, 0.5):
         N.line([(x, -s - 1.2, zt - 1.6), (x, -s + 1.5, zt + 0.2)], 0.05, lev)
     N.flame((-2.5, -s + 1.0, zt + 1.2), 3.0)
-    N.ground()
+    N.ground(grid=40, extent=900)
     N.stars(800, 3000)
     cam, tgt = N.camera(24, (6, -s - 6, zt + 3), (0, -s + 1, zt))
-    N.keys(cam, "location", [(1, (6, -s - 6, zt + 3)), (int(n * 0.35), (6, -s - 7, zt + 3)), (n, (160, -330, 150))])
+    N.keys(cam, "location", [(1, (9, -s - 9, zt + 4)), (int(n * 0.35), (9, -s - 10, zt + 4)), (n, (160, -330, 150))])
     N.keys(tgt, "location", [(1, (0, -s + 1, zt)), (int(n * 0.35), (0, -s + 1, zt)), (n, (0, 0, 70))])
 
 
@@ -422,6 +422,20 @@ def kings_chamber(beam_gold=None):
     N.line([(x0, y0, KH), (x1, y0, KH), (x1, y1, KH), (x0, y1, KH)], 0.02, edge, cyclic=True)
     for (x, y) in ((x0, y0), (x1, y0), (x1, y1), (x0, y1)):
         N.line([(x, y, 0), (x, y, KH)], 0.02, edge)
+    # joints verticaux des blocs de granit
+    rnd = random.Random(8)
+    for k in range(1, 5):
+        z0, z1 = KH * (k - 1) / 5, KH * k / 5
+        x = x0 + rnd.uniform(0.5, 1.5)
+        while x < x1 - 0.3:
+            N.line([(x, y1 - 0.01, z0), (x, y1 - 0.01, z1)], 0.006, dim)
+            N.line([(x, y0 + 0.01, z0), (x, y0 + 0.01, z1)], 0.006, dim)
+            x += rnd.uniform(1.4, 2.6)
+        y = y0 + rnd.uniform(0.6, 1.4)
+        while y < y1 - 0.3:
+            N.line([(x0 + 0.01, y, z0), (x0 + 0.01, y, z1)], 0.006, dim)
+            N.line([(x1 - 0.01, y, z0), (x1 - 0.01, y, z1)], 0.006, dim)
+            y += rnd.uniform(1.2, 2.2)
     # cinq assises de granit sur les murs
     for k in range(1, 5):
         z = KH * k / 5
@@ -511,9 +525,9 @@ def p13(n):
     N.keys(boat, "location", [(1, (-25, 0, 0)), (n, (5, 0, 0))])
     N.line([(-6000, 3000, 0), (6000, 3000, 0)], 40, N.emit(ORANGE, 5))
     N.stars(500, 4000, zmin=0.2)
-    cam, tgt = N.camera(30, (-40, -55, 9), (-20, 0, 2))
-    N.keys(cam, "location", [(1, (-40, -55, 9)), (n, (-8, -52, 9))])
-    N.keys(tgt, "location", [(1, (-24, 0, 2)), (n, (6, 0, 2))])
+    cam, tgt = N.camera(26, (-28, -24, 6), (-22, 0, 2))
+    N.keys(cam, "location", [(1, (-28, -24, 6)), (n, (0, -22, 6))])
+    N.keys(tgt, "location", [(1, (-24, 0, 2)), (n, (4, 0, 2))])
 
 
 # ---------------------------------------------------------------- 14 — hissées à 40 m, sans poulie ni roue
@@ -537,7 +551,7 @@ def p14(n):
     wood = N.emit(BLUE, 4)
     for x in (-0.8, 0.8):
         N.line([(x, -4.4, 0.05), (x, 4.4, 0.05), (x, 4.9, 0.4)], 0.07, wood, sled)
-    rope = N.emit(BLUE_HI, 3)
+    rope = N.emit(BLUE_HI, 1.0)
     for i in range(12):
         x = -0.9 + i * 1.8 / 11
         N.line([(x, 4.6, 0.4), (x * 3.5, 60, 1.2)], 0.02, rope, sled)
@@ -594,7 +608,7 @@ def p16(n):
     N.key_strength(red, [(1, 0), (int(n * 0.58), 0), (int(n * 0.66), 12)])
     N.key_strength(s_edge, [(int(n * 0.58), 6), (int(n * 0.66), 0.5)])
     N.stars(300, 400)
-    cam, tgt = N.camera(30, (x1 + 7, y0 - 9, 7), (cx - 1, y0 + 0.5, 0.5))
+    cam, tgt = N.camera(24, (x1 + 2.5, y0 - 5.5, 3.6), (cx - 1.2, y0 + 0.8, 0.4))
 
 
 # ---------------------------------------------------------------- 17 — posé pendant la construction, puis muré
@@ -731,7 +745,7 @@ def p20(n):
     queens_chamber()
     root = N.empty("conduit", (0, QD / 2, 1.5), (SH, 0, 0))
     shaft(root, 25)
-    N.light((0, QD / 2 - 0.4, 1.5), (0.8, 0.88, 1.0), 20)
+    N.light((0, QD / 2 - 0.6, 1.9), (0.8, 0.88, 1.0), 4)
     cam, tgt = N.camera(20, (0, QD / 2 - 1.0, 1.5), (0, QD / 2 + 3, 1.5 + 3 * math.tan(SH)))
     N.keys(cam, "location", [(1, (0, QD / 2 - 0.9, 1.5)), (n, (0, QD / 2 + 0.6, 1.5 + 0.6 * math.tan(SH) * 0.95))])
     N.keys(tgt, "location", [(1, (0, QD / 2 + 3, 1.5 + 0.5)), (n, (0, QD / 2 + 4, 1.5 + 4 * math.tan(SH)))])
@@ -757,7 +771,7 @@ def robot(parent, lights=True):
     if lights:
         s = N.spot((0, 0.21, 0), (0.85, 0.9, 1.0), 6, angle_deg=55, parent=rb)
         s.rotation_euler = (math.radians(-90), 0, 0)
-    N.line([(0, -0.19, 0), (0, -30, 0)], 0.004, N.emit(BLUE, 3), rb)
+    N.line([(0, -0.19, -0.07), (0, -30, -0.07)], 0.002, N.emit(BLUE, 0.8), rb)
     return rb
 
 
@@ -769,7 +783,7 @@ def p21(n):
     N.keys(rb, "location", [(1, (0, 1.0, -0.005)), (n, (0, 7.5, -0.005))])
     cam, tgt = N.camera(24, (0, 0, 0), (0, 0, 0))
     cam.parent = root; tgt.parent = root
-    cam.location = (0.0, 0.15, 0.03)
+    cam.location = (0.03, 0.15, 0.06)
     N.keys(tgt, "location", [(1, (0, 2.0, 0.0)), (n, (0, 8.0, 0.0))])
 
 
@@ -820,10 +834,11 @@ def p23(n):
     # seconde dalle, brute, 20 cm derrière
     s2 = N.glass(tint=(0.01, 0.012, 0.018), rough=0.4, name="dalle2")
     N.box(-0.1, 0.1, 6.26, 6.32, -0.1, 0.1, s2, root)
+    N.rect((-0.1, 6.259, -0.1), (0.2, 0, 0), (0, 0, 0.2), 0.0015, N.emit(BLUE, 2), root)
     red = N.emit(RED, 2.5)
     N.line([(-0.06, 6.259, -0.07), (-0.02, 6.259, 0.02), (0.03, 6.259, -0.01), (0.07, 6.259, 0.06)], 0.0015, red, root)
-    N.light((0, 6.2, 0), (0.85, 0.9, 1.0), 0.0, root)
-    drill = N.line([(0, 0, 0), (0, 0.5, 0)], 0.004, N.emit(BLUE_HI, 6), root)
+    N.light((0, 6.2, 0), (0.85, 0.9, 1.0), 0.15, root)
+    drill = N.line([(0, 0, 0), (0, 0.5, 0)], 0.0025, N.emit(BLUE, 2), root)
     N.keys(drill, "location", [(1, (0, 5.35, 0)), (fh, (0, 5.55, 0)), (fh + 10, (0, 5.2, 0))])
     hl = N.spot((0, 0, 0), (0.85, 0.9, 1.0), 4, angle_deg=40, parent=root)
     hl.rotation_euler = (math.radians(-90), 0, 0)
@@ -886,29 +901,35 @@ def p24(n):
     spl.rotation_euler = (math.radians(-80), 0, 0)
 
 
+def joint_wall(gap, golden=False):
+    """Deux énormes blocs de calcaire séparés par un joint étroit (axe y = profondeur du joint)."""
+    g = N.glass(tint=(0.02, 0.026, 0.04), rough=0.5, name="calcaire")
+    edge, dim = N.emit(BLUE_HI, 4), N.emit(BLUE, 0.45)
+    N.box(-4, -gap / 2, 0, 3, -3, 3, g)
+    N.box(gap / 2, 4, 0, 3, -3, 3, g)
+    N.box(-gap / 2, gap / 2, 2.6, 3, -3, 3, N.emit((0, 0, 0), 0))
+    for x in (-gap / 2, gap / 2):
+        N.line([(x, -0.002, -3), (x, -0.002, 3)], 0.004, edge)
+    for (x0, x1, z) in ((-4, -gap / 2, -1.2), (-4, -gap / 2, 1.05), (gap / 2, 4, -0.6), (gap / 2, 4, 1.6)):
+        N.line([(x0, -0.002, z), (x1, -0.002, z)], 0.004, dim)
+    for (x, z0, z1) in ((-2.2, -1.2, 1.05), (2.4, -0.6, 1.6), (-3.1, 1.05, 3), (1.3, -3, -0.6)):
+        N.line([(x, -0.002, z0), (x, -0.002, z1)], 0.004, dim)
+    return edge
+
+
 @plan("25")
 def p25(n):
-    g = N.glass(tint=(0.006, 0.01, 0.02), rough=0.2, name="calcaire")
-    N.box(-3, -0.012, 0, 2, -2, 2, g)
-    N.box(0.012, 3, 0, 2, -2, 2, g)
-    edge = N.emit(BLUE_HI, 4)
-    for x in (-0.012, 0.012):
-        N.line([(x, -0.001, -2), (x, -0.001, 2)], 0.004, edge)
-    dim = N.emit(BLUE, 0.6)
-    for z in (-1.1, 0.9):
-        N.line([(-3, -0.001, z), (-0.012, -0.001, z)], 0.004, dim)
-        N.line([(0.012, -0.001, z + 0.3), (3, -0.001, z + 0.3)], 0.004, dim)
-    cable = N.line([(0.25, -1.4, -0.9), (0.1, -0.6, -0.2), (0.0, -0.1, 0.0), (0.0, 0.0, 0.0), (0, 0.9, 0)], 0.005, N.emit(BLUE, 2.5))
-    N.keys(cable, "location", [(1, (0, -0.55, 0)), (n, (0, 0.0, 0))])
-    tip = N.sphere((0, 0, 0), 0.006, N.emit((0.9, 0.95, 1.0), 30), seg=8)
-    tl = N.light((0, 0, 0), (0.85, 0.9, 1.0), 1.5)
+    joint_wall(0.03)
+    cable = N.line([(0.6, -1.6, -1.1), (0.25, -0.8, -0.45), (0.05, -0.25, -0.06), (0.0, -0.05, 0.0), (0, 0.0, 0), (0, 1.2, 0)], 0.006, N.emit(BLUE, 1.5))
+    N.keys(cable, "location", [(1, (0, -0.7, 0)), (n, (0, 0.0, 0))])
+    tip = N.sphere((0, 0, 0), 0.008, N.emit((0.9, 0.95, 1.0), 30), seg=8)
+    tl = N.light((0, 0, 0), (0.85, 0.9, 1.0), 0.6)
     for o in (tip, tl):
-        N.keys(o, "location", [(1, (0, 0.35, 0)), (n, (0, 0.9, 0))])
-    hl = N.spot((0.4, -1.2, 0.6), (0.85, 0.9, 1.0), 60, angle_deg=30)
+        N.keys(o, "location", [(1, (0, 0.5, 0)), (n, (0, 1.2, 0))])
+    hl = N.spot((1.2, -2.5, 0.8), (0.85, 0.9, 1.0), 300, angle_deg=25)
     N.aim(hl, (0, 0, 0))
-    cam, tgt = N.camera(40, (0.35, -0.9, 0.3), (0, 0.05, 0))
-    N.keys(cam, "location", [(1, (0.35, -0.9, 0.3)), (n, (0.2, -0.6, 0.18))])
-
+    cam, tgt = N.camera(30, (0.9, -2.4, 0.5), (0, 0.1, 0))
+    N.keys(cam, "location", [(1, (0.9, -2.4, 0.5)), (n, (0.45, -1.3, 0.25))])
 
 def hidden_corridor():
     g = N.glass(tint=(0.006, 0.01, 0.02), rough=0.25, name="calcaire")
@@ -957,10 +978,10 @@ def p27(n):
     L, wall = hidden_corridor()
     gap = N.box(0.15, 0.55, L - 0.02, L + 0.02, 0.0, 0.035, N.emit((0, 0, 0), 0))
     N.line([(0.15, L - 0.025, 0.035), (0.55, L - 0.025, 0.035)], 0.003, N.emit(BLUE_HI, 4))
-    ring = N.light((0, 0, 0), (0.9, 0.95, 1.0), 20)
+    ring = N.light((0, 0, 0), (0.9, 0.95, 1.0), 6)
     cam, tgt = N.camera(24, (0, 5.5, 1.05), (0.2, 9, 0.6))
     N.keys(cam, "location", [(1, (0.0, 5.5, 1.05)), (n, (0.15, 7.6, 0.6))])
-    N.keys(ring, "location", [(1, (0.0, 5.6, 1.15)), (n, (0.15, 7.7, 0.7))])
+    N.keys(ring, "location", [(1, (0.0, 5.3, 1.25)), (n, (0.1, 7.2, 0.9))])
     N.keys(tgt, "location", [(1, (0.0, 9, 1.0)), (n, (0.35, 9, 0.05))])
     dust(n, ((-0.3, 0.9), (7.6, 8.8), (0.05, 0.6)), 30, N.emit((0.8, 0.85, 1.0), 4), n, toward=(0.35, L, 0.02))
 
@@ -982,7 +1003,7 @@ def p28(n):
     cam, tgt = N.camera(32, (0, 0, 0), (0, -12, 40))
     piv = N.empty("pivot", (0, -12, 40))
     cam.parent = piv
-    cam.location = (240, 0, 30)
+    cam.location = (125, 0, 12)
     N.keys(piv, "rotation_euler", [(1, (0, 0, math.radians(-12))), (n, (0, 0, math.radians(22)))])
 
 
@@ -1056,7 +1077,7 @@ def p32(n):
     N.ground(30000)
     rnd = random.Random(21)
     city = N.emit((1.0, 0.72, 0.42), 6)
-    city2 = N.emit((0.75, 0.85, 1.0), 5)
+    city2 = N.emit((1.0, 0.6, 0.3), 0.8)
     verts, faces = [], []
     for i in range(6000):
         ang = rnd.uniform(math.radians(20), math.radians(160))
@@ -1069,7 +1090,7 @@ def p32(n):
     N.mesh(verts, faces, city, name="ville")
     for i in range(30):
         ang = rnd.uniform(math.radians(25), math.radians(155))
-        N.line([(900 * math.cos(ang), 900 * math.sin(ang) - 300, 0.6), (9000 * math.cos(ang), 9000 * math.sin(ang) - 300, 0.6)], 3, city2)
+        N.line([(900 * math.cos(ang), 900 * math.sin(ang) - 300, 0.6), (9000 * math.cos(ang), 9000 * math.sin(ang) - 300, 0.6)], 1.2, city2)
     N.stars(500, 20000, zmin=0.15)
     cam, tgt = N.camera(28, (0, -420, 120), (0, 300, 60))
     N.keys(cam, "location", [(1, (60, -380, 110)), (n, (120, -900, 420))])
@@ -1079,22 +1100,17 @@ def p32(n):
 # ---------------------------------------------------------------- 33 — là où personne ne devait jamais regarder
 @plan("33")
 def p33(n):
-    g = N.glass(tint=(0.006, 0.01, 0.02), rough=0.3, name="calcaire")
-    N.box(-3, -0.02, 0, 3, -2, 2, g)
-    N.box(0.02, 3, 0, 3, -2, 2, g)
-    edge = N.emit(BLUE_HI, 3)
-    for x in (-0.02, 0.02):
-        N.line([(x, -0.001, -2), (x, -0.001, 2)], 0.004, edge)
+    edge = joint_wall(0.05)
     gold = N.emit(GOLD, 0)
-    N.sphere((0, 2.2, 0), 0.012, gold, seg=8)
+    N.sphere((0, 2.4, 0.1), 0.015, gold, seg=8)
     N.key_strength(gold, [(1, 0), (int(n * 0.3), 6), (int(n * 0.5), 25), (int(n * 0.6), 4), (int(n * 0.7), 18), (n, 0)])
-    gl_ = N.light((0, 2.1, 0), (1, 0.7, 0.3), 0)
-    gl_.data.keyframe_insert("energy", frame=1); gl_.data.energy = 1.5; gl_.data.keyframe_insert("energy", frame=int(n * 0.5))
+    gl_ = N.light((0, 2.3, 0.1), (1, 0.7, 0.3), 0)
+    gl_.data.keyframe_insert("energy", frame=1); gl_.data.energy = 2.0; gl_.data.keyframe_insert("energy", frame=int(n * 0.5))
     gl_.data.energy = 0; gl_.data.keyframe_insert("energy", frame=n)
-    f, l, m = N.flame((-0.9, -0.8, -0.6), 1.5, energy=40, frames=n)
-    N.key_strength(edge, [(1, 3), (int(n * 0.75), 3), (n, 0)])
+    f, l, m = N.flame((-1.4, -1.2, -0.9), 2.0, energy=90, frames=n)
+    N.key_strength(edge, [(1, 4), (int(n * 0.75), 4), (n, 0)])
     N.key_strength(m, [(int(n * 0.75), 40), (n, 0)])
-    l.data.energy = 40; l.data.keyframe_insert("energy", frame=int(n * 0.75)); l.data.energy = 0; l.data.keyframe_insert("energy", frame=n)
-    cam, tgt = N.camera(35, (0.25, -1.4, 0.2), (0, 0.5, 0))
-    N.keys(cam, "location", [(1, (0.25, -1.4, 0.2)), (n, (0.0, -0.05, 0.0))])
-    N.keys(tgt, "location", [(1, (0, 0.5, 0)), (n, (0, 2.2, 0))])
+    l.data.energy = 90; l.data.keyframe_insert("energy", frame=int(n * 0.75)); l.data.energy = 0; l.data.keyframe_insert("energy", frame=n)
+    cam, tgt = N.camera(32, (0.7, -3.0, 0.5), (0, 0.5, 0))
+    N.keys(cam, "location", [(1, (0.7, -3.0, 0.5)), (n, (0.0, -0.02, 0.05))])
+    N.keys(tgt, "location", [(1, (0, 0.5, 0)), (n, (0, 2.4, 0.1))])
