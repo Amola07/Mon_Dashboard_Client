@@ -63,11 +63,8 @@ def overlay(c, t):
 
 
 def soundtrack(path):
-    raw = subprocess.run(["ffmpeg", "-v", "error", "-i", VOIX, "-af",
-                          "highpass=f=80,equalizer=f=3000:t=q:w=1.2:g=4,equalizer=f=200:t=q:w=1:g=-2,"
-                          "acompressor=threshold=-28dB:ratio=4:attack=4:release=120:makeup=3,"
-                          "loudnorm=I=-13:TP=-1.5:LRA=5", "-ac", "1", "-ar", str(SR), "-f", "s16le", "-"],
-                         capture_output=True).stdout
+    raw = subprocess.run(["ffmpeg", "-v", "error", "-i", VOIX, "-ac", "1", "-ar", str(SR), "-f", "s16le", "-"],
+                         capture_output=True).stdout                  # voix telle quelle, sans traitement
     voice = np.frombuffer(raw, np.int16).astype(float) / 32768
     n = int(DUR * SR)
     mix = np.zeros(n)
@@ -97,8 +94,8 @@ def soundtrack(path):
     add(74.1, E1.sparkle(0.1))
     mus = E1.music(DUR)
     env = np.convolve(np.abs(mix), np.ones(int(0.15 * SR)) / int(0.15 * SR), mode="same")
-    duck = 1 - 0.85 * np.minimum(1, env / 0.04)
-    out_ = mix * 1.15 + E1.soften(fx, 6) * 0.45 * (1 - 0.5 * np.minimum(1, env / 0.04)) + mus * 0.45 * duck
+    duck = 1 - 0.55 * np.minimum(1, env / 0.05)
+    out_ = mix + E1.soften(fx, 6) * 0.8 + mus * duck                  # musique de fond à son niveau habituel
     fade = np.ones(n)
     k = int(0.6 * SR)
     fade[-k:] = np.linspace(1, 0, k)
@@ -123,7 +120,6 @@ def render(out_path):
     M9.burn(f"{tmp}/base.mp4", f"{tmp}/v.mp4")
     soundtrack(f"{tmp}/a.wav")
     subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", f"{tmp}/v.mp4", "-i", f"{tmp}/a.wav", "-c:v", "copy",
-                    "-af", "loudnorm=I=-11:TP=-1:LRA=7", "-ar", "48000",
                     "-c:a", "aac", "-b:a", "192k", "-shortest", "-movflags", "+faststart", out_path], check=True)
     have = [s[0] for s in SHOTS if os.path.exists(os.path.join(M9.CLIPS, f"{s[0]}.mp4"))]
     print("plans présents :", " ".join(have))
