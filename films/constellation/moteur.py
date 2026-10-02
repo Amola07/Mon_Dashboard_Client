@@ -93,6 +93,19 @@ def _deposit(P, C, A, pos, r, u, f, foc, focus, aperture, fn, ff, max_coc, buf):
                 buf[lvl, yy, xx, 2] += C[i, 2] * ww
 
 
+def dust(cam, t, n=1500, seed=11, near=2.0, far=45.0, spread=0.8):
+    """Poussière en suspension autour de la caméra (fortement floue = bokeh de premier plan)."""
+    g = np.random.default_rng(seed)
+    d = g.uniform(near, far, n)
+    x = g.uniform(-spread, spread, n) * d
+    y = g.uniform(-spread * 1.7, spread * 1.7, n) * d
+    ph = g.uniform(0, 6.28, n)
+    x = x + np.sin(t * 0.3 + ph) * 0.4
+    y = y + np.cos(t * 0.23 + ph) * 0.4 - t * 0.15
+    P = cam["pos"] + np.outer(d, cam["f"]) + np.outer(x, cam["r"]) + np.outer(y, cam["u"])
+    return P, g.uniform(0.2, 1.0, n).astype(np.float32)
+
+
 class Frame:
     """Accumule des groupes de points puis produit l'image finale (uint8 RGB)."""
 
@@ -100,13 +113,18 @@ class Frame:
         self.cam, self.lens = cam, lens
         self.buf = np.zeros((LEVELS, H, W, 3), np.float32)
 
-    def points(self, P, col, alpha=1.0):
-        """P (n,3) ; col (3,) ou (n,3) ; alpha scalaire ou (n,)."""
+    def points(self, P, col, alpha=1.0, warm_near=0.0):
+        """P (n,3) ; col (3,) ou (n,3) ; alpha scalaire ou (n,).
+        warm_near > 0 : les points plus proches que cette distance tirent vers un blanc chaud (profondeur)."""
         P = np.ascontiguousarray(P, np.float64)
         n = len(P)
         if n == 0:
             return
         C = np.ascontiguousarray(np.broadcast_to(np.asarray(col, np.float32), (n, 3)), np.float32)
+        if warm_near > 0:
+            z = (P - self.cam["pos"]) @ self.cam["f"]
+            k = (np.clip(1.0 - z / warm_near, 0, 1) ** 2 * 0.55).astype(np.float32)[:, None]
+            C = np.ascontiguousarray(C * (1 - k) + np.array([1.0, 0.9, 0.78], np.float32) * C.max(1, keepdims=True) * k)
         A = np.ascontiguousarray(np.broadcast_to(np.asarray(alpha, np.float32), (n,)), np.float32)
         c, L = self.cam, self.lens
         _deposit(P, C, A, c["pos"], c["r"], c["u"], c["f"], c["foc"], L.focus, L.aperture, L.fog_near, L.fog_far,
