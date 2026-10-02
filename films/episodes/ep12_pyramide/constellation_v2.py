@@ -142,7 +142,7 @@ def frame_A(t):
     Pr, Ar = rays(t, float(M.keyed(t, [(0, 1.0), (8.6, 1.0), (10.5, 0.25)])))
     fr.points(Pr, M.BLUE_HI, Ar * 3.0)
     add_dust(fr, cam, t, 0.25)
-    return fr.finish(exposure=1.6, bloom=1.0, seed=int(t * 30))
+    return fr.finish(exposure=2.6, bloom=1.0, seed=int(t * 30))
 
 
 # ================================================================== extrait B : 24,6 → 32,9 s (u = 0 → 8,3)
@@ -225,7 +225,7 @@ def frame_B(u):
     if night > 0:
         fr.points(MOON, M.WHITE, 0.5 * night)
     add_dust(fr, cam, u, 0.3)
-    return fr.finish(exposure=1.6, bloom=1.0, seed=int(u * 30) + 999)
+    return fr.finish(exposure=2.6, bloom=1.0, seed=int(u * 30) + 999)
 
 
 FRAMES = {"A": frame_A, "B": frame_B}

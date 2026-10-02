@@ -40,13 +40,14 @@ def look_at(pos, target, fov_deg=40.0, roll=0.0):
 
 
 class Lens:
-    def __init__(self, focus=100.0, aperture=0.0, fog_near=1e9, fog_far=2e9, max_coc=60.0):
+    def __init__(self, focus=100.0, aperture=0.0, fog_near=1e9, fog_far=2e9, max_coc=60.0, size=2.2):
         self.focus, self.aperture, self.fog_near, self.fog_far, self.max_coc = focus, aperture, fog_near, fog_far, max_coc
+        self.size = size          # taille minimale d'un point (px) : les particules restent lisibles
 
 
 # ------------------------------------------------------------------ dépôt des points
 @njit(cache=True, fastmath=True)
-def _deposit(P, C, A, pos, r, u, f, foc, focus, aperture, fn, ff, max_coc, buf):
+def _deposit(P, C, A, pos, r, u, f, foc, focus, aperture, fn, ff, max_coc, size, buf):
     n = P.shape[0]
     Hh, Ww = buf.shape[1], buf.shape[2]
     cx, cy = Ww * 0.5, Hh * 0.5
@@ -63,6 +64,8 @@ def _deposit(P, C, A, pos, r, u, f, foc, focus, aperture, fn, ff, max_coc, buf):
         if x < -40 or x > Ww + 40 or y < -40 or y > Hh + 40:
             continue
         coc = aperture * abs(1.0 - focus / z)
+        if coc < size:
+            coc = size
         if coc > max_coc:
             coc = max_coc
         lvl = 0
@@ -128,7 +131,7 @@ class Frame:
         A = np.ascontiguousarray(np.broadcast_to(np.asarray(alpha, np.float32), (n,)), np.float32)
         c, L = self.cam, self.lens
         _deposit(P, C, A, c["pos"], c["r"], c["u"], c["f"], c["foc"], L.focus, L.aperture, L.fog_near, L.fog_far,
-                 L.max_coc, self.buf)
+                 L.max_coc, L.size, self.buf)
 
     def finish(self, exposure=1.0, bloom=0.8, grain=0.035, seed=0):
         img = self.buf[0].copy()
@@ -137,7 +140,7 @@ class Frame:
                 s = 1.5 * 2 ** (k - 1) * 0.6
                 img += cv2.GaussianBlur(self.buf[k], (0, 0), s)
         # léger cœur net + halo : les points isolés deviennent des étoiles douces
-        img = cv2.GaussianBlur(img, (0, 0), 0.7) * 1.0
+        img = cv2.GaussianBlur(img, (0, 0), 0.6)
         glow = (cv2.GaussianBlur(img, (0, 0), 5) * 0.55 + cv2.GaussianBlur(img, (0, 0), 18) * 0.35 +
                 cv2.GaussianBlur(img, (0, 0), 55) * 0.25)
         img = img + glow * bloom
