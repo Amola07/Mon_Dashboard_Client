@@ -1,26 +1,26 @@
 # Épisode 11 — « Ton téléphone t'écoute ? » : prompts (un bloc = une génération)
-Voix : `audio/voix.mp3` (2 min 09). Style verre lumineux. Méthode : image → vidéo. Quand une **image de fin** est donnée, utilise le mode « première et dernière image » (Veo frames-to-video, Kling start/end frame). Nomme les clips `01.mp4`, `02.mp4`… Les noms (Siri, Vizio, 17 000…) et chiffres sont ajoutés par moi au montage.
+Voix : `audio/voix.mp3` (2 min 09). Style « néon sombre » validé (fond noir, contours bleu électrique, un seul point lumineux). Si un plan avec silhouette est refusé : remplace « glass human silhouette » par « abstract figure made of glowing light particles ». Méthode : image → vidéo. Quand une **image de fin** est donnée, utilise le mode « première et dernière image » (Veo frames-to-video, Kling start/end frame). Nomme les clips `01.mp4`, `02.mp4`… Les noms (Siri, Vizio, 17 000…) et chiffres sont ajoutés par moi au montage.
 
 ## Plan 01 · 0,0 – 3,1 s — « Une conversation entre amis. Un produit mentionné. »
 
 **Image**
 ```
-Two glowing glass human silhouettes sitting face to face at a small café table, a bright glowing sound wave flowing between them, a small glass sneaker floating inside the sound wave, cinematic 3D render, translucent glowing blue glass hologram material with light inside, volumetric blue light rays, glowing particles, pure black background, single centered subject, shallow depth of field, ray-traced reflections, strong bloom, high contrast, ultra detailed, Unreal Engine 5 / Octane render style, no text, no letters, no logos, vertical 9:16 portrait format.
+Two dark glass coffee cups facing each other on a small café table at night, a glowing sound wave flowing between them, a small glass sneaker floating inside the sound wave, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no text, no letters, no logos, vertical 9:16 portrait format.
 ```
 **Animation**
 ```
-The sound wave flows from one person to the other, the small glass sneaker inside it lights up brightly. The action starts immediately and is clearly finished within 3 seconds. Static camera unless stated, subject centered and in frame, no morphing of shapes, no text, no logo, no watermark.
+The glowing sound wave flows from one cup to the other, the small glass sneaker inside it lights up brightly. The action starts immediately and is clearly finished within 3 seconds. Static camera, subject centered and in frame, no text, no logo, no watermark.
 ```
 
 ## Plan 02 · 3,1 – 6,9 s — « Une heure plus tard, la pub apparaît. Hasard ? Non. »
 
 **Image**
 ```
-Close-up of a glowing glass smartphone held in a glass hand, its screen dark, cinematic 3D render, translucent glowing blue glass hologram material with light inside, volumetric blue light rays, glowing particles, pure black background, single centered subject, shallow depth of field, ray-traced reflections, strong bloom, high contrast, ultra detailed, Unreal Engine 5 / Octane render style, no text, no letters, no logos, vertical 9:16 portrait format.
+Close-up of a glowing glass smartphone held in a glass hand, its screen dark, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no text, no letters, no logos, vertical 9:16 portrait format.
 ```
 **Image de fin** (même style)
 ```
-Close-up of a glowing glass smartphone held in a glass hand, its screen lit and showing a glowing glass sneaker as an advertisement, cinematic 3D render, translucent glowing blue glass hologram material with light inside, volumetric blue light rays, glowing particles, pure black background, single centered subject, shallow depth of field, ray-traced reflections, strong bloom, high contrast, ultra detailed, Unreal Engine 5 / Octane render style, no text, no letters, no logos, vertical 9:16 portrait format.
+Close-up of a glowing glass smartphone held in a glass hand, its screen lit and showing a glowing glass sneaker as an advertisement, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no text, no letters, no logos, vertical 9:16 portrait format.
 ```
 **Animation**
 ```
@@ -31,7 +31,7 @@ The phone screen suddenly lights up, showing the same glowing glass sneaker as a
 
 **Image**
 ```
-A glowing glass smartphone floating alone in the black void, slightly tilted, its screen reflecting a large glowing question mark shape made of light, cinematic 3D render, translucent glowing blue glass hologram material with light inside, volumetric blue light rays, glowing particles, pure black background, single centered subject, shallow depth of field, ray-traced reflections, strong bloom, high contrast, ultra detailed, Unreal Engine 5 / Octane render style, no text, no letters, no logos, vertical 9:16 portrait format.
+A glowing glass smartphone floating alone in the black void, slightly tilted, its screen reflecting a large glowing question mark shape made of light, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no text, no letters, no logos, vertical 9:16 portrait format.
 ```
 **Animation**
 ```
@@ -42,11 +42,11 @@ Slow push-in toward the phone, its screen flickers, at the end a thin red line o
 
 **Image**
 ```
-X-ray cut-away view of a glowing glass smartphone showing a small microphone inside, a small red recording light glowing next to it, cinematic 3D render, translucent glowing blue glass hologram material with light inside, volumetric blue light rays, glowing particles, pure black background, single centered subject, shallow depth of field, ray-traced reflections, strong bloom, high contrast, ultra detailed, Unreal Engine 5 / Octane render style, no text, no letters, no logos, vertical 9:16 portrait format.
+X-ray cut-away view of a glowing glass smartphone showing a small microphone inside, a small red recording light glowing next to it, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no text, no letters, no logos, vertical 9:16 portrait format.
 ```
 **Image de fin** (même style)
 ```
-X-ray cut-away view of a glowing glass smartphone showing a small microphone inside glowing intensely blue, no red light, cinematic 3D render, translucent glowing blue glass hologram material with light inside, volumetric blue light rays, glowing particles, pure black background, single centered subject, shallow depth of field, ray-traced reflections, strong bloom, high contrast, ultra detailed, Unreal Engine 5 / Octane render style, no text, no letters, no logos, vertical 9:16 portrait format.
+X-ray cut-away view of a glowing glass smartphone showing a small microphone inside glowing intensely blue, no red light, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no text, no letters, no logos, vertical 9:16 portrait format.
 ```
 **Animation**
 ```
@@ -57,7 +57,7 @@ The red recording light switches off, then the microphone inside starts to glow 
 
 **Image**
 ```
-X-ray cut-away of a glowing glass smartphone, a tiny isolated chip glowing in one corner of the circuit board, cinematic 3D render, translucent glowing blue glass hologram material with light inside, volumetric blue light rays, glowing particles, pure black background, single centered subject, shallow depth of field, ray-traced reflections, strong bloom, high contrast, ultra detailed, Unreal Engine 5 / Octane render style, no text, no letters, no logos, vertical 9:16 portrait format.
+X-ray cut-away of a glowing glass smartphone, a tiny isolated chip glowing in one corner of the circuit board, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no text, no letters, no logos, vertical 9:16 portrait format.
 ```
 **Animation**
 ```
@@ -68,7 +68,7 @@ The camera dives inside the phone toward the tiny chip, which pulses steadily li
 
 **Image**
 ```
-Macro close-up of a tiny glowing chip on a circuit board, a short ribbon of sound waveform made of light passing through it, cinematic 3D render, translucent glowing blue glass hologram material with light inside, volumetric blue light rays, glowing particles, pure black background, single centered subject, shallow depth of field, ray-traced reflections, strong bloom, high contrast, ultra detailed, Unreal Engine 5 / Octane render style, no text, no letters, no logos, vertical 9:16 portrait format.
+Macro close-up of a tiny glowing chip on a circuit board, a short ribbon of sound waveform made of light passing through it, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no text, no letters, no logos, vertical 9:16 portrait format.
 ```
 **Animation**
 ```
@@ -79,7 +79,7 @@ A sound waveform flows into the chip from the right and dissolves into particles
 
 **Image**
 ```
-Macro close-up of a tiny glowing chip on a circuit board, a dim sound waveform flowing through it, cinematic 3D render, translucent glowing blue glass hologram material with light inside, volumetric blue light rays, glowing particles, pure black background, single centered subject, shallow depth of field, ray-traced reflections, strong bloom, high contrast, ultra detailed, Unreal Engine 5 / Octane render style, no text, no letters, no logos, vertical 9:16 portrait format.
+Macro close-up of a tiny glowing chip on a circuit board, a dim sound waveform flowing through it, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no text, no letters, no logos, vertical 9:16 portrait format.
 ```
 **Animation**
 ```
@@ -90,7 +90,7 @@ Two short bursts in the waveform flash bright gold one after the other as they p
 
 **Image**
 ```
-Thousands of glowing sound waveforms converging from all directions into a tiny glowing chip in the center, cinematic 3D render, translucent glowing blue glass hologram material with light inside, volumetric blue light rays, glowing particles, pure black background, single centered subject, shallow depth of field, ray-traced reflections, strong bloom, high contrast, ultra detailed, Unreal Engine 5 / Octane render style, no text, no letters, no logos, vertical 9:16 portrait format.
+Thousands of glowing sound waveforms converging from all directions into a tiny glowing chip in the center, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no text, no letters, no logos, vertical 9:16 portrait format.
 ```
 **Animation**
 ```
@@ -101,7 +101,7 @@ Thousands of waveforms stream into the chip from every direction, faster and fas
 
 **Image**
 ```
-A glowing glass television in a dark living room, very thin high-frequency rings of light coming out of its speaker, cinematic 3D render, translucent glowing blue glass hologram material with light inside, volumetric blue light rays, glowing particles, pure black background, single centered subject, shallow depth of field, ray-traced reflections, strong bloom, high contrast, ultra detailed, Unreal Engine 5 / Octane render style, no text, no letters, no logos, vertical 9:16 portrait format.
+A glowing glass television in a dark living room, very thin high-frequency rings of light coming out of its speaker, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no text, no letters, no logos, vertical 9:16 portrait format.
 ```
 **Animation**
 ```
@@ -112,7 +112,7 @@ Thin fast concentric rings of light pulse out of the television and spread acros
 
 **Image**
 ```
-A glowing glass smartphone lying on a coffee table in front of a glowing glass television, thin rings of light traveling from the TV toward the phone, cinematic 3D render, translucent glowing blue glass hologram material with light inside, volumetric blue light rays, glowing particles, pure black background, single centered subject, shallow depth of field, ray-traced reflections, strong bloom, high contrast, ultra detailed, Unreal Engine 5 / Octane render style, no text, no letters, no logos, vertical 9:16 portrait format.
+A glowing glass smartphone lying on a coffee table in front of a glowing glass television, thin rings of light traveling from the TV toward the phone, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no text, no letters, no logos, vertical 9:16 portrait format.
 ```
 **Animation**
 ```
@@ -123,7 +123,7 @@ The rings of light reach the phone, the phone lights up and a small red dot appe
 
 **Image**
 ```
-A large wall of hundreds of small glowing glass app icons floating in the dark, all blue, cinematic 3D render, translucent glowing blue glass hologram material with light inside, volumetric blue light rays, glowing particles, pure black background, single centered subject, shallow depth of field, ray-traced reflections, strong bloom, high contrast, ultra detailed, Unreal Engine 5 / Octane render style, no text, no letters, no logos, vertical 9:16 portrait format.
+A large wall of hundreds of small glowing glass app icons floating in the dark, all blue, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no text, no letters, no logos, vertical 9:16 portrait format.
 ```
 **Animation**
 ```
@@ -134,7 +134,7 @@ Dozens of app icons light up red one after another, spreading across the wall. T
 
 **Image**
 ```
-Endless rows of glowing glass televisions stretching to the horizon in the dark, cinematic 3D render, translucent glowing blue glass hologram material with light inside, volumetric blue light rays, glowing particles, pure black background, single centered subject, shallow depth of field, ray-traced reflections, strong bloom, high contrast, ultra detailed, Unreal Engine 5 / Octane render style, no text, no letters, no logos, vertical 9:16 portrait format.
+Endless rows of glowing glass televisions stretching to the horizon in the dark, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no text, no letters, no logos, vertical 9:16 portrait format.
 ```
 **Animation**
 ```
@@ -145,7 +145,7 @@ The camera flies slowly over the endless rows while the televisions light up one
 
 **Image**
 ```
-A single glowing glass television seen from behind, a stream of tiny glowing image frames flowing out of its back into the darkness, cinematic 3D render, translucent glowing blue glass hologram material with light inside, volumetric blue light rays, glowing particles, pure black background, single centered subject, shallow depth of field, ray-traced reflections, strong bloom, high contrast, ultra detailed, Unreal Engine 5 / Octane render style, no text, no letters, no logos, vertical 9:16 portrait format.
+A single glowing glass television seen from behind, a stream of tiny glowing image frames flowing out of its back into the darkness, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no text, no letters, no logos, vertical 9:16 portrait format.
 ```
 **Animation**
 ```
@@ -156,7 +156,7 @@ A continuous stream of small glowing frames flows out of the back of the TV like
 
 **Image**
 ```
-A glowing glass smart speaker on a table, above it a large holographic technical blueprint document floating and glowing, cinematic 3D render, translucent glowing blue glass hologram material with light inside, volumetric blue light rays, glowing particles, pure black background, single centered subject, shallow depth of field, ray-traced reflections, strong bloom, high contrast, ultra detailed, Unreal Engine 5 / Octane render style, no text, no letters, no logos, vertical 9:16 portrait format.
+A glowing glass smart speaker on a table, above it a large holographic technical blueprint document floating and glowing, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no text, no letters, no logos, vertical 9:16 portrait format.
 ```
 **Animation**
 ```
@@ -167,7 +167,7 @@ The blueprint unfolds page by page above the speaker, then a glowing outline of 
 
 **Image**
 ```
-A gigantic wall of thousands of small glowing glass app icons, a bright horizontal laser scan line at the top, cinematic 3D render, translucent glowing blue glass hologram material with light inside, volumetric blue light rays, glowing particles, pure black background, single centered subject, shallow depth of field, ray-traced reflections, strong bloom, high contrast, ultra detailed, Unreal Engine 5 / Octane render style, no text, no letters, no logos, vertical 9:16 portrait format.
+A gigantic wall of thousands of small glowing glass app icons, a bright horizontal laser scan line at the top, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no text, no letters, no logos, vertical 9:16 portrait format.
 ```
 **Animation**
 ```
@@ -178,7 +178,7 @@ The laser scan line sweeps slowly down across the whole wall, every icon stays c
 
 **Image**
 ```
-Close-up of a glowing glass smartphone screen, faint red light behind the glass, cinematic 3D render, translucent glowing blue glass hologram material with light inside, volumetric blue light rays, glowing particles, pure black background, single centered subject, shallow depth of field, ray-traced reflections, strong bloom, high contrast, ultra detailed, Unreal Engine 5 / Octane render style, no text, no letters, no logos, vertical 9:16 portrait format.
+Close-up of a glowing glass smartphone screen, faint red light behind the glass, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no text, no letters, no logos, vertical 9:16 portrait format.
 ```
 **Animation**
 ```
@@ -189,7 +189,7 @@ Copies of the screen peel off one after another as red glowing frames and fly aw
 
 **Image**
 ```
-A glowing glass human head in profile, a small glowing microphone shape near the mouth, faint data lines around the head, cinematic 3D render, translucent glowing blue glass hologram material with light inside, volumetric blue light rays, glowing particles, pure black background, single centered subject, shallow depth of field, ray-traced reflections, strong bloom, high contrast, ultra detailed, Unreal Engine 5 / Octane render style, no text, no letters, no logos, vertical 9:16 portrait format.
+A glowing glass human head in profile, a small glowing microphone shape near the mouth, faint data lines around the head, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no text, no letters, no logos, vertical 9:16 portrait format.
 ```
 **Animation**
 ```
@@ -200,7 +200,7 @@ The microphone fades away while the data lines around the head become brighter a
 
 **Image**
 ```
-A glowing glass human silhouette in the center, three glowing orbits around it carrying a map pin, floating web pages and small shopping bags, cinematic 3D render, translucent glowing blue glass hologram material with light inside, volumetric blue light rays, glowing particles, pure black background, single centered subject, shallow depth of field, ray-traced reflections, strong bloom, high contrast, ultra detailed, Unreal Engine 5 / Octane render style, no text, no letters, no logos, vertical 9:16 portrait format.
+A glowing glass human silhouette in the center, three glowing orbits around it carrying a map pin, floating web pages and small shopping bags, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no text, no letters, no logos, vertical 9:16 portrait format.
 ```
 **Animation**
 ```
@@ -211,7 +211,7 @@ The three orbits light up one after another: first the map pin, then the web pag
 
 **Image**
 ```
-Two glowing glass silhouettes in a dark room holding phones, a glowing Wi-Fi signal arc above them connecting both phones, cinematic 3D render, translucent glowing blue glass hologram material with light inside, volumetric blue light rays, glowing particles, pure black background, single centered subject, shallow depth of field, ray-traced reflections, strong bloom, high contrast, ultra detailed, Unreal Engine 5 / Octane render style, no text, no letters, no logos, vertical 9:16 portrait format.
+Two glowing glass silhouettes in a dark room holding phones, a glowing Wi-Fi signal arc above them connecting both phones, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no text, no letters, no logos, vertical 9:16 portrait format.
 ```
 **Animation**
 ```
@@ -222,7 +222,7 @@ Glowing lines grow from both phones, cross each other and tie into a bright knot
 
 **Image**
 ```
-A giant glowing neural network made of glass threads floating above a tiny glass human silhouette, cinematic 3D render, translucent glowing blue glass hologram material with light inside, volumetric blue light rays, glowing particles, pure black background, single centered subject, shallow depth of field, ray-traced reflections, strong bloom, high contrast, ultra detailed, Unreal Engine 5 / Octane render style, no text, no letters, no logos, vertical 9:16 portrait format.
+A giant glowing neural network made of glass threads floating above a tiny glass human silhouette, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no text, no letters, no logos, vertical 9:16 portrait format.
 ```
 **Animation**
 ```
@@ -233,11 +233,11 @@ Pulses of light run through the network and converge into a single bright point 
 
 **Image**
 ```
-A cloud of glowing particles floating in front of a glass human hand reaching out, cinematic 3D render, translucent glowing blue glass hologram material with light inside, volumetric blue light rays, glowing particles, pure black background, single centered subject, shallow depth of field, ray-traced reflections, strong bloom, high contrast, ultra detailed, Unreal Engine 5 / Octane render style, no text, no letters, no logos, vertical 9:16 portrait format.
+A cloud of glowing particles floating in front of a glass human hand reaching out, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no text, no letters, no logos, vertical 9:16 portrait format.
 ```
 **Image de fin** (même style)
 ```
-A glowing glass sneaker floating just in front of a glass human hand reaching out, cinematic 3D render, translucent glowing blue glass hologram material with light inside, volumetric blue light rays, glowing particles, pure black background, single centered subject, shallow depth of field, ray-traced reflections, strong bloom, high contrast, ultra detailed, Unreal Engine 5 / Octane render style, no text, no letters, no logos, vertical 9:16 portrait format.
+A glowing glass sneaker floating just in front of a glass human hand reaching out, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no text, no letters, no logos, vertical 9:16 portrait format.
 ```
 **Animation**
 ```
@@ -248,7 +248,7 @@ The particles quickly assemble into a glowing glass sneaker just before the hand
 
 **Image**
 ```
-An extremely long glowing glass scroll of documents rolling down endlessly into the dark, a signature line at the bottom, cinematic 3D render, translucent glowing blue glass hologram material with light inside, volumetric blue light rays, glowing particles, pure black background, single centered subject, shallow depth of field, ray-traced reflections, strong bloom, high contrast, ultra detailed, Unreal Engine 5 / Octane render style, no text, no letters, no logos, vertical 9:16 portrait format.
+An extremely long glowing glass scroll of documents rolling down endlessly into the dark, a signature line at the bottom, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no text, no letters, no logos, vertical 9:16 portrait format.
 ```
 **Animation**
 ```
@@ -259,7 +259,7 @@ The scroll unrolls fast downward, then the signature line at the bottom lights u
 
 **Image**
 ```
-A glowing glass smartphone showing three large switch toggles, each with a simple icon: a microphone, a map pin, a person, cinematic 3D render, translucent glowing blue glass hologram material with light inside, volumetric blue light rays, glowing particles, pure black background, single centered subject, shallow depth of field, ray-traced reflections, strong bloom, high contrast, ultra detailed, Unreal Engine 5 / Octane render style, no text, no letters, no logos, vertical 9:16 portrait format.
+A glowing glass smartphone showing three large switch toggles, each with a simple icon: a microphone, a map pin, a person, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no text, no letters, no logos, vertical 9:16 portrait format.
 ```
 **Animation**
 ```
@@ -270,7 +270,7 @@ The three toggles switch on one after the other, each one glowing brighter. The 
 
 **Image**
 ```
-A glowing glass smartphone floating in the dark, inside it a camera-like glowing lens, cinematic 3D render, translucent glowing blue glass hologram material with light inside, volumetric blue light rays, glowing particles, pure black background, single centered subject, shallow depth of field, ray-traced reflections, strong bloom, high contrast, ultra detailed, Unreal Engine 5 / Octane render style, no text, no letters, no logos, vertical 9:16 portrait format.
+A glowing glass smartphone floating in the dark, inside it a camera-like glowing lens, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no text, no letters, no logos, vertical 9:16 portrait format.
 ```
 **Animation**
 ```
@@ -281,7 +281,7 @@ Slow push-in toward the phone while the inner lens slowly opens like an eye. The
 
 **Image**
 ```
-A glowing glass human silhouette facing a floating glowing glass smartphone, thin data threads between them, cinematic 3D render, translucent glowing blue glass hologram material with light inside, volumetric blue light rays, glowing particles, pure black background, single centered subject, shallow depth of field, ray-traced reflections, strong bloom, high contrast, ultra detailed, Unreal Engine 5 / Octane render style, no text, no letters, no logos, vertical 9:16 portrait format.
+A glowing glass human silhouette facing a floating glowing glass smartphone, thin data threads between them, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no text, no letters, no logos, vertical 9:16 portrait format.
 ```
 **Animation**
 ```
