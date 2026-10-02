@@ -11,44 +11,65 @@
 - **Fin** : retour vers le spectateur et son quotidien (« quand tu utilises ton téléphone… »), ton émouvant.
 - **Image** : hologramme bleu sur fond noir, un plan par phrase, sous-titres d'une ligne au centre bas.
 
-Script ci-dessous : écrit pour nous (texte original), même mécanique. Durée estimée : 1 min 50 à 2 min 10.
+Style d'écriture repris des références : vouvoiement, phrases déclaratives très courtes, triades
+(« sans moteur, sans carburant, sans… »), sentences-chocs (« La vitesse est la clé. »), un bloc par fonction,
+ton de documentaire neutre, fin « Souvenez-vous ». Texte original. Durée estimée : 2 min 30 à 3 min.
 
-## Texte à générer (ElevenLabs, balises d'émotion)
+## Texte à générer (ElevenLabs — balises sobres, voix de narrateur posée)
 
 ```
-[intrigued] Au-dessus de ta tête, des milliers de machines filent dans le noir. Sans moteur allumé. Sans rien pour les retenir. [short pause] Alors pourquoi elles ne tombent pas ?
+[serious] Des milliers de satellites tournent au-dessus de vous. Sans aile. Sans moteur allumé. Sans câble pour les retenir. [short pause] Pourquoi ne tombent-ils pas ?
 
-[serious] La réponse va te surprendre : elles tombent. [short pause] Tout le temps. Depuis des années.
+[intrigued] Parce qu'ils tombent. [short pause] En permanence.
 
-[calm] Imagine une montagne si haute qu'elle dépasse l'atmosphère. Au sommet, un canon. [short pause] Tu tires doucement : le boulet retombe un peu plus loin. Tu tires plus fort : il retombe encore plus loin.
+[calm] Un satellite est en chute libre. Il tombe vers la Terre à chaque instant. Mais il avance si vite que la Terre se dérobe sous lui. Le sol s'éloigne aussi vite qu'il tombe. Il ne touche jamais.
 
-[amazed] Et si tu tires assez fort… le sol se courbe sous lui avant qu'il ne le touche. [slowly] Il tombe, encore et encore… mais il rate la Terre, à chaque fois.
+[serious] C'est le principe de l'orbite. Une chute sans fin.
 
-[serious] C'est ça, une orbite. Une chute qui ne finit jamais.
+Newton l'avait compris il y a plus de trois cents ans. Un boulet tiré du haut d'une montagne retombe plus loin. Tiré plus fort, encore plus loin. Tiré assez fort, il fait le tour de la planète.
 
-[fast] À quatre cents kilomètres d'altitude, il faut filer à vingt-huit mille kilomètres-heure. Plus lent : tu t'écrases. Plus rapide : tu t'échappes dans l'espace.
+[calm] La vitesse est la clé. Vingt-huit mille kilomètres-heure à quatre cents kilomètres d'altitude. Un tour de la Terre en quatre-vingt-dix minutes. Trop lent, il retombe. Trop rapide, il s'en va. [short pause] Pas de marge. Pas de deuxième chance.
 
-[intrigued] Et la gravité, là-haut ? [short pause] Elle est presque aussi forte qu'ici. Environ quatre-vingt-dix pour cent. [softly] Les astronautes ne flottent pas. Ils tombent… en même temps que leur station.
+La gravité ne s'arrête pas là-haut. À quatre cents kilomètres, elle garde presque toute sa force. Les astronautes ne sont pas en apesanteur. Ils tombent avec leur station. Ensemble. Au même rythme.
 
-[amazed] À cette vitesse, ils font le tour de la Terre en une heure et demie. Seize levers de soleil… par jour.
+[serious] Mettre un satellite en orbite, c'est un tir de précision. La fusée le monte. Puis elle le pousse à l'horizontale. Puis elle le lâche. [short pause] Une erreur de quelques mètres par seconde, et la mission est perdue.
 
-[mysterious] Plus haut, à trente-six mille kilomètres, il se passe quelque chose d'étrange. [short pause] Un satellite y tourne exactement à la vitesse de la Terre. Vu d'ici… il ne bouge plus. [short pause] C'est pour ça que ta parabole reste pointée au même endroit, toute ta vie.
+[calm] Une fois là-haut, plus besoin de moteur. Rien ne le freine. Pas d'air. Pas de frottement. Il tourne seul, pendant des années.
 
-[intrigued] Et ton GPS ? [short pause] Il écoute des horloges atomiques qui volent au-dessus de toi. Mais là-haut… le temps ne s'écoule pas à la même vitesse. [serious] Einstein avait raison : sans correction, ta position serait fausse de dix kilomètres chaque jour.
+Chaque satellite a un métier.
 
-[ominous] Mais un satellite ne vit pas éternellement. Quand il n'a plus de carburant pour corriger sa trajectoire, il meurt… et continue de tourner. [short pause] Des millions de débris filent déjà autour de nous, plus vite qu'une balle. Une seule collision peut en créer des milliers d'autres.
+Les satellites de communication sont des relais. Ils captent un signal. Ils l'amplifient. Ils le renvoient de l'autre côté du globe. Une vidéo, un appel, un paiement. En quelques fractions de seconde.
 
-[thoughtful] Alors la prochaine fois que tu regardes une carte, la météo, ou l'heure sur ton téléphone… [short pause] pense à ces machines qui tombent sans fin au-dessus de toi. [whispers] Juste assez vite… pour ne jamais arriver.
+Les satellites d'observation regardent. En infrarouge. En radar. De jour comme de nuit. À travers les nuages. Ils voient les forêts brûler, les glaces fondre, les villes grandir.
+
+Les satellites météo surveillent l'atmosphère. Les nuages. Les vents. La température des océans. Ils voient les tempêtes naître des jours avant qu'elles n'arrivent.
+
+[intrigued] Et puis il y a le GPS. [short pause] Des horloges atomiques en orbite. Chacune envoie l'heure exacte. Votre téléphone mesure le retard de chaque signal. Quatre satellites suffisent pour savoir où vous êtes.
+
+[serious] Mais là-haut, le temps ne passe pas à la même vitesse. Einstein l'avait prédit. Sans correction, votre position dériverait de dix kilomètres par jour. [short pause] Chaque fois que vous suivez un itinéraire, vous utilisez la relativité.
+
+[mysterious] Certains satellites semblent immobiles. À trente-six mille kilomètres, ils tournent exactement à la vitesse de la Terre. Ils restent au-dessus du même point. Toujours. [short pause] C'est vers eux que pointent les paraboles.
+
+[calm] Un satellite doit tout supporter. Les vibrations du décollage. Le vide. Les radiations. Plus de deux cents degrés d'écart entre l'ombre et le soleil. Sans réparation. Sans entretien. Pendant quinze ans.
+
+[ominous] Puis vient la fin. Le carburant s'épuise. Le satellite ne peut plus corriger sa trajectoire. Il s'éteint. [short pause] Mais il continue de tourner.
+
+Autour de la Terre, des millions de débris filent plus vite qu'une balle. Un boulon peut détruire un satellite. Une collision peut en provoquer des milliers d'autres. Une réaction en chaîne.
+
+[thoughtful] Alors souvenez-vous. Quand vous regardez la météo. Quand vous suivez un itinéraire. Quand vous appelez quelqu'un à l'autre bout du monde. [short pause] Il y a, au-dessus de vous, une machine qui tombe depuis des années… [whispers] et qui ne touchera jamais le sol.
 ```
 
-Conseil voix : démarrer sans silence ; « elles tombent. » sec, juste après la question (≈ 6 s).
+Conseil voix : narrateur calme et régulier, sans emphase excessive ; « Parce qu'ils tombent. » détaché, juste après
+la question. Pas de silence au début.
 
 ## Vérification des faits
 - Satellites actifs : plus de 10 000 en 2025 (la majorité Starlink) → « des milliers », sans chiffre exact.
 - Canon de Newton : expérience de pensée de Newton (*De mundi systemate*, 1728).
 - Orbite basse (≈ 400 km, Station spatiale) : ≈ 7,66 km/s ≈ 27 600 km/h → « vingt-huit mille » ; un tour en ≈ 92 min ;
   ≈ 16 levers de soleil par jour.
-- Gravité à 400 km : g × (6371 / 6771)² ≈ 0,89 g → « environ 90 % ».
+- Gravité à 400 km : g × (6371 / 6771)² ≈ 0,89 g → « presque toute sa force ».
+- Écart thermique en orbite : de ≈ −150 °C à l'ombre à ≈ +120 °C au soleil → « plus de deux cents degrés ».
+- Durée de vie : satellites géostationnaires conçus pour ≈ 15 ans.
 - Orbite géostationnaire : 35 786 km d'altitude (« trente-six mille ») ; période = un jour sidéral ; utilisée pour la
   télévision par satellite (paraboles fixes).
 - GPS : horloges atomiques à bord ; effets relativistes cumulés ≈ +38 µs/jour ; non corrigés, l'erreur de distance
