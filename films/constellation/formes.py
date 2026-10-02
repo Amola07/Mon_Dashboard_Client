@@ -405,3 +405,141 @@ class Figure:
         x, y = Q[:, 0].copy(), Q[:, 1].copy()
         Q[:, 0], Q[:, 1] = x * c + y * s, -x * s + y * c
         return Q + np.asarray(pos)
+
+
+# ================================================================== v3 : décors intérieurs et objets (épisode 12)
+def wall_blocks(n, x0, x1, z0, z1, y=0.0, bh=1.0, bw=1.5, seed=0, joint_frac=0.6):
+    """Mur plan (x-z à la profondeur y) : joints de blocs décalés + remplissage faible. Renvoie (P, intensité)."""
+    g = rng(seed)
+    rows = max(1, int(round((z1 - z0) / bh)))
+    hz = (z1 - z0) / rows
+    nj = int(n * joint_frac)
+    k = g.integers(0, rows, nj)
+    horiz = g.random(nj) < 0.55
+    x = g.uniform(x0, x1, nj)
+    z = z0 + k * hz
+    off = ((k * 0.618) % 1.0) * bw
+    xv = np.round((x - x0 - off) / bw) * bw + x0 + off
+    zz = np.where(horiz, z, z + g.random(nj) * hz)
+    xx = np.where(horiz, x, np.clip(xv, x0, x1))
+    P1 = np.stack([xx, np.full(nj, y), zz], 1)
+    nf = n - nj
+    P2 = np.stack([g.uniform(x0, x1, nf), np.full(nf, y), g.uniform(z0, z1, nf)], 1)
+    return np.concatenate([P1, P2]), np.r_[np.ones(nj), np.full(nf, 0.25)].astype(np.float32)
+
+
+def kings_chamber(n, seed=0):
+    """Chambre du roi (10,47 × 5,23 × 5,84 m, granit) centrée en (0,0), sol z=0 : murs en blocs + 9 poutres.
+    Renvoie (P, intensité, est_poutre)."""
+    W_, D_, H_ = 10.47, 5.23, 5.84
+    parts, I, B = [], [], []
+    m = int(n * 0.16)
+    for (x0, x1, y, rot) in ((-W_ / 2, W_ / 2, -D_ / 2, 0), (-W_ / 2, W_ / 2, D_ / 2, 0)):
+        P, i = wall_blocks(m, x0, x1, 0, H_, y, 1.17, 1.9, seed + len(parts))
+        parts.append(P); I.append(i); B.append(np.zeros(len(P), bool))
+    for xx in (-W_ / 2, W_ / 2):
+        P, i = wall_blocks(m // 2, -D_ / 2, D_ / 2, 0, H_, 0, 1.17, 1.6, seed + 7 + len(parts))
+        P = np.stack([np.full(len(P), xx), P[:, 0], P[:, 2]], 1)
+        parts.append(P); I.append(i); B.append(np.zeros(len(P), bool))
+    g = rng(seed + 20)
+    mb = n - sum(len(p) for p in parts)
+    w = W_ / 9
+    k = g.integers(0, 9, mb)
+    edge = g.random(mb) < 0.6
+    x = -W_ / 2 + k * w + np.where(edge, np.where(g.random(mb) < 0.5, 0.02, w - 0.02), g.uniform(0, w, mb))
+    P = np.stack([x, g.uniform(-D_ / 2, D_ / 2, mb), np.full(mb, H_)], 1)
+    parts.append(P); I.append(np.where(edge, 1.0, 0.3).astype(np.float32)); B.append(k)
+    floor = int(n * 0.05)
+    parts.append(np.stack([g.uniform(-W_ / 2, W_ / 2, floor), g.uniform(-D_ / 2, D_ / 2, floor), np.zeros(floor)], 1))
+    I.append(np.full(floor, 0.18, np.float32)); B.append(np.full(floor, -1))
+    beam = np.concatenate([np.where(b is not None and b.dtype == bool, -1, b) if b.dtype == bool else b for b in B])
+    return np.concatenate(parts), np.concatenate(I), beam
+
+
+def sarcophagus(n, seed=0, L=2.28, Wd=0.98, Hh=1.05, t=0.15):
+    """Sarcophage sans couvercle : coque extérieure + intérieur creux (arêtes renforcées)."""
+    a = box_surface(int(n * 0.6), -L / 2, L / 2, -Wd / 2, Wd / 2, 0, Hh, seed, edge=0.45)
+    a = a[~((np.abs(a[:, 0]) < L / 2 - 1e-6) & (np.abs(a[:, 1]) < Wd / 2 - 1e-6) & (a[:, 2] > Hh - 1e-6))]
+    b = box_surface(n - len(a), -L / 2 + t, L / 2 - t, -Wd / 2 + t, Wd / 2 - t, t, Hh, seed + 1, edge=0.45)
+    b = b[b[:, 2] < Hh - 1e-6]
+    return np.concatenate([a, b])
+
+
+def tube(n, a, b, w, h, seed=0, edge=0.5):
+    """Conduit rectangulaire (largeur w, hauteur h) de a à b : parois + arêtes."""
+    g = rng(seed)
+    t = g.random(n)
+    side = g.integers(0, 4, n)
+    e = g.random(n) < edge
+    u = np.where(e, np.where(g.random(n) < 0.5, -0.5, 0.5), g.uniform(-0.5, 0.5, n))
+    x = np.where(side < 2, np.where(side == 0, -w / 2, w / 2), u * w)
+    z = np.where(side >= 2, np.where(side == 2, 0.0, h), (u + 0.5) * h)
+    z = z - h / 2
+    rings = g.random(n) < 0.12
+    t[rings] = np.round(t[rings] * 40) / 40
+    return along(np.stack([x, t, z], 1), a, b)
+
+
+def gable_corridor(n, L=9.0, W=2.1, wall=1.3, rise=1.3, seed=0):
+    """Couloir caché de la face nord : murs + toit en chevrons (paires de poutres inclinées)."""
+    g = rng(seed)
+    parts = []
+    m = n // 5
+    for s in (-1, 1):
+        P, _ = wall_blocks(m, 0, L, 0, wall, 0, 0.65, 1.2, seed + 2 + s)
+        parts.append(np.stack([np.full(len(P), s * W / 2), P[:, 0], P[:, 2]], 1))
+        k = g.integers(0, int(L / 1.15) + 1, m)
+        y = k * 1.15 + np.where(g.random(m) < 0.6, 0.0, g.uniform(0, 1.1, m))
+        u = g.random(m)
+        parts.append(np.stack([s * W / 2 * (1 - u), y, wall + rise * u], 1))
+    fl = n - sum(len(p) for p in parts)
+    parts.append(np.stack([g.uniform(-W / 2, W / 2, fl), g.uniform(0, L, fl), np.zeros(fl)], 1))
+    return np.concatenate(parts)
+
+
+def chevrons(n, seed=0):
+    """Face nord autour de l'entrée d'origine (repère local : x largeur, z le long de la pente, y = 0 la face) :
+    deux paires de grandes poutres en chevron + appareil de blocs autour."""
+    g = rng(seed)
+    P, I = wall_blocks(int(n * 0.55), -14, 14, -6, 18, 0.0, 1.2, 2.0, seed)
+    parts, inten = [P], [I]
+    for (w, z0, t) in ((4.2, 3.0, 1.6), (4.2, 6.4, 1.6)):
+        for s in (-1, 1):
+            m = int(n * 0.1)
+            u, v = g.random(m), g.random(m)
+            edge = g.random(m) < 0.6
+            v = np.where(edge, np.round(v), v)
+            p0 = np.array([0, -0.3, z0 + 3.4])
+            p1 = np.array([s * w, -0.3, z0])
+            d = p1 - p0
+            nrm = np.array([-d[2], 0, d[0]]) / np.linalg.norm(d) * t * -s
+            Q = p0 + np.outer(u, d) + np.outer(v, nrm)
+            parts.append(Q); inten.append(np.where(edge, 1.3, 0.5).astype(np.float32))
+    m = n - sum(len(p) for p in parts)
+    ent = polyline([(-0.55, -0.05, -1.0), (-0.55, -0.05, 0.2), (0.55, -0.05, 0.2), (0.55, -0.05, -1.0)], m, 0.01, seed + 9)
+    parts.append(ent); inten.append(np.full(m, 1.4, np.float32))
+    return np.concatenate(parts), np.concatenate(inten)
+
+
+def egypt_map(n, seed=0):
+    """Carte plane de l'Égypte (x = longitude, y = latitude, en degrés) : côtes, Nil, villes, terres pointillées."""
+    d = np.load(os.path.join(_DATA, "terre.npz"))
+    g = rng(seed)
+    box_ = (24.0, 36.5, 21.0, 32.5)
+
+    def inside(P):
+        return (P[:, 0] > box_[0]) & (P[:, 0] < box_[1]) & (P[:, 1] > box_[2]) & (P[:, 1] < box_[3])
+    coast = _sample_lines(d["coast"], d["coast_i"], n * 6, seed, 0.01)
+    coast = coast[inside(coast)][: int(n * 0.3)]
+    nile = _sample_lines(d["nile"], d["nile_i"], n * 2, seed + 1, 0.02)
+    nile = nile[inside(nile)][: int(n * 0.25)]
+    shape = tuple(d["land_shape"])
+    mask = np.unpackbits(d["land"])[: shape[0] * shape[1]].reshape(shape).astype(bool)
+    m = n - len(coast) - len(nile)
+    ll = np.stack([g.uniform(box_[0], box_[1], m * 2), g.uniform(box_[2], box_[3], m * 2)], 1)
+    ok = mask[np.clip(((90 - ll[:, 1]) * 10).astype(int), 0, shape[0] - 1), np.clip(((ll[:, 0] + 180) * 10).astype(int), 0, shape[1] - 1)]
+    land = ll[ok][:m]
+    P = np.concatenate([coast, nile, land])
+    I = np.r_[np.full(len(coast), 1.0), np.full(len(nile), 1.6), np.full(len(land), 0.18)].astype(np.float32)
+    role = np.r_[np.zeros(len(coast)), np.ones(len(nile)), np.full(len(land), 2)]
+    return np.stack([P[:, 0], P[:, 1], np.zeros(len(P))], 1), I, role
