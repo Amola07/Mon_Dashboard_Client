@@ -1,0 +1,2 @@
+Open Peeps — Pablo Stanley (openpeeps.com), illustrations CC0 ; paquet npm @opeepsfun/open-peeps (MIT, Emre Çakır).
+svg/ : chaque élément exporté en SVG (export.js) ; catalogue.py : planches et assemblage des personnages.
