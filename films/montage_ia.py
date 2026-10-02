@@ -1,6 +1,6 @@
 """Montage commun des épisodes en clips générés, selon films/BIBLE_STYLE.md.
 
-- Voix : les silences de plus de 0,15 s sont raccourcis (débit continu) ; le minutage des phrases et des plans est
+- Voix : les silences de plus de 0,15 s sont raccourcis à 0,40 s au plus (respiration naturelle entre les phrases) ; le minutage des phrases et des plans est
   recalculé automatiquement.
 - Sous-titres : une seule ligne, petits, blancs, ombre douce, sans contour, vers 85 % de la hauteur, découpés en
   groupes de quelques mots calés sur la voix.
@@ -35,7 +35,7 @@ def load_voice(path):
     return np.frombuffer(raw, np.int16).astype(np.float64) / 32768
 
 
-def tighten(voice, max_gap=0.15, thr_db=-38.0):
+def tighten(voice, max_gap=0.40, thr_db=-38.0):
     """Raccourcit les silences à max_gap. Renvoie (voix, fonction temps_origine → temps_nouveau)."""
     win = int(0.02 * SR)
     n = len(voice) // win
