@@ -153,21 +153,25 @@ NUM_SKY = g.normal(0, 1, (len(NUM), 3)) * [160, 60, 80] + [0, 0, 160]
 _new = np.nonzero((PYR_B[:, 2] > 46) & (PYR_B[:, 2] <= 76))[0]
 NUM_DST = PYR_B[g.choice(_new, len(NUM))]
 NUM_ORDER = g.random(len(NUM))
-FIG = F.Figure(16_000, seed=14)
+from films.constellation import corps as CO, humain as HU
+BODIES = [HU.Humain(14_000, seed=21 + i, modele=m) for i, m in enumerate(("qt_male", "mh", "qt_male", "qt_female"))]
+# fenêtres où la capture tire vraiment (dos au sens de la marche, penché), en images
+PULLS = [(CO.Mouvement("tirer_lourd"), 110), (CO.Mouvement("trainer_lourd_1"), 125), (CO.Mouvement("trainer_lourd_2"), 110)]
+SPEED_PULL = 0.44
 SLED0 = np.array([150.0, -262.0, 0.0])
 DIRW = -SLED0[:2] / np.linalg.norm(SLED0[:2])                 # vers la pyramide
 DIRW3 = np.array([DIRW[0], DIRW[1], 0.0])
 SIDE3 = np.array([-DIRW[1], DIRW[0], 0.0])
 YAW = np.arctan2(DIRW[0], DIRW[1])
 BLOCK = F.box_surface(14_000, -0.8, 0.8, -0.6, 0.6, 0.25, 1.35, seed=15, edge=0.5)
-TEAM = [(1.0 * (i % 2 * 2 - 1), 3.2 + 1.5 * (i // 2), 0.37 * i) for i in range(8)]   # (côté, distance, phase)
+TEAM = [(0.8 * (i % 2 * 2 - 1), 3.0 + 1.6 * (i // 2), 9 * i) for i in range(8)]   # (côté, distance, décalage en images)
 TORCH = [SLED0 + DIRW3 * d + SIDE3 * s for d, s in ((2.0, 3.2), (7.0, -3.2), (12.0, 3.2))]
 MOON = F.sphere(6000, 40.0, (-900, 1600, 700), seed=16, lines=0.3)
 _S = np.array([150.0, -262.0, 0.0]); _D = -_S / np.linalg.norm(_S[:2]); _D[2] = 0; _L = np.array([-_D[1], _D[0], 0])
-_C1 = _S + _D * 6.5 + _L * 7.5 + [0, 0, 1.6]; _T1 = _S + _D * 3.0 + [0, 0, 1.2]
+_C1 = _S - _D * 2.2 + _L * 1.3 + [0, 0, 2.1]; _T1 = _S + _D * 7.0 + [0, 0, 1.2]
 CAM_B = [(0.0, (430, -470, 150), (0, 0, 55), 36), (1.2, (420, -500, 120), (40, -120, 150), 36),
          (3.2, (420, -500, 120), (40, -120, 150), 36), (4.6, (330, -420, 70), (0, 0, 60), 36),
-         (5.4, _C1, _T1, 42), (8.3, _C1 + _D * 3.2 + [0, 0, -0.3], _T1 + _D * 3.6, 42)]
+         (5.4, _C1, _T1, 48), (8.3, _C1 + _D * 2.2 + [0, 0, 0.4], _T1 + _D * 2.2, 48)]
 
 
 def frame_B(u):
@@ -177,9 +181,10 @@ def frame_B(u):
     base_scene(fr, u, 0.4 * (1 - 0.5 * night), 0.12)
     zb = ZB(u)
     m = PYR_B[:, 2] <= min(zb, 46.0) + 1e-6 if u < 4.6 else PYR_B[:, 2] <= zb + 1e-6
-    fr.points(PYR_B[m], M.BLUE[None, :] * PYR_BI[m, None], 0.42, warm_near=120)
+    a_p = float(M.keyed(u, [(0, 0.42), (4.6, 0.42), (5.4, 0.13)]))
+    fr.points(PYR_B[m], M.BLUE[None, :] * PYR_BI[m, None], a_p, warm_near=120)
     plat = F.platform(30_000, zb, seed=17)
-    fr.points(plat, M.BLUE, 0.12)
+    fr.points(plat, M.BLUE, 0.12 * a_p / 0.42)
     # rampe de chantier jusqu'au front de taille
     s_top = F.HALF * (1 - zb / F.HEIGHT)
     ramp = F.along(F.box_surface(40_000, -6, 6, 0, 1, -0.5, 0.0, seed=18, edge=0.6) * [1, 1, 1],
@@ -200,7 +205,7 @@ def frame_B(u):
         fr.points(P, col, a)
     # l'équipe tire le bloc sur son traîneau
     if u > 4.4:
-        adv = DIRW3 * 0.45 * (u - 4.4)
+        adv = DIRW3 * SPEED_PULL * (u - 4.4)
         sled = SLED0 + adv
         R2 = np.array([[DIRW[1], DIRW[0], 0], [-DIRW[0], DIRW[1], 0], [0, 0, 1]]).T
         fr.points(BLOCK @ R2.T + sled, M.BLUE_HI, 0.18, warm_near=12)
@@ -208,13 +213,20 @@ def frame_B(u):
             run = F.polyline([sled - DIRW3 * 1.0 + SIDE3 * sd + [0, 0, 0.08], sled + DIRW3 * 1.0 + SIDE3 * sd + [0, 0, 0.08],
                               sled + DIRW3 * 1.3 + SIDE3 * sd + [0, 0, 0.3]], 1500, seed=21)
             fr.points(run, M.ORANGE, 0.25)
+        yaw = np.arctan2(DIRW[1], DIRW[0])                       # le sens de la capture (+x) → vers la pyramide
+        cy, sy = np.cos(yaw), np.sin(yaw)
+        Rz = np.array([[cy, -sy, 0], [sy, cy, 0], [0, 0, 1]])
         for k, (side, dist, ph) in enumerate(TEAM):
-            pos = sled + DIRW3 * dist + SIDE3 * side
-            pts = FIG.points("walking", (u + ph) * 0.65, pos, yaw=-YAW, lean=0.32)
-            fr.points(pts, M.BLUE_HI, 0.11, warm_near=12)
-            hand = pos + DIRW3 * 0.35 + [0, 0, 1.0]
+            mv, f0 = PULLS[k % 3]
+            f = f0 + ph + (u - 4.4) * 30
+            P = mv.at(f / 30, loop=False)
+            P0 = mv.P[int(f0 + ph), 0]
+            Q = (P - [P0[0], P0[1], 0]) @ Rz.T + SLED0 + DIRW3 * dist + SIDE3 * side
+            pts = BODIES[k % 4].points(Q)
+            fr.points(pts, M.BLUE_HI, 0.16, warm_near=12)
+            hand = (Q[CO.J["LeftHand"]] + Q[CO.J["RightHand"]]) / 2
             rope = F.polyline([sled + DIRW3 * 0.8 + SIDE3 * side * 0.4 + [0, 0, 0.9], hand], 400, seed=30 + k)
-            fr.points(rope, M.GOLD, 0.3)
+            fr.points(rope, M.GOLD, 0.45)
         if night > 0:
             for i, tp in enumerate(TORCH):
                 tp = tp + adv
@@ -245,7 +257,10 @@ def main():
     tmp = tempfile.mkdtemp()
     voice_all = MI.load_voice(os.path.join(HERE, "audio", "voix.mp3"))
     pieces = []
+    only = sys.argv[sys.argv.index("--parts") + 1] if "--parts" in sys.argv else "AB"
     for name, (a, b) in PARTS.items():
+        if name not in only:
+            continue
         subs = MI.groups([(txt, s0 - a, s1 - a) for txt, s0, s1 in SEG if a <= s0 < b])
         enc = subprocess.Popen(["ffmpeg", "-nostdin", "-y", "-v", "error", "-f", "rawvideo", "-pix_fmt", "rgba",
                                 "-s", f"{M.W}x{M.H}", "-r", str(M.FPS), "-i", "-", "-c:v", "libx264", "-crf", "20",
