@@ -1,11 +1,11 @@
 # Épisode 12 — « Ce que cache encore la Grande Pyramide » : prompts
-Style néon sombre validé, personnages en verre sombre là où la scène en demande, texte néon dans l'image (vérifie l'orthographe, régénère si faute), couleurs de sens (rouge = mystère/inconnu, or = chiffres, orange = cuivre). Quand il y a une **Image de fin**, utilise le mode « première et dernière image ». Nomme les clips `01.mp4`, `02.mp4`…
+Style néon sombre validé, personnages en verre sombre là où la scène en demande, texte néon seulement sur 5 plans clés — 06, 10, 11, 12, 24 (vérifie l'orthographe, régénère si faute), couleurs de sens (rouge = mystère/inconnu, or = chiffres, orange = cuivre). Quand il y a une **Image de fin**, utilise le mode « première et dernière image ». Nomme les clips `01.mp4`, `02.mp4`…
 
 ## Plan 01 · 0,0 – 6,1 s — « En 2017, des physiciens ont envoyé des particules venues de l'espace à travers la Grande Pyramide. »
 
 **Image**
 ```
-Two physicists, people shown as elegant figures made of dark translucent glass with glowing blue outlines, faceless, standing at the foot of the Great Pyramid of Giza at night, looking at a glowing detector plate on the ground, the pyramid outlined in electric blue, thin vertical lines of cosmic particles falling from the sky through the pyramid. The only text in the image is the words "2017" written in clean bold uppercase glowing cyan neon letters, perfectly spelled, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no logos, no watermark, vertical 9:16 portrait format.
+Two physicists, people shown as elegant figures made of dark translucent glass with glowing blue outlines, faceless, standing at the foot of the Great Pyramid of Giza at night, looking at a glowing detector plate on the ground, the pyramid outlined in electric blue, thin vertical lines of cosmic particles falling from the sky through the pyramid, no text, no letters, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no logos, no watermark, vertical 9:16 portrait format.
 ```
 **Animation**
 ```
@@ -31,7 +31,7 @@ A large glowing red elongated shape slowly appears inside the pyramid on the scr
 
 **Image**
 ```
-X-ray cut-away side view of the Great Pyramid, its inner corridors drawn in thin blue lines, a long empty hollow space in its heart glowing red. The only text in the image is the words "30 M" written in clean bold uppercase glowing red neon letters, perfectly spelled, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no logos, no watermark, vertical 9:16 portrait format.
+X-ray cut-away side view of the Great Pyramid, its inner corridors drawn in thin blue lines, a long empty hollow space in its heart glowing red, no text, no letters, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no logos, no watermark, vertical 9:16 portrait format.
 ```
 **Animation**
 ```
@@ -42,7 +42,7 @@ Slow push-in toward the red hollow space in the heart of the pyramid, which puls
 
 **Image**
 ```
-Inside a massive wall of dark glass stone blocks, a sealed empty cavity glowing faint red from within, no opening, no door. The only text in the image is the words "UNKNOWN" written in clean bold uppercase glowing red neon letters, perfectly spelled, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no logos, no watermark, vertical 9:16 portrait format.
+Inside a massive wall of dark glass stone blocks, a sealed empty cavity glowing faint red from within, no opening, no door, no text, no letters, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no logos, no watermark, vertical 9:16 portrait format.
 ```
 **Animation**
 ```
@@ -53,7 +53,7 @@ Camera slowly moves along the sealed wall toward the cavity, the faint red glow 
 
 **Image**
 ```
-The Great Pyramid of Giza alone in the desert at night, seen from the ground, huge and majestic, a starry black sky, a few small tourists people shown as elegant figures made of dark translucent glass with glowing blue outlines, faceless, looking up at it. The only text in the image is the words "4,500 YEARS" written in clean bold uppercase glowing cyan neon letters, perfectly spelled, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no logos, no watermark, vertical 9:16 portrait format.
+The Great Pyramid of Giza alone in the desert at night, seen from the ground, huge and majestic, a starry black sky, a few small tourists people shown as elegant figures made of dark translucent glass with glowing blue outlines, faceless, looking up at it, no text, no letters, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no logos, no watermark, vertical 9:16 portrait format.
 ```
 **Animation**
 ```
@@ -79,7 +79,7 @@ Glass stone blocks fly in and stack themselves layer by layer very fast until th
 
 **Image**
 ```
-A single glass stone block in the foreground, behind it a large glowing clock face, half of the background showing a sun, half showing a moon. The only text in the image is the words "1 BLOCK / 2 MIN" written in clean bold uppercase glowing gold neon letters, perfectly spelled, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no logos, no watermark, vertical 9:16 portrait format.
+A single glass stone block in the foreground, behind it a large glowing clock face, half of the background showing a sun, half showing a moon, no text, no letters, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no logos, no watermark, vertical 9:16 portrait format.
 ```
 **Animation**
 ```
@@ -90,7 +90,7 @@ The clock hands spin fast, the block slides into place, the sun and moon swap pl
 
 **Image**
 ```
-The unfinished flat top of a pyramid under construction high above the desert at night, a group of workers people shown as elegant figures made of dark translucent glass with glowing blue outlines, faceless, pulling a big stone block with ropes at the very edge, a dizzying drop below. The only text in the image is the words "HOW ?" written in clean bold uppercase glowing red neon letters, perfectly spelled, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no logos, no watermark, vertical 9:16 portrait format.
+The unfinished flat top of a pyramid under construction high above the desert at night, a group of workers people shown as elegant figures made of dark translucent glass with glowing blue outlines, faceless, pulling a big stone block with ropes at the very edge, a dizzying drop below, no text, no letters, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no logos, no watermark, vertical 9:16 portrait format.
 ```
 **Animation**
 ```
@@ -101,7 +101,7 @@ The workers pull on the ropes, the block slides slightly up the edge, the camera
 
 **Image**
 ```
-X-ray cut-away side view of the Great Pyramid with thin blue corridors, a small rectangular room high in its center glowing brighter. The only text in the image is the words "KING'S CHAMBER" written in clean bold uppercase glowing cyan neon letters, perfectly spelled, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no logos, no watermark, vertical 9:16 portrait format.
+X-ray cut-away side view of the Great Pyramid with thin blue corridors, a small rectangular room high in its center glowing brighter, no text, no letters, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no logos, no watermark, vertical 9:16 portrait format.
 ```
 **Animation**
 ```
@@ -156,7 +156,7 @@ Slow push-in toward the sarcophagus in the dark chamber. The action starts immed
 
 **Image**
 ```
-Top view of an open empty stone sarcophagus with no lid, next to the narrow entrance of a corridor, a red measuring line showing the sarcophagus is wider than the corridor. The only text in the image is the words "TOO WIDE" written in clean bold uppercase glowing red neon letters, perfectly spelled, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no logos, no watermark, vertical 9:16 portrait format.
+Top view of an open empty stone sarcophagus with no lid, next to the narrow entrance of a corridor, a red measuring line showing the sarcophagus is wider than the corridor, no text, no letters, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no logos, no watermark, vertical 9:16 portrait format.
 ```
 **Animation**
 ```
@@ -182,7 +182,7 @@ Time-lapse: the workers vanish while granite walls and the ceiling rise and clos
 
 **Image**
 ```
-Close-up of an empty open stone sarcophagus, above it the faint ghostly outline of a pharaoh with a royal headdress made of thin blue light. The only text in the image is the words "NOT FOUND" written in clean bold uppercase glowing red neon letters, perfectly spelled, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no logos, no watermark, vertical 9:16 portrait format.
+Close-up of an empty open stone sarcophagus, above it the faint ghostly outline of a pharaoh with a royal headdress made of thin blue light, no text, no letters, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no logos, no watermark, vertical 9:16 portrait format.
 ```
 **Animation**
 ```
@@ -193,7 +193,7 @@ The ghostly outline of the pharaoh slowly fades away, leaving the sarcophagus em
 
 **Image**
 ```
-X-ray cut-away of the Great Pyramid, a lower chamber with two very thin shafts rising diagonally from its walls into the stone, glowing blue. The only text in the image is the words "20 CM" written in clean bold uppercase glowing cyan neon letters, perfectly spelled, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no logos, no watermark, vertical 9:16 portrait format.
+X-ray cut-away of the Great Pyramid, a lower chamber with two very thin shafts rising diagonally from its walls into the stone, glowing blue, no text, no letters, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no logos, no watermark, vertical 9:16 portrait format.
 ```
 **Animation**
 ```
@@ -204,7 +204,7 @@ Light travels up the two thin shafts from the chamber into the dark stone. The a
 
 **Image**
 ```
-Inside a tiny narrow square stone shaft, a small tracked robot with a bright headlight crawling upward. The only text in the image is the words "1993" written in clean bold uppercase glowing cyan neon letters, perfectly spelled, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no logos, no watermark, vertical 9:16 portrait format.
+Inside a tiny narrow square stone shaft, a small tracked robot with a bright headlight crawling upward, no text, no letters, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no logos, no watermark, vertical 9:16 portrait format.
 ```
 **Animation**
 ```
@@ -226,11 +226,11 @@ The robot headlight reaches the small stone door, the two copper handles catch t
 
 **Image**
 ```
-A small stone slab door with two copper handles at the end of a narrow shaft, a thin drill touching its center. The only text in the image is the words "2002" written in clean bold uppercase glowing cyan neon letters, perfectly spelled, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no logos, no watermark, vertical 9:16 portrait format.
+A small stone slab door with two copper handles at the end of a narrow shaft, a thin drill touching its center, no text, no letters, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no logos, no watermark, vertical 9:16 portrait format.
 ```
 **Image de fin**
 ```
-Through a small round hole in a stone slab, a camera view showing a short empty space and behind it a second stone door glowing faint red. The only text in the image is the words "2002" written in clean bold uppercase glowing cyan neon letters, perfectly spelled, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no logos, no watermark, vertical 9:16 portrait format.
+Through a small round hole in a stone slab, a camera view showing a short empty space and behind it a second stone door glowing faint red, no text, no letters, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no logos, no watermark, vertical 9:16 portrait format.
 ```
 **Animation**
 ```
@@ -241,7 +241,7 @@ The drill pierces the stone door, the camera pushes through the hole and reveals
 
 **Image**
 ```
-Two scientists people shown as elegant figures made of dark translucent glass with glowing blue outlines, faceless, standing on the north face of the Great Pyramid next to huge chevron-shaped stones, slipping a thin glowing cable camera into a narrow crack. The only text in the image is the words "2023" written in clean bold uppercase glowing cyan neon letters, perfectly spelled, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no logos, no watermark, vertical 9:16 portrait format.
+Two scientists people shown as elegant figures made of dark translucent glass with glowing blue outlines, faceless, standing on the north face of the Great Pyramid next to huge chevron-shaped stones, slipping a thin glowing cable camera into a narrow crack, no text, no letters, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no logos, no watermark, vertical 9:16 portrait format.
 ```
 **Animation**
 ```
@@ -252,7 +252,7 @@ The scientists slowly push the glowing cable deeper into the crack, the cable li
 
 **Image**
 ```
-Inside a hidden empty stone corridor with a pointed gable ceiling of large leaning stones, seen through a small camera light. The only text in the image is the words "9 M — SEALED" written in clean bold uppercase glowing cyan neon letters, perfectly spelled, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no logos, no watermark, vertical 9:16 portrait format.
+Inside a hidden empty stone corridor with a pointed gable ceiling of large leaning stones, seen through a small camera light, no text, no letters, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no logos, no watermark, vertical 9:16 portrait format.
 ```
 **Animation**
 ```
@@ -285,7 +285,7 @@ The gallery lights up from bottom to top, then the red hollow space above it glo
 
 **Image**
 ```
-Scientists people shown as elegant figures made of dark translucent glass with glowing blue outlines, faceless, standing around a floating holographic 3D model of the pyramid with a red hollow space inside, a small camera, a small robot and a human figure placed in front of it, all outside. The only text in the image is the words "NEVER ENTERED" written in clean bold uppercase glowing red neon letters, perfectly spelled, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no logos, no watermark, vertical 9:16 portrait format.
+Scientists people shown as elegant figures made of dark translucent glass with glowing blue outlines, faceless, standing around a floating holographic 3D model of the pyramid with a red hollow space inside, a small camera, a small robot and a human figure placed in front of it, all outside, no text, no letters, dark minimal cinematic 3D render, mostly pure black frame, the subject defined by bright vivid electric blue glowing edges with a soft neon glow, dark translucent glass body with faint inner reflections, one single small bright cyan accent point, deep shadows, low key lighting, no light rays, no sparkles, no particles everywhere, high contrast, clean, elegant, Unreal Engine 5 style, no logos, no watermark, vertical 9:16 portrait format.
 ```
 **Animation**
 ```
