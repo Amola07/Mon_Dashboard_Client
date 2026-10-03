@@ -58,3 +58,33 @@ Ce désert blanc n'est pas vide. C'est la mémoire de la Terre.
 - ALH84001 : trouvée le 27 décembre 1984 par Roberta Score (programme ANSMET), 1,93 kg, d'origine martienne ;
   McKay et al., Science, 1996 ; déclaration de Bill Clinton le 7 août 1996. La plupart des scientifiques penchent
   aujourd'hui pour une origine non biologique → formulation « le doute n'a jamais été totalement levé ».
+
+## Version 2 du texte (après comparaison avec la référence)
+
+Pourquoi la v1 ne retenait pas : phrases télégraphiques sans liaisons (une liste, pas une histoire), presque pas
+d'images fortes, pas d'escalade (la météorite arrivait sur un « et ce n'est pas tout »), peu de détails concrets.
+Procédés de la v2 : promesse dès la 5e seconde (le président des États-Unis), liaisons de cause (« ce qui a tout
+changé ? », « parce que »), images (page blanche, archive où rien ne s'efface, courant comme un mur), escalade
+(« c'est là que ça devient fou »), détails concrets (motoneige, mammouths, impact), fin qui boucle sur le glaçon.
+
+```
+Ce glaçon vient d'Antarctique. Quand il fond, il crépite : chaque petit « crac », c'est de l'air vieux de centaines de milliers d'années qui s'échappe. Et ce qu'on a trouvé dans cette glace a fini à la télévision, annoncé par le président des États-Unis.
+
+Vu de haut, l'Antarctique n'est qu'une page blanche. En vrai, c'est une archive où rien ne s'efface. Chaque hiver, la neige s'écrase sous son propre poids, devient de la glace, et emprisonne de minuscules bulles d'air. Couche après couche.
+
+Les scientifiques creusent à plus de trois kilomètres de profondeur. Dans chaque bulle qu'ils remontent, il y a un morceau du ciel d'avant les humains. On sait littéralement quel air respiraient les mammouths.
+
+Mais ce désert n'a pas toujours été gelé. Il y a quatre-vingt-dix millions d'années, près du pôle Sud, poussait une forêt humide. Et bien avant ça, des dinosaures y chassaient. Ce qui a tout changé ? Les continents se sont écartés. Un courant glacé s'est enroulé autour du continent, comme un mur… et la chaleur n'est plus jamais passée.
+
+Et c'est là que ça devient fou. Sur cette glace, la moindre pierre noire se voit de très loin. En 1984, une chercheuse en motoneige en repère une. Deux kilos. Elle vient de Mars : arrachée par un impact, elle a erré dans l'espace pendant des millions d'années avant de tomber ici.
+
+Douze ans plus tard, au microscope, on découvre dedans des formes qui ressemblent à des bactéries fossiles. Bill Clinton l'annonce en direct : il y a peut-être eu de la vie sur Mars. Aujourd'hui, la plupart des scientifiques pensent que c'est de la chimie… mais ce caillou a relancé la course vers Mars.
+
+Alors ce petit crépitement dans ton verre… c'est la Terre qui te raconte ce qu'elle a vu.
+```
+
+Faits ajoutés : la glace de glacier crépite en fondant (bulles d'air sous pression) ; carottes continues jusqu'à
+~800 000 ans (époque des mammouths laineux) ; forêt humide tempérée à ~900 km du pôle il y a ~90 Ma (Klages 2020) ;
+Cryolophosaurus (Jurassique, mont Kirkpatrick) ; Roberta Score repère ALH84001 en motoneige (ANSMET, 27/12/1984),
+éjectée de Mars il y a ~16 Ma, tombée il y a ~13 000 ans ; consensus actuel plutôt abiotique (Steele et al., Science,
+2022) ; l'affaire a relancé l'exobiologie et l'exploration de Mars à la NASA.
