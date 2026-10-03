@@ -172,21 +172,7 @@ def bouche(c, t, e):
     elif ex == "surpris":
         c.drawCircle(0, 56, 9, P(white, stroke=6))
     elif ex == "parle" and e.levres is not None:
-        w, h, dents, langue = e.levres
-        y0 = 62
-        if h < 6:                                         # lèvres fermées : un trait
-            c.drawRoundRect(skia.Rect(-w / 2, y0 - 2.5, w / 2, y0 + 2.5), 3, 3, P(white))
-        else:
-            rr = skia.RRect.MakeRectXY(skia.Rect(-w / 2, y0 - h / 2, w / 2, y0 + h / 2), min(w, h) / 2, min(w, h) / 2)
-            c.drawRRect(rr, P((40, 12, 70)))                 # intérieur de la bouche
-            c.save()
-            c.clipRRect(rr, doAntiAlias=True)
-            if dents > 0.3:
-                c.drawRect(skia.Rect(-w / 2, y0 - h / 2, w / 2, y0 - h / 2 + 6 * dents), P(white, 230))
-            if langue > 0.3:
-                c.drawOval(skia.Rect(-w * 0.32, y0 + h * 0.05, w * 0.32, y0 + h * 0.75), P((255, 120, 160), int(220 * langue)))
-            c.restore()
-            c.drawRRect(rr, P(white, stroke=5.5))
+        bouche_parle(c, *e.levres)
     elif ex == "parle":
         o = 5 + 14 * abs(math.sin(t * 13)) * (0.6 + 0.4 * math.sin(t * 3.1))
         c.drawRoundRect(skia.Rect(-12, 50 - o / 2, 12, 50 + o / 2), 8, 8, P(white))
@@ -201,6 +187,40 @@ def bouche(c, t, e):
         for k in range(1, 7):
             p.lineTo(-22 + k * 7.3, 54 + (6 if k % 2 else -6))
         c.drawPath(p, P(white, stroke=5))
+
+
+def bouche_parle(c, w, h, dents, langue, y0=56.0):
+    """Bouche de dessin animé : lèvre haute presque droite aux coins relevés, lèvre basse en « D » qui descend
+    avec l'ouverture ; intérieur sombre en dégradé, langue rose au fond, rangée de dents en haut."""
+    white = (255, 255, 255)
+    w = max(w, 24.0)
+    if h < 7:                                            # bouche fermée : un sourire léger
+        p = skia.Path()
+        p.moveTo(-w * 0.42, y0 - 3)
+        p.quadTo(0, y0 + 9, w * 0.42, y0 - 3)
+        c.drawPath(p, P(white, 120, blur=5, stroke=9))
+        c.drawPath(p, P(white, stroke=6))
+        return
+    hw = w / 2
+    top = y0 - h * 0.18
+    p = skia.Path()
+    p.moveTo(-hw, y0 - 4)                                # coin gauche, un peu relevé
+    p.cubicTo(-hw * 0.5, top, hw * 0.5, top, hw, y0 - 4)
+    p.cubicTo(hw * 0.95, y0 + h * 0.95, -hw * 0.95, y0 + h * 0.95, -hw, y0 - 4)
+    p.close()
+    c.drawPath(p, P(white, 90, blur=8))
+    inner = skia.GradientShader.MakeLinear([skia.Point(0, top), skia.Point(0, y0 + h)],
+                                           [rgb((70, 20, 80)), rgb((30, 8, 40))])
+    c.drawPath(p, P(shader=inner))
+    c.save()
+    c.clipPath(p, doAntiAlias=True)
+    if h > 14:                                           # langue
+        lw = hw * 0.75
+        c.drawOval(skia.Rect(-lw, y0 + h * 0.45, lw, y0 + h * 1.15), P((255, 120, 165), int(170 + 70 * langue)))
+    if dents > 0.3 or h > 30:                            # dents du haut
+        c.drawRect(skia.Rect(-hw, top - 4, hw, top + 4 + 4 * max(dents, 0.5)), P(white, 235))
+    c.restore()
+    c.drawPath(p, P(white, 230, stroke=4))
 
 
 def rayon(c, t, e):

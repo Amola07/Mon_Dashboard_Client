@@ -1,11 +1,11 @@
 """Épisode 13 — « Pourquoi on bâille quand quelqu'un d'autre bâille ? », version Orbe.
 
 L'Orbe dit le texte (bouche synchronisée sur la voix, films.persos.levres) ; au-dessus de lui, des illustrations
-animées. Les petits personnages (« pions ») bâillent, et la contagion circule le long de fils dorés. L'Orbe lui-même
-bâille deux fois : après la question d'ouverture et à la toute fin.
+animées. Les petits personnages (« pions ») bâillent, et la contagion circule le long de fils dorés. L'Orbe ne bâille
+jamais : il se déplace d'une scène à l'autre, rebondit sur les syllabes accentuées, penche vers ce qu'il regarde et
+montre les éléments clés avec son rayon de lumière.
 
-Toutes les scènes sont écrites dans le temps de la voix d'origine (o) ; deux silences sont ajoutés pour les
-bâillements de l'Orbe (O(t) ramène le temps de la vidéo au temps de la voix).
+Les scènes sont écrites dans le temps de la voix d'origine (o) ; O(t) ramène le temps de la vidéo à ce temps.
 
     python -m films.episodes.ep13_baillement.orbe_ep13 output/ep13_orbe.mp4
 """
@@ -32,9 +32,9 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 VOIX = os.path.join(HERE, "audio", "voix.mp3")
 
 # ------------------------------------------------------------------------------------------------ temps
-GAP_AT, GAP = 2.80, 1.40                  # l'Orbe bâille après la question d'ouverture
+GAP_AT, GAP = 2.80, 0.0                   # (aucun silence ajouté)
 END_O = 118.75
-TAIL = 2.9                                # bâillement final de l'Orbe
+TAIL = 1.8
 DUR = END_O + GAP + TAIL
 
 
@@ -48,7 +48,6 @@ def O(t):
     return GAP_AT if t < GAP_AT + GAP else t - GAP
 
 
-YAWNS = [(GAP_AT + 0.05, GAP - 0.1), (N(END_O) + 0.15, 2.4)]   # (début, durée) en temps vidéo
 
 T = 0.0                                   # temps vidéo de l'image en cours (mouvements continus)
 
@@ -865,7 +864,7 @@ def sc_fin(c, o, t):
     a = 255 * win(o, 113.3, 200)
     if a <= 1:
         return
-    fade = 1 - ease((t - (N(END_O) + 0.3)) / 0.8) * 0.75        # les pions s'effacent derrière l'Orbe qui bâille
+    fade = 1.0
     L, R = (300, 640), (780, 640)
     yl = yawn_at(o, 114.4, dur=1.9)
     yr = yawn_at(o, 116.0, dur=1.9)
@@ -879,18 +878,27 @@ def sc_fin(c, o, t):
 
 
 # ------------------------------------------------------------------------------------------------ l'Orbe
-HOME = (540.0, 1330.0, 0.72)
+# (instant o, position) : l'Orbe change de place à chaque scène pour laisser voir l'illustration et l'accompagner
+STATIONS = [(0.0, (540, 1320, 0.76)), (3.2, (380, 1300, 0.72)), (6.4, (720, 1310, 0.72)), (11.6, (760, 1280, 0.72)),
+            (17.3, (360, 1300, 0.74)), (24.0, (540, 1330, 0.68)), (27.1, (330, 1320, 0.68)), (31.6, (760, 1320, 0.68)),
+            (36.6, (790, 1300, 0.72)), (40.0, (380, 1310, 0.72)), (44.4, (720, 1300, 0.72)), (48.2, (540, 1320, 0.72)),
+            (50.7, (300, 1290, 0.7)), (54.3, (560, 1300, 0.74)), (57.8, (760, 1300, 0.72)), (61.0, (380, 1320, 0.72)),
+            (67.1, (700, 1320, 0.7)), (69.3, (540, 1290, 0.72)), (76.0, (540, 1150, 0.92)), (79.2, (760, 1310, 0.72)),
+            (83.1, (360, 1300, 0.72)), (89.8, (760, 1310, 0.72)), (94.7, (330, 1300, 0.72)), (100.3, (730, 1300, 0.72)),
+            (105.0, (540, 1320, 0.72)), (109.7, (380, 1300, 0.74)), (113.3, (540, 1300, 0.8)), (117.4, (540, 1200, 0.95))]
+# (de, à, point montré par le rayon de lumière)
+POINTS = [(11.9, 13.3, (540, 300)), (37.3, 39.2, (470, 650)), (43.2, 44.3, (700, 1050)), (58.0, 60.6, (540, 300)),
+          (66.0, 66.9, (540, 1060)), (69.6, 72.2, (540, 800)), (86.2, 88.0, (540, 1050)), (92.4, 94.2, (905, 600)),
+          (103.1, 104.6, (330, 650)), (107.0, 109.2, (905, 850)), (110.6, 112.8, (560, 640))]
 
 
 def orbe_target(t):
     o = O(t)
-    if YAWNS[0][0] - 0.2 <= t < YAWNS[0][0] + YAWNS[0][1] + 0.1:
-        return 540.0, 1260.0, 0.95
-    if 76.0 <= o < 79.0:
-        return 540.0, 1180.0, 0.85
-    if t >= N(END_O) - 0.2:
-        return 540.0, 1180.0, 1.05
-    return HOME
+    pos = STATIONS[0][1]
+    for t0, p in STATIONS:
+        if o >= t0:
+            pos = p
+    return pos
 
 
 # (instant o, yeux, humeur) pendant qu'il parle
@@ -909,26 +917,26 @@ _POSE = {}
 
 
 def orbe_pose(t):
+    """Position (ressort amorti vers la station), vitesse horizontale (pour l'inclinaison) et échelle."""
     if not _POSE:
         n = int(DUR * FPS) + 2
         x, y, s = orbe_target(0.0)
         vx = vy = vs = 0.0
         h = 1.0 / (FPS * 4)
-        w = 7.0
+        w = 5.5
         for f in range(n):
-            _POSE[f] = (x, y, s)
+            _POSE[f] = (x, y, s, vx)
             for k in range(4):
                 tx, ty, ts = orbe_target((f + k / 4) / FPS)
-                vx += (w * w * (tx - x) - 2 * 0.85 * w * vx) * h
-                vy += (w * w * (ty - y) - 2 * 0.85 * w * vy) * h
+                vx += (w * w * (tx - x) - 2 * 0.7 * w * vx) * h
+                vy += (w * w * (ty - y) - 2 * 0.7 * w * vy) * h
                 vs += (w * w * (ts - s) - 2 * 0.9 * w * vs) * h
                 x, y, s = x + vx * h, y + vy * h, s + vs * h
     f = t * FPS
     i = max(0, min(int(f), len(_POSE) - 2))
     u = f - i
     a, b = _POSE[i], _POSE[i + 1]
-    x, y, s = (a[j] + (b[j] - a[j]) * u for j in range(3))
-    return (x, y + 7 * math.sin(t * 2.1)), s
+    return tuple(a[j] + (b[j] - a[j]) * u for j in range(4))
 
 
 def last(lst, o):
@@ -942,12 +950,25 @@ def last(lst, o):
 SYNC = None
 
 
+def voice_level(t):
+    i = min(len(SYNC.env) - 1, max(0, int((t + 0.03) * SYNC.rate)))
+    return float(SYNC.env[i])
+
+
 def draw_orbe_at(c, t):
     o = O(t)
-    (x, y), s = orbe_pose(t)
+    x, y, vx, s = None, None, None, None
+    x, y, s, vx = orbe_pose(t)
     (yeux, hum), (_, hum0), tc = last(MOODS, o)
-    e = Etat(expr="parle", age=o - tc, levres=SYNC(t), yeux=yeux, humeur=hum or "calme",
-             humeur_avant=hum0 or "calme", humeur_mix=(o - tc) / 0.5)
+    age = o - tc
+    v = voice_level(t)
+    # mouvements : flottement, petite dérive, rebond sur les syllabes fortes, saut aux réactions
+    x += 16 * math.sin(t * 0.9) + 6 * math.sin(t * 2.3)
+    y += 9 * math.sin(t * 2.1) - 16 * v
+    if yeux in ("surpris", "joie", "idee"):
+        y -= 55 * math.sin(math.pi * min(1.0, age / 0.5)) if age < 0.5 else 0.0
+    e = Etat(expr="parle", age=age, levres=SYNC(t), yeux=yeux, humeur=hum or "calme",
+             humeur_avant=hum0 or "calme", humeur_mix=age / 0.5)
     e.cligne = yeux == "parle" and (t % 3.4) < 0.11
     (fp,), _, _ = last([(a, b) for a, b in FOCUS], o)
     if fp is None:
@@ -956,18 +977,18 @@ def draw_orbe_at(c, t):
         d = (fp[0] - x, fp[1] - y)
         n = math.hypot(*d) or 1.0
         e.regard = (0.7 * d[0] / n, 0.7 * d[1] / n)
-    stretch = 0.0
-    for t0, d in YAWNS:                                         # l'Orbe bâille
-        yv = yawn_curve(t - t0, d)
-        if yv > 0:
-            stretch = yv
-            e.levres = (62 + 14 * yv, 6 + 100 * yv, 0, 1 if yv > 0.5 else 0)
-            e.yeux = "baille" if yv > 0.3 else "parle"
-            e.humeur, e.humeur_mix = "calme", 1.0
-            e.regard = (0.0, 0.0)
+    # inclinaison : vers ce qu'il regarde, dans le sens du déplacement, et un léger balancement en parlant
+    tilt = 7 * e.regard[0] - max(-14.0, min(14.0, vx * 0.03)) + 4 * math.sin(t * 1.3) * (0.4 + v)
+    for a_, b_, pt in POINTS:
+        if a_ <= o < b_:
+            dx, dy = (pt[0] - x) / s, (pt[1] - y) / s
+            r = math.radians(-tilt)
+            e.cible = (dx * math.cos(r) - dy * math.sin(r), dx * math.sin(r) + dy * math.cos(r))
+            e.age = o - a_
     c.save()
     c.translate(x, y)
-    c.scale(s * (1 - 0.05 * stretch), s * (1 + 0.09 * stretch))
+    c.rotate(tilt)
+    c.scale(s * (1 + 0.03 * v), s * (1 - 0.02 * v))
     draw_orbe(c, t, e)
     c.restore()
 
@@ -995,11 +1016,11 @@ def voice_track():
     v = MI.load_voice(VOIX)
     sr = MI.SR
     i = int(GAP_AT * sr)
-    return np.concatenate([v[:i], np.zeros(int(GAP * sr)), v[i:]])
+    return np.concatenate([v[:i], np.zeros(int(GAP * sr)), v[i:]]) if GAP else v
 
 
 def fx_events():
-    ev = [(0.0, E1.swell(0.12), 1.0), (YAWNS[0][0], E1.swell(0.1), 1.0), (N(6.9), E1.pop_s(500, 0.12), 1.0),
+    ev = [(0.0, E1.swell(0.12), 1.0), (N(6.9), E1.pop_s(500, 0.12), 1.0),
           (N(11.75), E1.ding(660, 0.12), 1.0), (N(21.4), E1.pop_s(520, 0.14), 1.0), (N(22.4), E1.sparkle(0.1), 1.0),
           (N(24.1), E1.swish(0.8, 0.1), 1.0), (N(27.3), E1.ding(700, 0.1), 1.0), (N(30.4), E1.ding(620, 0.09), 1.0),
           (N(31.7), E1.ding(540, 0.06), 1.0), (N(37.2), E1.ding(784, 0.12), 1.0), (N(43.2), E1.pop_s(560, 0.12), 1.0),
@@ -1007,7 +1028,7 @@ def fx_events():
           (N(61.3), E1.ding(660, 0.12), 1.0), (N(69.4), HK.sub_drop(0.3), 1.0), (N(77.5), E1.swell(0.14), 1.0),
           (N(83.1), E1.ding(660, 0.12), 1.0), (N(86.0), E1.swish(0.5, 0.1), 1.0), (N(89.9), E1.sparkle(0.12), 1.0),
           (N(103.0), E1.pop_s(480, 0.12), 1.0), (N(106.3), E1.swish(2.6, 0.06), 1.0), (N(110.6), HK.sub_drop(0.3), 1.0),
-          (N(117.4), E1.swell(0.14), 1.0), (YAWNS[1][0], E1.swell(0.12), 1.0)]
+          (N(117.4), E1.swell(0.14), 1.0)]
     ev += [(N(t0 + 0.6), E1.ding(523 + 40 * i, 0.06), 1.0) for i, t0 in enumerate((58.0, 58.5, 59.0))]
     return ev
 
