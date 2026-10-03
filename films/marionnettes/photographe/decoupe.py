@@ -31,6 +31,8 @@ def main():
         cs, _ = cv2.findContours(m, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
         full = np.zeros_like(m)
         cv2.drawContours(full, cs, -1, 255, -1)                  # trous remplis (blanc des yeux, dents)
+        if nom == "complet":                                       # sauf le personnage entier : les jours
+            full = m.copy()                                         # entre bras et corps restent transparents
         full = cv2.erode(full, np.ones((3, 3), np.uint8))               # retire le liseré blanc
         alpha = cv2.GaussianBlur(full, (3, 3), 0)
         p = 2
