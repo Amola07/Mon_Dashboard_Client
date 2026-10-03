@@ -48,3 +48,37 @@ A 19th-century scientific engraving with fine cross-hatching, hand-colored with 
 2. Reconnaissable en 1 s dans le fil, sans voir le nom du compte ?
 3. Tient-il sur 40 plans différents (cohérence d'un sujet à l'autre) ?
 4. Est-ce que ça existe déjà en masse sur TikTok FR ? (néon, hologramme filaire, rendu « cinématique IA » = à éviter)
+
+## Résultats de la série 1
+- A cyanotype : le plus original et le plus « marque » (bord au pinceau, tampon rouille). Idée retenue : seul
+  l'élément important est en rouge rouille.
+- B risographie : très lisible, polyvalente, un peu moins unique.
+- C thermique : la plus frappante, mais n'a pas de sens pour une carte, une météorite, un objet.
+- D microscope : magnifique mais limité aux sujets microscopiques → plan récurrent possible.
+- E diorama : joli mais sombre et chargé en petit ; les miniatures en flou de bascule existent déjà.
+- F gravure : se perd dans le fil (beige sur beige).
+→ Série 2 : A et B sur 3 sujets difficiles (météorite, téléphone la nuit, cerveau).
+
+# Série de tests n° 2
+
+## A — cyanotype, accent rouge
+```
+A cyanotype photogram print of a black meteorite resting alone on wind-polished blue ice in Antarctica, the meteorite rendered as the only element printed in rust-red ink, everything else in crisp white and pale-blue tones on deep Prussian blue, visible paper fibers and uneven brush-painted chemical edges on cream watercolor paper, museum archive aesthetic, minimalist composition with lots of negative space, vertical 9:16 portrait format, no text, no logo, no watermark.
+```
+```
+A cyanotype photogram print of a faceless person sitting on a bed at night looking at a smartphone, the glowing smartphone rendered as the only element printed in rust-red ink, everything else in white and pale-blue tones on deep Prussian blue, visible paper fibers and uneven brush-painted chemical edges on cream watercolor paper, museum archive aesthetic, minimalist composition, vertical 9:16 portrait format, no text, no logo, no watermark.
+```
+```
+A cyanotype photogram print of a faceless human figure seen from the side with a translucent head revealing the brain, the brain rendered as the only element printed in rust-red ink, everything else in white and pale-blue tones on deep Prussian blue, visible paper fibers and uneven brush-painted chemical edges on cream watercolor paper, anatomical archive aesthetic, vertical 9:16 portrait format, no text, no logo, no watermark.
+```
+
+## B — risographie
+```
+A two-color risograph print illustration of a black meteorite resting alone on blue ice in Antarctica, printed only in fluorescent pink and teal blue ink on cream paper, visible grain, halftone dots, slight misregistration, dark purple where the inks overlap, bold flat shapes, graphic editorial zine style, vertical 9:16 portrait format, no text, no logo, no watermark.
+```
+```
+A two-color risograph print illustration of a faceless person sitting on a bed at night looking at a glowing smartphone, printed only in fluorescent pink and teal blue ink on cream paper, visible grain, halftone dots, slight misregistration, dark purple where the inks overlap, bold flat shapes, graphic editorial zine style, vertical 9:16 portrait format, no text, no logo, no watermark.
+```
+```
+A two-color risograph print illustration of a faceless human figure seen from the side with a translucent head revealing the brain, printed only in fluorescent pink and teal blue ink on cream paper, visible grain, halftone dots, slight misregistration, dark purple where the inks overlap, bold flat shapes, graphic editorial zine style, vertical 9:16 portrait format, no text, no logo, no watermark.
+```
