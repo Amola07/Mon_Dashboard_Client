@@ -1,0 +1,4 @@
+images/*
+!images/CREDITS.md
+!images/telecharger.py
+audio/voix_serree.wav
