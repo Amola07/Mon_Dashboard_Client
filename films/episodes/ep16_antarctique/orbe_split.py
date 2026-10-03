@@ -3,7 +3,7 @@
 Montage : un plan toutes les 2 à 3 s ; chaque plan a son mouvement de caméra (panoramique ou zoom) ; les images
 basse définition ou à voir en entier (cartes, microscope, archives) sont posées en « carte » sur un fond flou ;
 transitions variées : coupe sèche avec petit coup de zoom, filé horizontal (whip), zoom flouté, flash blanc sur les
-révélations. L'Orbe reste fixe en haut à droite et regarde l'image ; il ne bâille jamais. Accroche discrète en haut au début, sous-titres karaoké en bas.
+révélations. Version retenue sans l'Orbe (ORBE=1 pour le remettre, fixe en haut à droite). Accroche discrète en haut au début, sous-titres karaoké en bas.
 
 Les images (NASA, Wikimedia Commons) ne sont pas versionnées : voir images/CREDITS.md et images/telecharger.py.
 
@@ -114,6 +114,7 @@ PLANS = [
 ]
 
 ORBE_XY = (890, 330)                                               # fixe, en haut à droite
+AVEC_ORBE = os.environ.get("ORBE", "0") == "1"                     # version retenue : sans l'Orbe
 
 # humeurs de l'Orbe (temps d'origine) : (yeux, palette)
 MOODS = [(0.0, "surpris", "surprise"), (6.6, "parle", "calme"), (24.79, "parle", "reflexion"),
@@ -293,8 +294,9 @@ def accroche(c, t, t_hook):
     if a <= 0:
         return
     c.saveLayerAlpha(None, int(255 * a))
-    ligne(c, "CET AIR A", 560, 58, (255, 255, 255), t / 0.3)
-    ligne(c, "2 MILLIONS D'ANNÉES", 650, 78, (120, 220, 255), (t - 0.2) / 0.3)
+    y0 = 560 if AVEC_ORBE else 330
+    ligne(c, "CET AIR A", y0, 58, (255, 255, 255), t / 0.3)
+    ligne(c, "2 MILLIONS D'ANNÉES", y0 + 90, 78, (120, 220, 255), (t - 0.2) / 0.3)
     c.restore()
 
 
@@ -387,7 +389,8 @@ def image(c, t, plans, moods, sync, t_hook):
     accroche(c, t, t_hook)
     if t >= t_hook - 0.1:
         sous_titres(c, t)
-    orbe(c, t, sync, moods, plans)
+    if AVEC_ORBE:
+        orbe(c, t, sync, moods, plans)
     return k
 
 
