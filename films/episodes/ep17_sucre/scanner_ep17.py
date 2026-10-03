@@ -13,6 +13,7 @@ import re
 import subprocess
 import sys
 import tempfile
+import wave
 
 import numpy as np
 import skia
@@ -24,8 +25,10 @@ from films.styles.test_scanner import (BLANC, MONO, ORANGE, P, TITRE, W, H, FPS,
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 IMG = os.path.join(HERE, "images")
-VOIX = os.environ.get("VOIX", os.path.join(HERE, "audio", "voix_provisoire.wav"))
-SEGS = os.environ.get("SEGS", os.path.join(HERE, "audio", "voix_provisoire.json"))
+VOIX = os.environ.get("VOIX", os.path.join(HERE, "audio", "voix.mp3"))
+VOIX2 = os.path.join(HERE, "audio", "voix_serree.wav")
+SEGS = os.environ.get("SEGS", os.path.join(HERE, "audio", "voix.json"))
+T_ACC = 3.0                                                          # fin de l'accroche (recalculée)
 TR = 0.35                                                            # durée de la transition « balayage »
 
 # ------------------------------------------------------------------------------------------------ plans
@@ -36,41 +39,65 @@ TR = 0.35                                                            # durée de
 #   ("loupe", t, (sx, sy), (lx, ly, r), grossissement, étiquette)
 #   ("texte", t, (x, y), texte, taille, couleur)
 PLANS = [
-    (0, "01", (1.0, 1.10), (540, 700), [
-        ("lock", 0.5, (262, 192, 822, 1160), "OBJET 01 // CUBE"),
-        ("tag", 1.0, (538, 1512, 34, 60), "HUMAIN // 1,75 m", -1),
+    (0, "01", (1.0, 1.08), (540, 700), [
+        ("lock", 0.6, (262, 192, 822, 1160), "OBJET 01 // CUBE"),
+        ("tag", 1.4, (538, 1512, 34, 60), "HUMAIN // 1,75 m", -1),
     ]),
-    (1, "02", (1.04, 1.16), (540, 900), [
-        ("compteur", 0.1, 1.3, (80, 300), 0, 8_000_000_000, "", "PERSONNES"),
-        ("tag", 0.6, (605, 1603, 30, 70), "1 / 8 000 000 000", -1),
+    (2, "03", (1.0, 1.6), (600, 1000), [
+        ("lock", 0.1, (274, 450, 928, 1406), "OBJET 02 // TA MAIN"),
+        ("texte", 1.1, (120, 300), "ZOOM ×10", 34, ORANGE),
+        ("texte", 2.1, (120, 360), "ZOOM ×100", 34, ORANGE),
     ]),
-    (3, "03", (1.0, 1.12), (600, 900), [
-        ("lock", 0.2, (274, 450, 928, 1406), "OBJET 02 // MAIN"),
-        ("texte", 1.4, (300, 1500), "DENSITÉ APPARENTE : SOLIDE", 30, BLANC),
+    (5, "04", (1.0, 1.3), (560, 850), [
+        ("loupe", 0.1, (560, 820), (760, 1300, 170), 3.0, "GROSSISSEMENT"),
+        ("texte", 0.2, (90, 300), "×1 000        CELLULES", 30, BLANC),
+        ("texte", 1.4, (90, 360), "×1 000 000    MOLÉCULES", 30, BLANC),
+        ("texte", 2.7, (90, 420), "×10 000 000   ATOMES", 30, ORANGE),
     ]),
-    (5, "04", (1.0, 1.15), (560, 900), [
-        ("loupe", 0.3, (560, 820), (760, 1300, 170), 3.0, "GROSSISSEMENT ×10 000 000"),
-        ("compteur", 0.8, 1.4, (80, 300), 0, 99.9999999999999, " %", "D'ESPACE VIDE"),
+    (8, "05", (1.0, 1.25), (538, 964), [
+        ("tag", 0.6, (538, 964, 14, 14), "NOYAU", 1),
+        ("lock", 1.2, (150, 560, 930, 1380), "ATOME"),
     ]),
-    (7, "05", (1.0, 1.25), (538, 964), [
-        ("tag", 0.2, (538, 964, 14, 14), "NOYAU", 1),
-        ("lock", 0.9, (150, 560, 930, 1380), "ATOME"),
-        ("texte", 1.4, (180, 1480), "NOYAU / ATOME ≈ 1 / 100 000", 30, ORANGE),
+    (9, "06", (1.0, 1.9), (534, 970), [
+        ("tag", 0.6, (534, 970, 16, 16), "NOYAU // UNE BILLE", 1),
+        ("lock", 2.5, (90, 700, 1000, 1480), "ATOME // UN STADE"),
+        ("texte", 4.8, (220, 1250), "ENTRE LES DEUX : RIEN", 36, ORANGE),
     ]),
-    (8, "06", (1.0, 1.9), (534, 970), [
-        ("lock", 0.4, (90, 700, 1000, 1480), "ATOME // 150 m"),
-        ("tag", 2.6, (534, 970, 16, 16), "NOYAU // 1 cm", 1),
-        ("texte", 4.4, (300, 1250), "TOUT LE RESTE : DU VIDE", 34, ORANGE),
+    (14, "03", (1.25, 1.0), (600, 900), [
+        ("lock", 0.1, (274, 450, 928, 1406), "TON CORPS"),
+        ("compteur", 1.6, 2.6, (80, 300), 0, 99.9999999999999, " %", "DE VIDE"),
     ]),
-    (10, "08", (1.0, 1.12), (500, 900), [
+    (16, "04", (1.15, 1.35), (560, 900), [
+        ("texte", 0.6, (90, 300), "CONTACT MAIN / TABLE ?", 32, BLANC),
+        ("texte", 2.6, (90, 370), "ÉLECTRONS ⟷ ÉLECTRONS : RÉPULSION", 28, ORANGE),
+        ("texte", 4.9, (90, 440), "CONTACT RÉEL : 0", 32, ORANGE),
+    ]),
+    (19, "08", (1.0, 1.12), (500, 900), [
         ("tag", 0.3, (281, 1293, 46, 258), "SUJET 01 // TOI", 1),
-        ("compteur", 1.6, 4.0, (80, 300), 8_000_000_000, 0, "", "HUMAINS RESTANTS"),
-        ("tag", 2.2, (830, 776, 20, 20), "POINT DE COMPRESSION", -1),
+        ("compteur", 1.0, 3.8, (80, 300), 0, 8_000_000_000, "", "HUMAINS COMPRESSÉS"),
+        ("tag", 1.8, (830, 776, 20, 20), "POINT DE COMPRESSION", -1),
     ]),
-    (14, "09", (1.0, 1.35), (540, 742), [
-        ("lock", 0.3, (480, 680, 600, 804), "MATIÈRE // ?"),
-        ("compteur", 0.6, 2.2, (80, 300), 1000, 230_000_000_000_000_000, " kg/m³", "DENSITÉ"),
-        ("texte", 3.0, (120, 1450), "VOLUME : 1 MORCEAU DE SUCRE", 38, ORANGE),
+    (22, "02", (1.04, 1.16), (540, 900), [
+        ("compteur", 0.0, 1.2, (80, 300), 0, 8_000_000_000, "", "PERSONNES"),
+    ]),
+    (23, "09", (1.0, 1.35), (540, 742), [
+        ("lock", 0.2, (480, 680, 600, 804), "MORCEAU DE SUCRE // 2 cm³"),
+    ]),
+    (24, "01", (1.15, 1.0), (540, 700), [
+        ("lock", 0.2, (262, 192, 822, 1160), "MASSE ?"),
+        ("compteur", 0.6, 2.6, (80, 1380), 0, 400_000_000, " t", "MASSE DU SUCRE"),
+    ]),
+    (25, "05", (1.6, 2.3), (538, 964), [
+        ("tag", 5.6, (538, 964, 22, 22), "ÉTOILE À NEUTRONS", 1),
+        ("texte", 7.2, (120, 300), "MASSE > SOLEIL", 34, BLANC),
+        ("texte", 8.8, (120, 360), "DIAMÈTRE ≈ 20 km", 34, ORANGE),
+    ]),
+    (31, "02", (1.16, 1.0), (540, 900), [
+        ("texte", 0.4, (90, 300), "1 CUILLÈRE D'ÉTOILE", 36, ORANGE),
+        ("texte", 1.8, (90, 370), "> 8 000 000 000 HUMAINS", 36, BLANC),
+    ]),
+    (33, "03", (1.0, 1.15), (600, 900), [
+        ("lock", 0.4, (274, 450, 928, 1406), "TOI // 99,9999999999999 % DE VIDE"),
     ]),
 ]
 
@@ -251,9 +278,9 @@ def sous_titres(c, t):
 
 
 def accroche(c, t):
-    if t > 2.6:
+    if t > T_ACC:
         return
-    a = 255 * (1 - ease((t - 2.3) / 0.3))
+    a = 255 * (1 - ease((t - T_ACC + 0.3) / 0.3))
     s = E1.pop(t) if t < 0.5 else 1.0
     c.save()
     c.translate(W / 2, 1560)
@@ -270,9 +297,18 @@ def accroche(c, t):
 
 # ------------------------------------------------------------------------------------------------ rendu
 def preparer():
-    segs = json.load(open(SEGS))
+    """Voix resserrée (silences ≤ 0,40 s), minutage recalé, images chargées (plans sans image sautés)."""
+    global T_ACC
+    v, N, _ = MI.tighten(MI.load_voice(VOIX), max_gap=0.40, thr_db=-38.0)
+    with wave.open(VOIX2, "wb") as w:
+        w.setnchannels(1)
+        w.setsampwidth(2)
+        w.setframerate(MI.SR)
+        w.writeframes((np.clip(v, -1, 1) * 32767).astype(np.int16).tobytes())
+    segs = [(N(a), N(b), txt) for a, b, txt in json.load(open(SEGS))]
+    T_ACC = segs[0][1] + 0.1
     plans = []
-    for i, (s, nom, zoom, vise, ev) in enumerate(PLANS):
+    for s, nom, zoom, vise, ev in PLANS:
         p = os.path.join(IMG, nom + ".jpg")
         if os.path.exists(p):
             plans.append({"t0": segs[s][0] - (0.15 if s else 0.0), "nom": nom, "img": charger(p), "zoom": zoom,
@@ -326,14 +362,14 @@ def render(out):
         hud(c, p, a, u, t)
         cadre(c, t, int(p["nom"]))
         accroche(c, t)
-        if t > 2.6:
+        if t > T_ACC:
             sous_titres(c, t)
         if t < 0.3:
             c.drawRect(skia.Rect(0, 0, W, H), P((0, 0, 0), 255 * (1 - t / 0.3)))
         ff.stdin.write(surf.makeImageSnapshot().tobytes())
     ff.stdin.close()
     ff.wait()
-    MI.soundtrack(f"{tmp}/a.wav", MI.load_voice(VOIX), dur, fx)
+    MI.soundtrack(f"{tmp}/a.wav", MI.load_voice(VOIX2), dur, fx)
     subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", f"{tmp}/v.mp4", "-i", f"{tmp}/a.wav", "-c:v", "copy",
                     "-af", "loudnorm=I=-14:TP=-1.5:LRA=9", "-ar", "48000", "-c:a", "aac", "-b:a", "192k", "-shortest",
                     "-movflags", "+faststart", out], check=True)
