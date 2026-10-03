@@ -29,7 +29,6 @@ VOIX = os.environ.get("VOIX", os.path.join(HERE, "audio", "voix.mp3"))
 VOIX2 = os.path.join(HERE, "audio", "voix_serree.wav")
 SEGS = os.environ.get("SEGS", os.path.join(HERE, "audio", "voix.json"))
 T_ACC = 3.0                                                          # fin de l'accroche (recalculée)
-TR = 0.35                                                            # durée de la transition « balayage »
 
 # ------------------------------------------------------------------------------------------------ plans
 # phrase de départ (index dans SEGS), image, zoom début → fin, point visé, événements (t relatif au plan)
@@ -117,27 +116,111 @@ PLANS = [
 
 
 # ------------------------------------------------------------------------------------------------ dessin
-def camera(plan, u):
-    """Zoom du plan à l'avancement u ; le point visé glisse doucement vers le centre de l'écran."""
-    (z0, z1), (fx, fy) = plan["zoom"], plan["vise"]
+def cadrage(plan, a):
+    """Cadrage actif à l'instant a du plan : (indice, début, durée, zoom, point visé)."""
+    cs = plan["cadres"]
+    j = max(i for i, c in enumerate(cs) if c[0] <= a or i == 0)
+    s0 = cs[j][0]
+    s1 = cs[j + 1][0] if j + 1 < len(cs) else plan["t1"] - plan["t0"]
+    return j, s0, max(0.1, s1 - s0), cs[j][1], cs[j][2]
+
+
+def camera(plan, a):
+    """Zoom à l'instant a du plan ; le point visé glisse vers le centre ; petit coup de zoom à chaque coupe."""
+    j, s0, d, (z0, z1), (fx, fy) = cadrage(plan, a)
+    u = min(1.0, max(0.0, (a - s0) / d))
     z = z0 + (z1 - z0) * (0.6 * u + 0.4 * ease(u))
-    k = ease(u) * min(1.0, (z1 - 1) * 1.5)
+    if j:
+        z *= 1 + 0.06 * math.exp(-(a - s0) * 14)
+    k = ease(u) * min(1.0, (max(z0, z1) - 1) * 1.5)
     return z, fx, fy, fx + (540 - fx) * k, fy + (820 - fy) * k
 
 
-def vers_ecran(plan, u, x, y):
-    z, fx, fy, tx, ty = camera(plan, u)
+def vers_ecran(plan, a, x, y):
+    z, fx, fy, tx, ty = camera(plan, a)
     return tx + (x - fx) * z, ty + (y - fy) * z
 
 
-def image_plan(c, plan, u):
+def image_plan(c, plan, a, paint=None, extra=1.0):
     c.save()
-    z, fx, fy, tx, ty = camera(plan, u)
+    z, fx, fy, tx, ty = camera(plan, a)
+    c.translate(540, 820)
+    c.scale(extra, extra)
+    c.translate(-540, -820)
     c.translate(tx, ty)
     c.scale(z, z)
     c.translate(-fx, -fy)
-    c.drawImage(plan["img"], 0, 0, skia.SamplingOptions(skia.FilterMode.kLinear))
+    c.drawImage(plan["img"], 0, 0, skia.SamplingOptions(skia.FilterMode.kLinear), paint)
     c.restore()
+
+
+# ------------------------------------------------------------------------------------------------ transitions
+TRANSITIONS = ["balayage", "glitch", "zoom", "iris", "flash", "coupe"]
+DUREE_TR = {"balayage": 0.35, "glitch": 0.30, "zoom": 0.42, "iris": 0.45, "flash": 0.30, "coupe": 0.0}
+ROUGE = skia.ColorFilters.Matrix([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0])
+VERT_BLEU = skia.ColorFilters.Matrix([0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0])
+
+
+def transition(c, kind, q, p, a, t):
+    """Dessine le passage du plan q au plan p (a = temps écoulé dans p). Renvoie False s'il n'y a rien à faire."""
+    d = DUREE_TR[kind]
+    if a >= d or kind == "coupe":
+        return False
+    u = a / d
+    if kind == "balayage":
+        y = H * ease(u)
+        image_plan(c, p, a)
+        c.save()
+        c.clipRect(skia.Rect(0, y, W, H))
+        image_plan(c, q, q["t1"] - q["t0"])
+        c.restore()
+        g = skia.GradientShader.MakeLinear([skia.Point(0, y - 160), skia.Point(0, y)],
+                                           [skia.Color(*ORANGE, 0), skia.Color(*ORANGE, 90)])
+        c.drawRect(skia.Rect(0, y - 160, W, y), skia.Paint(Shader=g))
+        c.drawLine(0, y, W, y, P(ORANGE, 240, 3))
+    elif kind == "glitch":
+        e = 1 - u
+        dx = 34 * e
+        image_plan(c, p, a, skia.Paint(ColorFilter=ROUGE), 1.0)
+        c.save()
+        c.translate(-dx, 0)
+        image_plan(c, p, a, skia.Paint(ColorFilter=VERT_BLEU, BlendMode=skia.BlendMode.kPlus))
+        c.restore()
+        rng = np.random.default_rng(int(t * FPS))
+        for _ in range(int(9 * e) + 1):                               # tranches décalées de l'ancien plan
+            y0 = rng.uniform(0, H)
+            h = rng.uniform(20, 140)
+            c.save()
+            c.clipRect(skia.Rect(0, y0, W, y0 + h))
+            c.translate(rng.uniform(-90, 90) * e, 0)
+            image_plan(c, q if rng.random() < e else p, a)
+            c.restore()
+            c.drawLine(0, y0, W, y0, P(ORANGE if rng.random() < 0.5 else BLANC, 160 * e, 2))
+    elif kind == "zoom":
+        sig = 26 * math.sin(math.pi * u) + 0.1
+        c.saveLayer(None, skia.Paint(ImageFilter=skia.ImageFilters.Blur(sig, sig)))
+        if u < 0.5:
+            image_plan(c, q, q["t1"] - q["t0"], extra=1 + 1.2 * ease(u * 2))
+        else:
+            image_plan(c, p, a, extra=1.5 - 0.5 * ease((u - 0.5) * 2))
+        c.restore()
+        c.drawRect(skia.Rect(0, 0, W, H), P((255, 255, 255), 70 * math.sin(math.pi * u)))
+    elif kind == "iris":
+        image_plan(c, q, q["t1"] - q["t0"])
+        cx, cy = vers_ecran(p, a, *p["cadres"][0][2])
+        r = 1300 * ease(u)
+        c.save()
+        clip = skia.Path()
+        clip.addCircle(cx, cy, r)
+        c.clipPath(clip, doAntiAlias=True)
+        image_plan(c, p, a)
+        c.restore()
+        c.drawCircle(cx, cy, r, P(ORANGE, 230 * (1 - u), 6))
+        c.drawCircle(cx, cy, r * 0.94, P(BLANC, 140 * (1 - u), 2))
+    elif kind == "flash":
+        image_plan(c, p, a)
+        c.drawRect(skia.Rect(0, 0, W, H), P((255, 236, 214), 240 * (1 - u) ** 2))
+    return True
 
 
 def fmt(v, unite):
@@ -151,8 +234,8 @@ def fmt(v, unite):
     return s + unite
 
 
-def hud(c, plan, a, u, t_abs):
-    E = lambda x, y: vers_ecran(plan, u, x, y)                     # noqa: E731
+def hud(c, plan, a, t_abs):
+    E = lambda x, y: vers_ecran(plan, a, x, y)                     # noqa: E731
     for ev in plan["hud"]:
         kind, t0 = ev[0], ev[1]
         if a < t0:
@@ -174,7 +257,7 @@ def hud(c, plan, a, u, t_abs):
         elif kind == "tag":
             x, y, hw, hh = ev[2]
             cx, cy = E(x, y)
-            z = camera(plan, u)[0]
+            z = camera(plan, a)[0]
             k = ease(d / 0.35)
             crochets(c, (cx - hw * z - 8, cy - hh * z - 8, cx + hw * z + 8, cy + hh * z + 8), BLANC, 230 * k, l=14, w=3)
             sd = ev[4]
@@ -310,6 +393,22 @@ def accroche(c, t):
 
 
 # ------------------------------------------------------------------------------------------------ rendu
+PLAN_MAX = 1.6                                                       # au-delà, l'image est recoupée en plusieurs cadrages
+
+
+def cadres(p):
+    """Découpe un plan long en cadrages successifs (large, serré sur le sujet, décalé…) : plus de plans, même image."""
+    d = p["t1"] - p["t0"]
+    n = max(1, round(d / PLAN_MAX))
+    (z0, z1), (fx, fy) = p["zoom"], p["vise"]
+    zm = max(z0, z1)
+    variantes = [((z0, z1), (fx, fy)),
+                 ((zm * 1.38, zm * 1.48), (fx, fy)),
+                 ((1.12, 1.04), (fx + (540 - fx) * 0.5 + 90, fy + (820 - fy) * 0.5 - 60)),
+                 ((zm * 1.22, zm * 1.12), (fx - 50, fy + 40))]
+    return [(j * d / n,) + variantes[j % len(variantes)] for j in range(n)]
+
+
 def preparer():
     """Voix resserrée (silences ≤ 0,40 s), minutage recalé, images chargées (plans sans image sautés)."""
     global T_ACC
@@ -330,6 +429,8 @@ def preparer():
                           "vise": vise, "hud": ev})
     for k, p in enumerate(plans):
         p["t1"] = plans[k + 1]["t0"] if k + 1 < len(plans) else segs[-1][1] + 1.2
+        p["trans"] = TRANSITIONS[(k * 5 + 1) % len(TRANSITIONS)] if k else "coupe"
+        p["cadres"] = cadres(p)
     preparer_mots(segs)
     return plans, segs
 
@@ -345,7 +446,11 @@ def render(out):
     fx = [(0.0, E1.swell(0.10), 1.0)]
     for k, p in enumerate(plans):
         if k:
-            fx.append((p["t0"], E1.swell(0.06), 1.0))
+            snd = {"balayage": E1.swell(0.06), "zoom": E1.swell(0.09), "iris": E1.swell(0.07),
+                   "glitch": E1.pop_s(2400, 0.06), "flash": E1.pop_s(1700, 0.10), "coupe": E1.pop_s(520, 0.06)}
+            fx.append((p["t0"], snd[p["trans"]], 1.0))
+        for c0 in p["cadres"][1:]:
+            fx.append((p["t0"] + c0[0], E1.pop_s(600, 0.04), 1.0))
         for ev in p["hud"]:
             t = p["t0"] + ev[1]
             fx.append((t, E1.pop_s({"lock": 880, "tag": 1180, "compteur": 660, "loupe": 990, "texte": 1320}[ev[0]],
@@ -357,24 +462,13 @@ def render(out):
         k = max(i for i, p in enumerate(plans) if p["t0"] <= t or i == 0)
         p = plans[k]
         a = t - p["t0"]
-        u = min(1.0, max(0.0, a / (p["t1"] - p["t0"])))
         c = surf.getCanvas()
         c.clear(skia.Color(0, 0, 0))
-        image_plan(c, p, u)
-        if k and a < TR:                                             # balayage : l'ancien plan reste sous la ligne
-            q = plans[k - 1]
-            y = H * ease(a / TR)
-            c.save()
-            c.clipRect(skia.Rect(0, y, W, H))
-            image_plan(c, q, 1.0)
-            c.restore()
-            g = skia.GradientShader.MakeLinear([skia.Point(0, y - 160), skia.Point(0, y)],
-                                               [skia.Color(*ORANGE, 0), skia.Color(*ORANGE, 90)])
-            c.drawRect(skia.Rect(0, y - 160, W, y), skia.Paint(Shader=g))
-            c.drawLine(0, y, W, y, P(ORANGE, 240, 3))
+        if not (k and transition(c, p["trans"], plans[k - 1], p, a, t)):
+            image_plan(c, p, a)
         ambiance(c, t)
         finitions(c, t)
-        hud(c, p, a, u, t)
+        hud(c, p, a, t)
         cadre(c, t, int(p["nom"]))
         accroche(c, t)
         if t > T_ACC:
