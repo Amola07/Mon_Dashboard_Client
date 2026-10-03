@@ -878,7 +878,9 @@ def sc_fin(c, o, t):
 
 
 # ------------------------------------------------------------------------------------------------ l'Orbe
-# (instant o, position) : l'Orbe change de place à chaque scène pour laisser voir l'illustration et l'accompagner
+FIXE = True                               # l'Orbe ne se déplace pas (choix retenu)
+HOME = (540.0, 1330.0, 0.74)
+# (instant o, position) si FIXE est faux : l'Orbe change de place à chaque scène pour laisser voir l'illustration et l'accompagner
 STATIONS = [(0.0, (540, 1320, 0.76)), (3.2, (380, 1300, 0.72)), (6.4, (720, 1310, 0.72)), (11.6, (760, 1280, 0.72)),
             (17.3, (360, 1300, 0.74)), (24.0, (540, 1330, 0.68)), (27.1, (330, 1320, 0.68)), (31.6, (760, 1320, 0.68)),
             (36.6, (790, 1300, 0.72)), (40.0, (380, 1310, 0.72)), (44.4, (720, 1300, 0.72)), (48.2, (540, 1320, 0.72)),
@@ -958,15 +960,19 @@ def voice_level(t):
 def draw_orbe_at(c, t):
     o = O(t)
     x, y, vx, s = None, None, None, None
-    x, y, s, vx = orbe_pose(t)
     (yeux, hum), (_, hum0), tc = last(MOODS, o)
     age = o - tc
     v = voice_level(t)
-    # mouvements : flottement, petite dérive, rebond sur les syllabes fortes, saut aux réactions
-    x += 16 * math.sin(t * 0.9) + 6 * math.sin(t * 2.3)
-    y += 9 * math.sin(t * 2.1) - 16 * v
-    if yeux in ("surpris", "joie", "idee"):
-        y -= 55 * math.sin(math.pi * min(1.0, age / 0.5)) if age < 0.5 else 0.0
+    if FIXE:                                                    # l'Orbe reste à sa place : seuls yeux, bouche
+        x, y, s = HOME                                          # et couleurs changent
+        vx = 0.0
+    else:
+        x, y, s, vx = orbe_pose(t)
+        # mouvements : flottement, petite dérive, rebond sur les syllabes fortes, saut aux réactions
+        x += 16 * math.sin(t * 0.9) + 6 * math.sin(t * 2.3)
+        y += 9 * math.sin(t * 2.1) - 16 * v
+        if yeux in ("surpris", "joie", "idee"):
+            y -= 55 * math.sin(math.pi * min(1.0, age / 0.5)) if age < 0.5 else 0.0
     e = Etat(expr="parle", age=age, levres=SYNC(t), yeux=yeux, humeur=hum or "calme",
              humeur_avant=hum0 or "calme", humeur_mix=age / 0.5)
     e.cligne = yeux == "parle" and (t % 3.4) < 0.11
@@ -978,7 +984,7 @@ def draw_orbe_at(c, t):
         n = math.hypot(*d) or 1.0
         e.regard = (0.7 * d[0] / n, 0.7 * d[1] / n)
     # inclinaison : vers ce qu'il regarde, dans le sens du déplacement, et un léger balancement en parlant
-    tilt = 7 * e.regard[0] - max(-14.0, min(14.0, vx * 0.03)) + 4 * math.sin(t * 1.3) * (0.4 + v)
+    tilt = 0.0 if FIXE else 7 * e.regard[0] - max(-14.0, min(14.0, vx * 0.03)) + 4 * math.sin(t * 1.3) * (0.4 + v)
     for a_, b_, pt in POINTS:
         if a_ <= o < b_:
             dx, dy = (pt[0] - x) / s, (pt[1] - y) / s
@@ -988,7 +994,7 @@ def draw_orbe_at(c, t):
     c.save()
     c.translate(x, y)
     c.rotate(tilt)
-    c.scale(s * (1 + 0.03 * v), s * (1 - 0.02 * v))
+    c.scale(s, s) if FIXE else c.scale(s * (1 + 0.03 * v), s * (1 - 0.02 * v))
     draw_orbe(c, t, e)
     c.restore()
 
