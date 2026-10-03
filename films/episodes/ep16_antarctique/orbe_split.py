@@ -1,10 +1,9 @@
-"""Épisode 16 — « L'air de l'Antarctique » : vraies images en plein écran, l'Orbe (petit) se promène dessus.
+"""Épisode 16 — « L'air de l'Antarctique » : vraies images en plein écran, l'Orbe (petit) fixe en haut à droite.
 
 Montage : un plan toutes les 2 à 3 s ; chaque plan a son mouvement de caméra (panoramique ou zoom) ; les images
 basse définition ou à voir en entier (cartes, microscope, archives) sont posées en « carte » sur un fond flou ;
 transitions variées : coupe sèche avec petit coup de zoom, filé horizontal (whip), zoom flouté, flash blanc sur les
-révélations. L'Orbe change de place à chaque plan (déplacement doux), flotte légèrement et regarde l'image ; il ne
-bâille jamais. Accroche discrète en haut au début, sous-titres karaoké en bas.
+révélations. L'Orbe reste fixe en haut à droite et regarde l'image ; il ne bâille jamais. Accroche discrète en haut au début, sous-titres karaoké en bas.
 
 Les images (NASA, Wikimedia Commons) ne sont pas versionnées : voir images/CREDITS.md et images/telecharger.py.
 
@@ -114,9 +113,7 @@ PLANS = [
     (93.70, "02_antarctique", "carte", (0.5, 0.5), (0.5, 0.5), (1.15, 0.9), "zoom"),
 ]
 
-# places de l'Orbe (évite la bande des sous-titres et les boutons TikTok à droite) ; une par plan, en tournant
-PLACES = [(250, 640), (800, 470), (270, 1160), (760, 1230), (300, 850), (790, 820), (540, 1240), (240, 470),
-          (780, 1080), (520, 560)]
+ORBE_XY = (890, 330)                                               # fixe, en haut à droite
 
 # humeurs de l'Orbe (temps d'origine) : (yeux, palette)
 MOODS = [(0.0, "surpris", "surprise"), (6.6, "parle", "calme"), (24.79, "parle", "reflexion"),
@@ -181,9 +178,9 @@ def couvrir(c, img, fx, fy, z):
 
 def carte(c, img, z):
     """Image entière posée au centre (coins arrondis, ombre)."""
-    s = min(1000 / img.width(), 1150 / img.height()) * z
+    s = min(1000 / img.width(), 1000 / img.height()) * z
     w, h = img.width() * s, img.height() * s
-    r = skia.Rect(W / 2 - w / 2, 900 - h / 2, W / 2 + w / 2, 900 + h / 2)
+    r = skia.Rect(W / 2 - w / 2, 970 - h / 2, W / 2 + w / 2, 970 + h / 2)
     rr = skia.RRect.MakeRectXY(r, 34, 34)
     sh = skia.Paint(AntiAlias=True, Color=skia.Color(0, 0, 0, 170),
                     MaskFilter=skia.MaskFilter.MakeBlur(skia.kNormal_BlurStyle, 30))
@@ -296,8 +293,8 @@ def accroche(c, t, t_hook):
     if a <= 0:
         return
     c.saveLayerAlpha(None, int(255 * a))
-    ligne(c, "CET AIR A", 250, 58, (255, 255, 255), t / 0.3)
-    ligne(c, "2 MILLIONS D'ANNÉES", 340, 78, (120, 220, 255), (t - 0.2) / 0.3)
+    ligne(c, "CET AIR A", 560, 58, (255, 255, 255), t / 0.3)
+    ligne(c, "2 MILLIONS D'ANNÉES", 650, 78, (120, 220, 255), (t - 0.2) / 0.3)
     c.restore()
 
 
@@ -352,44 +349,23 @@ def sous_titres(c, t):
 
 
 # ------------------------------------------------------------------------------------------------ Orbe
-def position(plans, t):
-    """Place de l'Orbe : il rejoint une nouvelle place à chaque plan (0,8 s, en arc) puis flotte."""
-    k = max(i for i, p in enumerate(plans) if p[0] <= t)
-    b = PLACES[k % len(PLACES)]
-    a = PLACES[(k - 1) % len(PLACES)] if k else b
-    u = ease((t - plans[k][0]) / 0.8)
-    x = a[0] + (b[0] - a[0]) * u
-    y = a[1] + (b[1] - a[1]) * u - 60 * math.sin(math.pi * u) * (1 if k else 0)
-    x += 22 * math.sin(t * 0.9) + 8 * math.sin(t * 2.3)
-    y += 16 * math.sin(t * 1.3 + 1.0)
-    vx, vy = (b[0] - a[0]) * (1 - u), (b[1] - a[1]) * (1 - u)
-    return x, y, vx, vy, u
-
-
 def orbe(c, t, sync, moods, plans):
+    """L'Orbe reste fixe en haut à droite ; seuls la bouche, les yeux et les couleurs changent."""
     k = max(i for i, m in enumerate(moods) if m[0] <= t)
     tc, yeux, hum = moods[k]
     hum0 = moods[k - 1][2] if k else hum
     e = Etat(expr="parle", age=t - tc, levres=sync(t), yeux=yeux, humeur=hum, humeur_avant=hum0,
              humeur_mix=min(1.0, (t - tc) / 0.5))
     e.cligne = (t % 3.7) < 0.11
-    x, y, vx, vy, u = position(plans, t)
-    if u < 1 and math.hypot(vx, vy) > 5:                             # regarde où il va
-        n = math.hypot(vx, vy)
-        e.regard = (0.8 * vx / n, 0.8 * vy / n)
-    else:                                                            # puis regarde l'image (le centre)
-        d = (W / 2 - x, 900 - y)
-        n = math.hypot(*d) or 1.0
-        e.regard = (0.6 * d[0] / n, 0.6 * d[1] / n)
+    x, y = ORBE_XY
+    d = (W / 2 - x, 900 - y)                                         # il regarde l'image
+    n = math.hypot(*d)
+    e.regard = (0.5 * d[0] / n, 0.5 * d[1] / n)
     s = ECHELLE_ORBE * (E1.pop(t - 0.3) if t < 0.9 else 1.0)
     if s <= 0:
         return
-    c.drawOval(skia.Rect(x - 95 * s / 0.8, y + 120 * s / 0.8, x + 95 * s / 0.8, y + 150 * s / 0.8),
-               skia.Paint(AntiAlias=True, Color=skia.Color(0, 0, 0, 90),
-                          MaskFilter=skia.MaskFilter.MakeBlur(skia.kNormal_BlurStyle, 18)))
     c.save()
     c.translate(x, y)
-    c.rotate(max(-12, min(12, vx * 0.02)) if u < 1 else 0)          # penche dans le sens du déplacement
     c.scale(s, s)
     draw_orbe(c, t, e)
     c.restore()
