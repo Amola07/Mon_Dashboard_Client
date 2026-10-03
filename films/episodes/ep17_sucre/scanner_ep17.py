@@ -43,6 +43,9 @@ PLANS = [
         ("lock", 0.6, (262, 192, 822, 1160), "OBJET 01 // CUBE"),
         ("tag", 1.4, (538, 1512, 34, 60), "HUMAIN // 1,75 m", -1),
     ]),
+    (1, "02", (1.04, 1.12), (540, 900), [
+        ("compteur", 0.0, 0.9, (80, 300), 0, 8_000_000_000, "", "PERSONNES"),
+    ]),
     (2, "03", (1.0, 1.6), (600, 1000), [
         ("lock", 0.1, (274, 450, 928, 1406), "OBJET 02 // TA MAIN"),
         ("texte", 1.1, (120, 300), "ZOOM ×10", 34, ORANGE),
@@ -58,46 +61,57 @@ PLANS = [
         ("tag", 0.6, (538, 964, 14, 14), "NOYAU", 1),
         ("lock", 1.2, (150, 560, 930, 1380), "ATOME"),
     ]),
-    (9, "06", (1.0, 1.9), (534, 970), [
-        ("tag", 0.6, (534, 970, 16, 16), "NOYAU // UNE BILLE", 1),
-        ("lock", 2.5, (90, 700, 1000, 1480), "ATOME // UN STADE"),
-        ("texte", 4.8, (220, 1250), "ENTRE LES DEUX : RIEN", 36, ORANGE),
+    (9, "07", (1.0, 1.25), (540, 1266), [
+        ("tag", 0.5, (540, 1266, 36, 36), "NOYAU // UNE BILLE", 1),
+    ]),
+    (10, "06", (1.0, 1.5), (534, 970), [
+        ("lock", 0.3, (90, 700, 1000, 1480), "ATOME // UN STADE"),
+        ("tag", 1.2, (534, 970, 16, 16), "NOYAU", 1),
+        ("texte", 2.5, (220, 1250), "ENTRE LES DEUX : RIEN", 36, ORANGE),
     ]),
     (14, "03", (1.25, 1.0), (600, 900), [
         ("lock", 0.1, (274, 450, 928, 1406), "TON CORPS"),
         ("compteur", 1.6, 2.6, (80, 300), 0, 99.9999999999999, " %", "DE VIDE"),
     ]),
-    (16, "04", (1.15, 1.35), (560, 900), [
-        ("texte", 0.6, (90, 300), "CONTACT MAIN / TABLE ?", 32, BLANC),
-        ("texte", 2.6, (90, 370), "ÉLECTRONS ⟷ ÉLECTRONS : RÉPULSION", 28, ORANGE),
-        ("texte", 4.9, (90, 440), "CONTACT RÉEL : 0", 32, ORANGE),
+    (16, "15", (1.0, 1.3), (541, 893), [
+        ("tag", 0.4, (541, 893, 30, 90), "CONTACT ?", 1),
+        ("texte", 2.6, (90, 300), "ÉLECTRONS ⟷ ÉLECTRONS : RÉPULSION", 28, ORANGE),
+        ("texte", 4.9, (90, 370), "CONTACT RÉEL : 0", 34, ORANGE),
     ]),
     (19, "08", (1.0, 1.12), (500, 900), [
         ("tag", 0.3, (281, 1293, 46, 258), "SUJET 01 // TOI", 1),
         ("compteur", 1.0, 3.8, (80, 300), 0, 8_000_000_000, "", "HUMAINS COMPRESSÉS"),
         ("tag", 1.8, (830, 776, 20, 20), "POINT DE COMPRESSION", -1),
     ]),
-    (22, "02", (1.04, 1.16), (540, 900), [
-        ("compteur", 0.0, 1.2, (80, 300), 0, 8_000_000_000, "", "PERSONNES"),
+    (22, "09", (1.0, 1.3), (540, 742), [
+        ("lock", 0.2, (480, 680, 600, 804), "8 000 000 000 HUMAINS"),
     ]),
-    (23, "09", (1.0, 1.35), (540, 742), [
-        ("lock", 0.2, (480, 680, 600, 804), "MORCEAU DE SUCRE // 2 cm³"),
+    (23, "10", (1.0, 1.15), (540, 1167), [
+        ("lock", 0.2, (387, 1043, 692, 1290), "MORCEAU DE SUCRE // 2 cm³"),
     ]),
-    (24, "01", (1.15, 1.0), (540, 700), [
-        ("lock", 0.2, (262, 192, 822, 1160), "MASSE ?"),
-        ("compteur", 0.6, 2.6, (80, 1380), 0, 400_000_000, " t", "MASSE DU SUCRE"),
+    (24, "11", (1.0, 1.15), (540, 1100), [
+        ("lock", 0.2, (490, 1290, 590, 1395), "MASSE ?"),
+        ("compteur", 0.5, 2.4, (80, 300), 0, 400_000_000, " t", "MASSE DU SUCRE"),
+        ("tag", 1.0, (771, 1167, 18, 40), "HUMAIN", 1),
     ]),
-    (25, "05", (1.6, 2.3), (538, 964), [
-        ("tag", 5.6, (538, 964, 22, 22), "ÉTOILE À NEUTRONS", 1),
-        ("texte", 7.2, (120, 300), "MASSE > SOLEIL", 34, BLANC),
-        ("texte", 8.8, (120, 360), "DIAMÈTRE ≈ 20 km", 34, ORANGE),
+    ((24, 1.3), "12", (1.0, 1.4), (540, 960), [
+        ("tag", 0.2, (540, 960, 30, 30), "IL S'ENFONCE", 1),
     ]),
-    (31, "02", (1.16, 1.0), (540, 900), [
-        ("texte", 0.4, (90, 300), "1 CUILLÈRE D'ÉTOILE", 36, ORANGE),
-        ("texte", 1.8, (90, 370), "> 8 000 000 000 HUMAINS", 36, BLANC),
+    (25, "05", (1.6, 2.2), (538, 964), [
+        ("texte", 1.6, (120, 300), "ÉTOILE GÉANTE // EFFONDREMENT", 30, BLANC),
     ]),
-    (33, "03", (1.0, 1.15), (600, 900), [
-        ("lock", 0.4, (274, 450, 928, 1406), "TOI // 99,9999999999999 % DE VIDE"),
+    (28, "13", (1.0, 1.25), (540, 952), [
+        ("lock", 0.2, (440, 852, 640, 1052), "ÉTOILE À NEUTRONS"),
+        ("texte", 1.6, (120, 300), "MASSE > SOLEIL", 34, BLANC),
+        ("texte", 3.2, (120, 360), "DIAMÈTRE ≈ 20 km", 34, ORANGE),
+    ]),
+    (31, "14", (1.0, 1.2), (541, 900), [
+        ("lock", 0.2, (337, 766, 745, 1034), "1 CUILLÈRE D'ÉTOILE"),
+        ("texte", 1.9, (90, 300), "MASSE > 8 000 000 000 HUMAINS", 32, ORANGE),
+    ]),
+    (33, "16", (1.12, 1.0), (540, 900), [
+        ("tag", 0.3, (539, 1473, 30, 50), "TOI", -1),
+        ("lock", 1.0, (260, 415, 809, 1322), "99,9999999999999 % DE VIDE"),
     ]),
 ]
 
@@ -309,9 +323,10 @@ def preparer():
     T_ACC = segs[0][1] + 0.1
     plans = []
     for s, nom, zoom, vise, ev in PLANS:
+        s, dt = s if isinstance(s, tuple) else (s, 0.0)               # (phrase, décalage) pour couper en cours de phrase
         p = os.path.join(IMG, nom + ".jpg")
         if os.path.exists(p):
-            plans.append({"t0": segs[s][0] - (0.15 if s else 0.0), "nom": nom, "img": charger(p), "zoom": zoom,
+            plans.append({"t0": segs[s][0] + dt - (0.15 if s and not dt else 0.0), "nom": nom, "img": charger(p), "zoom": zoom,
                           "vise": vise, "hud": ev})
     for k, p in enumerate(plans):
         p["t1"] = plans[k + 1]["t0"] if k + 1 < len(plans) else segs[-1][1] + 1.2
