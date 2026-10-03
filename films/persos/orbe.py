@@ -44,6 +44,8 @@ class Etat:
     humeur_mix: float = 1.0              # transition de couleur vers la nouvelle humeur (0..1)
     humeur_avant: str = "calme"
     levres: tuple = None                 # forme de bouche synchronisée sur la voix (films.persos.levres)
+    yeux: str = None                     # expression des yeux si elle diffère de expr (ex. parler en étant surpris)
+    humeur: str = None                   # palette imposée (clé de HUMEURS)
 
 
 def rgb(c, a=255):
@@ -74,7 +76,7 @@ def ease(u):
 
 
 def palette(e):
-    new = HUMEURS[HUMEUR_DE.get(e.expr, "calme")]
+    new = HUMEURS[e.humeur or HUMEUR_DE.get(e.expr, "calme")]
     old = HUMEURS[e.humeur_avant]
     u = ease(e.humeur_mix)
     return [mix(o, n, u) for o, n in zip(old, new)]
@@ -108,10 +110,17 @@ def yeux(c, t, e):
     for side in (-1, 1):
         x, y = side * 38 + lx * 20, -6 + ly * 16
         halo = P(white, 150, blur=20)
-        if e.cligne and e.expr in ("neutre", "parle", "reflechit"):
+        ex = e.yeux or e.expr
+        if e.cligne and ex in ("neutre", "parle", "reflechit"):
             c.drawRoundRect(skia.Rect(x - 16, y - 4, x + 16, y + 4), 4, 4, P(white))
             continue
-        ex = e.expr
+        if ex == "baille":                                      # yeux plissés, fermés vers le bas
+            p = skia.Path()
+            p.moveTo(x - 18, y - 2)
+            p.quadTo(x, y + 12, x + 18, y - 2)
+            c.drawPath(p, P(white, 150, blur=8, stroke=14))
+            c.drawPath(p, P(white, stroke=9))
+            continue
         if ex in ("joie", "idee") and not (ex == "idee" and e.age > 0.25):
             p = skia.Path()
             p.moveTo(x - 17, y + 8)
