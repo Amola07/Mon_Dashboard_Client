@@ -374,6 +374,9 @@ def sous_titres(c, t):
     c.restore()
 
 
+ACCROCHE = ("TOUTE L'HUMANITÉ", "TIENT DANS UN SUCRE")                # 2 lignes géantes pendant la 1re phrase
+
+
 def accroche(c, t):
     if t > T_ACC:
         return
@@ -382,7 +385,7 @@ def accroche(c, t):
     c.save()
     c.translate(W / 2, 1560)
     c.scale(s, s)
-    for txt, y, taille, col in (("TOUTE L'HUMANITÉ", 0, 80, (255, 255, 255)), ("TIENT DANS UN SUCRE", 92, 64, ORANGE)):
+    for (txt, y, taille), col in zip(((ACCROCHE[0], 0, 80), (ACCROCHE[1], 92, 64)), ((255, 255, 255), ORANGE)):
         f = skia.Font(TITRE, taille)
         w = f.measureText(txt)
         c.drawString(txt, -w / 2, y, f, skia.Paint(AntiAlias=True, Color=skia.Color(0, 0, 0, int(a * 0.8)),
