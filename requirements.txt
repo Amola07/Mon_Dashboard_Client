@@ -17,3 +17,4 @@ pillow
 skia-python>=87
 # Trou noir calculé rayon par rayon (python -m films.trou_noir.film)
 numba>=0.60
+scipy

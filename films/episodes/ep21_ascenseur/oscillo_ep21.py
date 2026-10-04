@@ -8,6 +8,7 @@ juste avant chaque révélation, mixage à −14 LUFS.
     python -m films.episodes.ep21_ascenseur.oscillo_ep21 output/ep21_oscillo.mp4
 """
 import json
+import re
 import math
 import os
 import subprocess
@@ -20,6 +21,7 @@ import skia
 
 from films import montage_ia as MI
 from films.episodes.ep01_triangle import ep01 as E1
+from films.styles import oscillo_son as Z
 from films.styles.oscillo_ascenseur import AMBRE, MONO, VERT, VERT_PALE, P, cercle_pts, ease, faisceau, rect_pts
 
 W, H, FPS = 1080, 1920, 30
@@ -672,7 +674,7 @@ def render(out):
     ff.wait()
     mixage(f"{tmp}/a.wav", voix, dur, tabs, impacts)
     subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", f"{tmp}/v.mp4", "-i", f"{tmp}/a.wav", "-c:v", "copy",
-                    "-af", "loudnorm=I=-14:TP=-1.5:LRA=11,volume=2.3dB,alimiter=limit=0.9:level=disabled", "-ar", "48000", "-c:a", "aac", "-b:a", "192k",
+                    "-af", volume_cible(f"{tmp}/a.wav"), "-ar", "48000", "-c:a", "aac", "-b:a", "192k",
                     "-shortest", "-movflags", "+faststart", out], check=True)
     print("OK", out)
 
@@ -687,56 +689,110 @@ def bruit_blanc(d, amp):
     return RNG.normal(0, amp, n) * np.linspace(1, 0, n) ** 2
 
 
+def effets(tabs):
+    """Effets sonores variés, placés sur l'image (t, son)."""
+    t_r, t_f = e(0) - 0.55, e(1) - 0.15
+    ev = [(0.0, Z.allumage(0.35)), (0.0, Z.crepitement(0.4, 0.05)),
+          (t_r, Z.snap(0.55)), (t_r, Z.boom(0.45, 80)), (t_r + 0.05, Z.vent(t_f - t_r - 0.05, 0.28)),
+          (t_r + 0.1, Z.crepitement(t_f - t_r - 0.1, 0.10, 50)), (t_f, Z.arret_bande(0.6, 0.3)),
+          (s(1) + 1.2, Z.alarme(0.08, 2)), (s(2) + 0.2, Z.chirp(500, 1100, 0.25, 0.08)),
+          (s(3) - 0.9, Z.riser(0.9, 0.12)), (s(3) + 0.05, Z.boom(0.75, 55)), (s(3) + 0.05, Z.clang(110, 0.2, 2.0)),
+          (s(4) + 0.3, Z.whoosh(0.4, 0.12))]
+    # vitesse
+    tc0, tc1 = s(5) + 0.6, e(6) - 0.5
+    ev += [(tc0, Z.vent(tc1 - tc0, 0.22)), (tc0, Z.sifflement(tc1 - tc0, 0.05, 400, 1600)),
+           (s(7), Z.boom(0.4, 70)), (s(7) + 0.1, Z.chirp(1200, 1900, 0.4, 0.07))]
+    ev += [(tc0 + i * 0.07, Z.cliquet(0.04)) for i in range(int((tc1 - tc0) / 0.07))]
+    # saut
+    ev += [(s(8) + 0.2, Z.chirp(180, 900, 0.8, 0.10)), (s(8) + 1.4, Z.chirp(500, 1500, 0.22, 0.12)),
+           (s(9), Z.chirp(180, 820, 0.5, 0.10)), (s(9) + 0.3, Z.chirp(820, 700, 1.4, 0.04)),
+           (s(10), Z.thump(0.35)), (s(10) + 0.4, Z.chirp(900, 450, 0.25, 0.08))]
+    # apesanteur
+    ev += [(s(11) + 0.2, Z.vent(s(16) - s(11) - 0.3, 0.10, 120, 700)), (s(12) + 1.0, Z.whoosh(0.35, 0.10, False)),
+           (s(12) + 2.4, Z.whoosh(0.35, 0.10, False)), (s(13), Z.scintillement(2.6, 0.08)),
+           (s(14) + 0.1, Z.alarme(0.09, 3)), (s(15) + 0.4, Z.clang(1200, 0.08, 0.6)),
+           (s(15) + 0.7, Z.tictac(e(15) - s(15) - 0.7, 0.07)), (s(15) + 2.2, Z.chirp(2000, 2000, 0.08, 0.06))]
+    # que faire
+    ev += [(s(17) + 0.6, Z.thump(0.3)), (s(17) + 2.2, Z.thump(0.3)), (s(17) + 1.6, Z.whoosh(0.3, 0.08))]
+    ev += [(s(18) + 0.3 + 0.06 * i, Z.pince(1046.5 * 2 ** (i / 12 * 2), 0.04, 0.3)) for i in range(9)]
+    ev += [(s(18) + 2.0, Z.boom(0.4, 90)), (s(18) + 2.05, Z.craquement(0.15)), (s(18) + 3.0, Z.thump(0.35)),
+           (s(18) + 3.0, Z.craquement(0.2))]
+    # rassurez-vous
+    ev += [(s(19) + 0.9, Z.cloche(523.3, 0.12)), (s(19) + 1.3, Z.cloche(659.3, 0.12)),
+           (s(19) + 1.7, Z.cloche(784, 0.10))]
+    # Otis
+    t_coupe = s(21) + 0.55
+    ev += [(s(20) + 0.1, Z.cliquet(0.06)), (s(20) + 2.6, Z.foule(t_coupe - s(20) - 2.4, 0.07)),
+           (t_coupe - 0.3, Z.riser(0.3, 0.06)), (t_coupe, Z.snap(0.5)), (t_coupe + 0.12, Z.exclamation(0.13)),
+           (t_coupe + 0.05, Z.cliquet(0.2)), (t_coupe + 0.12, Z.cliquet(0.16)), (t_coupe + 0.15, Z.clang(300, 0.22)),
+           (s(22) + 0.3, Z.boom(0.3, 70)), (s(22) + 0.5, Z.applaudissements(2.4, 0.09)),
+           (s(23) + 0.1, Z.whoosh(0.35, 0.08)), (s(23) + 0.7, Z.cliquet(0.15)), (s(23) + 0.78, Z.cliquet(0.12))]
+    # ascenseur moderne
+    ev += [(s(24) + 0.9, Z.clang(250, 0.16, 0.8)), (s(24) + 0.95, Z.clang(262, 0.12, 0.8))]
+    ev += [(s(25) - 0.3 + i * 0.1, Z.pince(f, 0.08)) for i, f in enumerate((349.2, 392, 440, 523.3, 587.3, 698.5))]
+    # Empire State Building
+    tc0, tc1 = s(26) + 2.8, e(26) - 0.25
+    ev += [(s(26) + 2.2, Z.chirp(1500, 1500, 0.1, 0.05)), (tc0, Z.vent(tc1 - tc0, 0.24)),
+           (tc0, Z.sifflement(tc1 - tc0, 0.06)), (tc1 - 1.2, Z.riser(1.2, 0.08)),
+           (tc1, Z.boom(0.8, 50)), (tc1, Z.clang(140, 0.25, 1.8)), (tc1, Z.crepitement(0.5, 0.2, 150))]
+    ev += [(tc0 + i * 0.09, Z.cliquet(0.035)) for i in range(int((tc1 - tc0) / 0.09))]
+    # survie : battements
+    k = 0
+    while s(27) + k * 0.85 + 0.32 < s(29) - 0.2:
+        ev.append((s(27) + k * 0.85 + 0.30, Z.coeur(0.22)))
+        k += 1
+    ev += [(s(28) + 0.1, Z.boom(0.4, 70)), (s(28) + 0.15, Z.cloche(1046.5, 0.12)), (s(28) + 0.15, Z.cloche(1318.5, 0.09))]
+    # fin
+    ev += [(s(29) + 0.6, Z.cliquet(0.05)), (s(30) - 0.6, Z.ding_ascenseur(0.18)), (s(30) + 0.2, Z.porte(1.6, 0.08)),
+           (s(30), Z.souffle(1.0, 0.07, True)), (s(30) + 1.1, Z.souffle(1.3, 0.06, False)),
+           (s(31), Z.boom(0.3, 60)), (s(31) + 0.6, Z.cloche(698.5, 0.14, 3.0)), (s(31) + 0.6, Z.cloche(880, 0.10, 3.0))]
+    # transitions
+    for t0, _, tr in tabs[1:]:
+        ev.append((t0, {"neige": lambda: Z.neige(0.22, 0.2), "balayage": lambda: Z.whoosh(0.4, 0.16),
+                        "glitch": lambda: Z.glitch(0.25, 0.16), "noir": lambda: Z.thump(0.35)}[tr]()))
+    return ev
+
+
 def mixage(path, voix, dur, tabs, impacts):
     n = int(dur * MI.SR)
     v = np.zeros(n)
     v[:min(n, len(voix))] = voix[:n]
     v *= 10 ** (-16 / 20) / (np.sqrt((v[np.abs(v) > 0.01] ** 2).mean()) + 1e-9)
-    nappe = MI.bed(dur)[:n]
-    nappe = (nappe.mean(1) if nappe.ndim == 2 else nappe) * 10 ** (-28 / 20) / 0.35
+    t_f = e(1) - 0.15
+    musique = Z.musique(dur, [(0.0, "tension"), (e(0) - 0.55, "chute"), (s(3) + 0.05, "chute"), (s(5) - 0.1, "pulsation"),
+                              (s(11) - 0.1, "flottant"), (s(16) - 0.1, "reflexion"), (s(19) - 0.1, "lumineux"),
+                              (s(26) - 0.1, "tension2"), (e(26) - 0.25, "silence"), (s(28), "chaleur")])
+    musique *= 10 ** (-27 / 20) / (np.sqrt((musique[np.abs(musique) > 1e-4] ** 2).mean()) + 1e-9)
     tt = np.arange(n) / MI.SR
     coupe = np.ones(n)
-    for r in (s(3), s(7), s(22), s(27), s(31)):                           # silence avant chaque révélation
+    coupe[(tt > t_f) & (tt < s(3))] = 0.0                                  # arrêt sur image : plus rien
+    for r in (s(7), s(22), s(27), s(31)):                                  # silence avant chaque révélation
         coupe[(tt > r - 0.55) & (tt < r)] = 0.0
-    lisse = int(0.08 * MI.SR)
-    coupe = np.convolve(coupe, np.ones(lisse) / lisse, "same")
-    env = np.convolve(np.abs(v), np.ones(int(0.2 * MI.SR)) / int(0.2 * MI.SR), "same")
-    a = v + nappe * coupe * (1 - 0.35 * np.minimum(1, env / 0.03))
+    lisse = int(0.06 * MI.SR)
+    coupe = Z.lisser(coupe, lisse)
+    env = Z.lisser(np.abs(v), int(0.2 * MI.SR))
+    a = v + musique[:n] * coupe * (1 - 0.35 * np.minimum(1, env / 0.03))
     ev = []
-    for t0, kind, args in SONS.values():
+    for t0, kind, args in SONS.values():                                   # bips du faisceau et frappe
         if kind == "trace":
             f0, d = args
-            ev.append((t0, E1.pop_s(f0, 0.05)))
-            for i in range(1, int(d / 0.11)):
-                ev.append((t0 + 0.11 * i, E1.pop_s(f0 + 150 * (i % 3), 0.014)))
+            ev.append((t0, E1.pop_s(f0, 0.04)))
+            for i in range(1, int(d / 0.13)):
+                ev.append((t0 + 0.13 * i, E1.pop_s(f0 + 150 * (i % 3), 0.010)))
         elif kind == "frappe":
             nb, d = args
-            for i in range(min(nb, 14)):
-                ev.append((t0 + d * i / max(1, min(nb, 14)), E1.pop_s(1800 + 40 * (i % 4), 0.018)))
-        elif kind == "montee":
-            (d,) = args
-            for i in range(int(d / 0.16)):
-                ev.append((t0 + 0.16 * i, E1.pop_s(700 + 1400 * (i * 0.16 / d), 0.03)))
+            for i in range(min(nb, 12)):
+                ev.append((t0 + d * i / max(1, min(nb, 12)), E1.pop_s(1800 + 40 * (i % 4), 0.014)))
         elif kind == "bip_coeur":
-            ev.append((t0, E1.tone(1000, 0.12, 0.10, 0.002, 0.08)))
-    for t0 in impacts:
-        ev += [(t0, E1.pop_s(150, 0.5)), (t0 + 0.01, E1.pop_s(2600, 0.12))]
-    for t0, _, tr in tabs[1:]:
-        if tr == "neige":
-            ev.append((t0, bruit_blanc(0.18, 0.12)))
-        elif tr in ("balayage", "glitch"):
-            ev.append((t0, E1.pop_s(260, 0.22)))
-        else:
-            ev.append((t0, E1.pop_s(120, 0.3)))
-    ev.append((s(31) + 0.6, E1.ding(784, 0.16)))
+            ev.append((t0, E1.tone(1000, 0.12, 0.08, 0.002, 0.08)))
+    ev += effets(tabs)
     fx = np.zeros(n)
     for t0, snd in ev:
-        snd = _rs(snd)
         i = int(t0 * MI.SR)
         k = min(n - i, len(snd))
         if k > 0 and i >= 0:
             fx[i:i + k] += snd[:k]
-    a = a + fx * 0.55
+    a = a + fx * 0.6
     a *= np.minimum(1, (n - np.arange(n)) / (0.6 * MI.SR))
     a = a / max(1.0, np.abs(a).max() / 0.95)
     with wave.open(path, "wb") as w:
@@ -744,6 +800,13 @@ def mixage(path, voix, dur, tabs, impacts):
         w.setsampwidth(2)
         w.setframerate(MI.SR)
         w.writeframes((np.clip(a, -1, 1) * 32767).astype(np.int16).tobytes())
+
+
+def volume_cible(wav, cible=-14.0):
+    """Filtre ffmpeg qui amène le mixage à la sonie cible (mesure EBU R128, puis limiteur)."""
+    log = subprocess.run(["ffmpeg", "-i", wav, "-af", "ebur128", "-f", "null", "-"], capture_output=True, text=True).stderr
+    i = float(re.findall(r"I:\s+(-?[0-9.]+) LUFS", log)[-1])
+    return f"volume={cible - i + 1.0:.2f}dB,alimiter=limit=0.89:level=disabled"
 
 
 if __name__ == "__main__":
