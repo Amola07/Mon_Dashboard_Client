@@ -1,7 +1,7 @@
 # Épisode 21 — Ascenseur qui tombe : un film en 16 plans
 
-Une seule histoire continue : le câble casse, il tente de sauter, il flotte, il s'allonge, le frein de sécurité
-le sauve. Chaque prompt d'animation **commence exactement sur son image** et **finit sur l'état qui ouvre le plan
+Une seule histoire continue, **vécue de l'intérieur de la cabine** : le personnage est dans les 16 plans. Le câble
+casse, il tente de sauter, il flotte, il s'allonge, le frein de sécurité le sauve. Chaque prompt d'animation **commence exactement sur son image** et **finit sur l'état qui ouvre le plan
 suivant**. Le personnage, la cabine et la gaine sont décrits à l'identique dans chaque prompt : ne les modifie pas.
 
 - **Personnage** : a man in his late twenties with short black hair, wearing a dark charcoal hoodie, black jeans, white sneakers and a small black backpack, his face kept in shadow or turned away from the camera.
@@ -27,22 +27,22 @@ Starts exactly on the image: the man scrolls on his phone. After two seconds the
 
 **Image**
 ```
-Low angle view looking up inside a tall dark elevator shaft with concrete walls, two vertical steel guide rails, thick steel cables and teal fog drifting in the depths, the top of the elevator cabin just below the camera, the main steel cable above it stretched tight and starting to fray, a few broken wire strands sticking out with tiny orange sparks, cinematic film still, shot on anamorphic lens, deep teal shadows and one warm orange light source, volumetric haze, subtle film grain, realistic, vertical 9:16 portrait format, no text, no numbers, no logo, no watermark.
+Low angle shot inside a modern elevator cabin with brushed steel walls, a dark mirror on the back wall, a horizontal steel handrail, a dark grey floor, a single round warm orange light in the ceiling and a small glowing orange arrow panel above the closed doors: a man in his late twenties with short black hair, wearing a dark charcoal hoodie, black jeans, white sneakers and a small black backpack, his face kept in shadow or turned away from the camera holding the handrail and looking straight up at the small square maintenance hatch in the ceiling, a thin line of bright orange sparks visible through the gap of the hatch, the ceiling light flickering, dust falling from the ceiling onto his face, cinematic film still, shot on anamorphic lens, deep teal shadows and one warm orange light source, volumetric haze, subtle film grain, realistic, vertical 9:16 portrait format, no text, no numbers, no logo, no watermark.
 ```
 **Vidéo (à partir de l'image)**
 ```
-Starts exactly on the image: the frayed cable vibrates, then snaps with a burst of orange sparks; the broken end whips upward out of frame and the cabin roof drops away from the camera. Ends with the empty shaft above and falling sparks. Keep the exact same character, clothes, cabin, colors and lighting as the image. Realistic, physically plausible motion, no morphing, no extra people, no text. Ambient sound only, no dialogue. Duration about 6 seconds.
+Starts exactly on the image: a loud metallic snap above, a burst of orange sparks flashes through the gap of the ceiling hatch, the man flinches and raises an arm to protect his face, the light goes dim. Ends with him staring up, frozen, the cabin starting to drop. Keep the exact same character, clothes, cabin, colors and lighting as the image. Realistic, physically plausible motion, no morphing, no extra people, no text. Ambient sound only, no dialogue. Duration about 6 seconds.
 ```
 
 ## f03 — « …et que vous sautez juste avant l'impact… »
 
 **Image**
 ```
-View looking straight down inside a tall dark elevator shaft with concrete walls, two vertical steel guide rails, thick steel cables and teal fog drifting in the depths: the roof of the elevator cabin falling away from the camera toward the foggy depths, bright orange sparks streaming from the guide rails on both sides, cinematic film still, shot on anamorphic lens, deep teal shadows and one warm orange light source, volumetric haze, subtle film grain, realistic, vertical 9:16 portrait format, no text, no numbers, no logo, no watermark.
+Wide shot inside a modern elevator cabin with brushed steel walls, a dark mirror on the back wall, a horizontal steel handrail, a dark grey floor, a single round warm orange light in the ceiling and a small glowing orange arrow panel above the closed doors in free fall: a man in his late twenties with short black hair, wearing a dark charcoal hoodie, black jeans, white sneakers and a small black backpack, his face kept in shadow or turned away from the camera pressed against the back mirror with both hands on the handrail, his backpack straps and hood lifting upward, through the narrow vertical gap between the two closed doors a stream of orange sparks and the blur of concrete walls rushing upward, cinematic film still, shot on anamorphic lens, deep teal shadows and one warm orange light source, volumetric haze, subtle film grain, realistic, vertical 9:16 portrait format, no text, no numbers, no logo, no watermark.
 ```
 **Vidéo (à partir de l'image)**
 ```
-Starts exactly on the image: the cabin plunges down the shaft and shrinks into the fog, two long trails of orange sparks streaming upward along the rails toward the camera. The camera stays fixed. Ends with only a faint orange glow deep below. Keep the exact same character, clothes, cabin, colors and lighting as the image. Realistic, physically plausible motion, no morphing, no extra people, no text. Ambient sound only, no dialogue. Duration about 6 seconds.
+Starts exactly on the image: the cabin shudders as it falls, the sparks in the door gap stream upward faster and faster, the man's hood rises and his phone slips out of his hand and starts to float. Ends with the phone hovering in front of him. Keep the exact same character, clothes, cabin, colors and lighting as the image. Realistic, physically plausible motion, no morphing, no extra people, no text. Ambient sound only, no dialogue. Duration about 6 seconds.
 ```
 
 ## f04 — « …est-ce que vous pouvez l'éviter ? »
@@ -60,22 +60,22 @@ Starts exactly on the image: the man crouches lower, tensing his legs, staring a
 
 **Image**
 ```
-Exterior cutaway of a tall modern glass tower at dusk, its front wall cut open like an architectural section to reveal the full height of a vertical elevator shaft, the small illuminated elevator cabin halfway down the shaft, teal fog around the base of the tower, warm orange city lights in the background, cinematic film still, shot on anamorphic lens, deep teal shadows and one warm orange light source, volumetric haze, subtle film grain, realistic, vertical 9:16 portrait format, no text, no numbers, no logo, no watermark.
+Over-the-shoulder shot from behind a man in his late twenties with short black hair, wearing a dark charcoal hoodie, black jeans, white sneakers and a small black backpack, his face kept in shadow or turned away from the camera, inside a modern elevator cabin with brushed steel walls, a dark mirror on the back wall, a horizontal steel handrail, a dark grey floor, a single round warm orange light in the ceiling and a small glowing orange arrow panel above the closed doors: he stares at the narrow gap between the closed doors, through which bright horizontal bands of light from each passing floor flash by, rhythmically lighting his hood in orange, cinematic film still, shot on anamorphic lens, deep teal shadows and one warm orange light source, volumetric haze, subtle film grain, realistic, vertical 9:16 portrait format, no text, no numbers, no logo, no watermark.
 ```
 **Vidéo (à partir de l'image)**
 ```
-Starts exactly on the image: the illuminated cabin falls quickly down the open shaft past floor after floor, a thin trail of orange sparks behind it. The camera tilts down slowly following it. Ends as the cabin nears the lower floors. Keep the exact same character, clothes, cabin, colors and lighting as the image. Realistic, physically plausible motion, no morphing, no extra people, no text. Ambient sound only, no dialogue. Duration about 6 seconds.
+Starts exactly on the image: the bands of light from the passing floors flash through the door gap faster and faster, like a strobe, lighting the man in rhythm. Ends with the flashes almost continuous. Keep the exact same character, clothes, cabin, colors and lighting as the image. Realistic, physically plausible motion, no morphing, no extra people, no text. Ambient sound only, no dialogue. Duration about 6 seconds.
 ```
 
 ## f06 — « …près de quatre-vingt-dix kilomètres-heure. »
 
 **Image**
 ```
-Close shot of the outside wall of the falling elevator cabin inside a tall dark elevator shaft with concrete walls, two vertical steel guide rails, thick steel cables and teal fog drifting in the depths, extreme motion blur on the concrete walls, steel guide shoes scraping the rail and throwing long orange sparks, sense of extreme speed, cinematic film still, shot on anamorphic lens, deep teal shadows and one warm orange light source, volumetric haze, subtle film grain, realistic, vertical 9:16 portrait format, no text, no numbers, no logo, no watermark.
+Close-up of a man in his late twenties with short black hair, wearing a dark charcoal hoodie, black jeans, white sneakers and a small black backpack, his face kept in shadow or turned away from the camera's hands gripping the steel handrail, knuckles white, the handrail vibrating, orange sparks reflected in the brushed steel wall, his sleeve fluttering upward, intense vibration and speed, cinematic film still, shot on anamorphic lens, deep teal shadows and one warm orange light source, volumetric haze, subtle film grain, realistic, vertical 9:16 portrait format, no text, no numbers, no logo, no watermark.
 ```
 **Vidéo (à partir de l'image)**
 ```
-Starts exactly on the image: the camera falls together with the cabin, the shaft walls streaking upward faster and faster, sparks spraying. Ends with the blur becoming almost total. Keep the exact same character, clothes, cabin, colors and lighting as the image. Realistic, physically plausible motion, no morphing, no extra people, no text. Ambient sound only, no dialogue. Duration about 6 seconds.
+Starts exactly on the image: the handrail vibrates harder and harder, the reflected sparks streak across the steel wall, the man's grip tightens. Ends on his white knuckles. Keep the exact same character, clothes, cabin, colors and lighting as the image. Realistic, physically plausible motion, no morphing, no extra people, no text. Ambient sound only, no dialogue. Duration about 6 seconds.
 ```
 
 ## f07 — « Le meilleur saut humain… »
@@ -93,11 +93,11 @@ Starts exactly on the image: in slow motion the man rises only a tiny bit above 
 
 **Image**
 ```
-Side cutaway diagram of the falling elevator cabin rendered as a cinematic 3D visualization: the cabin drawn as a translucent glass box falling down a dark shaft, the small silhouette of a man inside floating just above the cabin floor, a long orange motion trail behind the cabin, teal background, cinematic film still, shot on anamorphic lens, deep teal shadows and one warm orange light source, volumetric haze, subtle film grain, realistic, vertical 9:16 portrait format, no text, no numbers, no logo, no watermark.
+Full-body side shot inside a modern elevator cabin with brushed steel walls, a dark mirror on the back wall, a horizontal steel handrail, a dark grey floor, a single round warm orange light in the ceiling and a small glowing orange arrow panel above the closed doors: a man in his late twenties with short black hair, wearing a dark charcoal hoodie, black jeans, white sneakers and a small black backpack, his face kept in shadow or turned away from the camera in mid-air just a few centimetres above the floor after his tiny jump, arms out for balance, the cabin walls blurred by vibration, sparks flashing through the door gap, his expression hidden in shadow, cinematic film still, shot on anamorphic lens, deep teal shadows and one warm orange light source, volumetric haze, subtle film grain, realistic, vertical 9:16 portrait format, no text, no numbers, no logo, no watermark.
 ```
 **Vidéo (à partir de l'image)**
 ```
-Starts exactly on the image: the translucent cabin keeps falling with the man inside; the man moves up only a tiny distance relative to the cabin while both keep plunging together. Ends with the bottom of the shaft appearing in the fog below. Keep the exact same character, clothes, cabin, colors and lighting as the image. Realistic, physically plausible motion, no morphing, no extra people, no text. Ambient sound only, no dialogue. Duration about 6 seconds.
+Starts exactly on the image: the man stays suspended at the same small height above the floor, drifting very slightly upward, realising the jump changed nothing, the cabin still shaking around him. Ends with him slowly beginning to tumble. Keep the exact same character, clothes, cabin, colors and lighting as the image. Realistic, physically plausible motion, no morphing, no extra people, no text. Ambient sound only, no dialogue. Duration about 6 seconds.
 ```
 
 ## f09 — « Vous flottez. »
@@ -148,40 +148,40 @@ Starts exactly on the image: the man presses himself flat against the floor and 
 
 **Image**
 ```
-The same top-down view rendered as a scientific visualization: the man lying flat appears as a translucent glowing body on the floor, a wave of orange light spreading evenly across the whole body from head to toe, teal background, cinematic film still, shot on anamorphic lens, deep teal shadows and one warm orange light source, volumetric haze, subtle film grain, realistic, vertical 9:16 portrait format, no text, no numbers, no logo, no watermark.
+Close shot along the floor of a modern elevator cabin with brushed steel walls, a dark mirror on the back wall, a horizontal steel handrail, a dark grey floor, a single round warm orange light in the ceiling and a small glowing orange arrow panel above the closed doors: a man in his late twenties with short black hair, wearing a dark charcoal hoodie, black jeans, white sneakers and a small black backpack, his face kept in shadow or turned away from the camera lying flat on his back, arms crossed over his face, his whole body pressed evenly against the floor, a faint warm orange glow outlining his entire body from head to toe, the floor vibrating, cinematic film still, shot on anamorphic lens, deep teal shadows and one warm orange light source, volumetric haze, subtle film grain, realistic, vertical 9:16 portrait format, no text, no numbers, no logo, no watermark.
 ```
 **Vidéo (à partir de l'image)**
 ```
-Starts exactly on the image: a ripple of orange light spreads evenly across the whole body and fades, showing the force shared everywhere. Ends with the body glowing softly and evenly. Keep the exact same character, clothes, cabin, colors and lighting as the image. Realistic, physically plausible motion, no morphing, no extra people, no text. Ambient sound only, no dialogue. Duration about 6 seconds.
+Starts exactly on the image: the vibration grows, the man's whole body stays flat and pressed evenly against the floor, the orange outline pulses once along his entire body. Ends with him bracing, still flat. Keep the exact same character, clothes, cabin, colors and lighting as the image. Realistic, physically plausible motion, no morphing, no extra people, no text. Ambient sound only, no dialogue. Duration about 6 seconds.
 ```
 
 ## f14 — « Mais rassurez-vous : ça n'arrive presque jamais. »
 
 **Image**
 ```
-Close-up inside a tall dark elevator shaft with concrete walls, two vertical steel guide rails, thick steel cables and teal fog drifting in the depths of the safety brake mounted under the falling cabin: two steel jaws on either side of the guide rail, a bright burst of orange sparks as the jaws start to clamp the rail, cinematic film still, shot on anamorphic lens, deep teal shadows and one warm orange light source, volumetric haze, subtle film grain, realistic, vertical 9:16 portrait format, no text, no numbers, no logo, no watermark.
+Inside a modern elevator cabin with brushed steel walls, a dark mirror on the back wall, a horizontal steel handrail, a dark grey floor, a single round warm orange light in the ceiling and a small glowing orange arrow panel above the closed doors: a man in his late twenties with short black hair, wearing a dark charcoal hoodie, black jeans, white sneakers and a small black backpack, his face kept in shadow or turned away from the camera lying flat on the floor, a huge burst of orange sparks exploding through the gap between the doors and the floor as the safety brake grabs the rails, the cabin lurching, dust jumping off the floor, cinematic film still, shot on anamorphic lens, deep teal shadows and one warm orange light source, volumetric haze, subtle film grain, realistic, vertical 9:16 portrait format, no text, no numbers, no logo, no watermark.
 ```
 **Vidéo (à partir de l'image)**
 ```
-Starts exactly on the image: the jaws snap shut on the rail with a shower of sparks, the cabin decelerates hard, the sparks fade. Ends with the brake locked and the cabin completely still. Keep the exact same character, clothes, cabin, colors and lighting as the image. Realistic, physically plausible motion, no morphing, no extra people, no text. Ambient sound only, no dialogue. Duration about 6 seconds.
+Starts exactly on the image: a loud screech, a flood of sparks through the door gaps, the cabin decelerates violently, the man is pressed harder against the floor, his floating phone drops and lands next to him. Ends with the sparks dying out and the cabin completely still. Keep the exact same character, clothes, cabin, colors and lighting as the image. Realistic, physically plausible motion, no morphing, no extra people, no text. Ambient sound only, no dialogue. Duration about 6 seconds.
 ```
 
 ## f15 — « Depuis, tous les ascenseurs en ont un. Et plusieurs câbles. »
 
 **Image**
 ```
-Looking up inside a tall dark elevator shaft with concrete walls, two vertical steel guide rails, thick steel cables and teal fog drifting in the depths at the top of the stopped elevator cabin held perfectly still, several thick parallel steel cables above it and the safety brake locked on the rails, dust floating in a warm orange light, calm after the storm, cinematic film still, shot on anamorphic lens, deep teal shadows and one warm orange light source, volumetric haze, subtle film grain, realistic, vertical 9:16 portrait format, no text, no numbers, no logo, no watermark.
+Top-down shot inside a modern elevator cabin with brushed steel walls, a dark mirror on the back wall, a horizontal steel handrail, a dark grey floor, a single round warm orange light in the ceiling and a small glowing orange arrow panel above the closed doors after the stop: a man in his late twenties with short black hair, wearing a dark charcoal hoodie, black jeans, white sneakers and a small black backpack, his face kept in shadow or turned away from the camera still lying flat on his back, slowly lowering his arms from his face, his phone and keys lying on the floor beside him, dust floating gently in the warm orange ceiling light, total calm, cinematic film still, shot on anamorphic lens, deep teal shadows and one warm orange light source, volumetric haze, subtle film grain, realistic, vertical 9:16 portrait format, no text, no numbers, no logo, no watermark.
 ```
 **Vidéo (à partir de l'image)**
 ```
-Starts exactly on the image: dust slowly settles, the cabin hangs perfectly still, a gentle swing of the cables stops. Ends in total calm. Keep the exact same character, clothes, cabin, colors and lighting as the image. Realistic, physically plausible motion, no morphing, no extra people, no text. Ambient sound only, no dialogue. Duration about 6 seconds.
+Starts exactly on the image: the dust slowly settles, the man lowers his arms, breathes, and slowly sits up, the ceiling light steadies to a calm warm glow. Ends with him sitting up on the floor. Keep the exact same character, clothes, cabin, colors and lighting as the image. Realistic, physically plausible motion, no morphing, no extra people, no text. Ambient sound only, no dialogue. Duration about 6 seconds.
 ```
 
 ## f16 — « La physique est de votre côté. »
 
 **Image**
 ```
-Front view of the elevator doors opening onto a bright modern lobby with warm orange light, a man in his late twenties with short black hair, wearing a dark charcoal hoodie, black jeans, white sneakers and a small black backpack, his face kept in shadow or turned away from the camera standing up inside the cabin, dusting off his hoodie, backpack on one shoulder, relieved, cinematic film still, shot on anamorphic lens, deep teal shadows and one warm orange light source, volumetric haze, subtle film grain, realistic, vertical 9:16 portrait format, no text, no numbers, no logo, no watermark.
+Front view of the elevator doors opening onto a bright modern lobby with warm orange light, a man in his late twenties with short black hair, wearing a dark charcoal hoodie, black jeans, white sneakers and a small black backpack, his face kept in shadow or turned away from the camera getting up from the cabin floor, dusting off his hoodie, backpack on one shoulder, relieved, cinematic film still, shot on anamorphic lens, deep teal shadows and one warm orange light source, volumetric haze, subtle film grain, realistic, vertical 9:16 portrait format, no text, no numbers, no logo, no watermark.
 ```
 **Vidéo (à partir de l'image)**
 ```
