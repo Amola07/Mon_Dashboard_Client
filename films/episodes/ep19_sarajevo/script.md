@@ -5,7 +5,7 @@ deux tirs → dominos → nuance (« poudrière ») → coïncidence de la plaqu
 
 ## Texte à générer (ElevenLabs)
 ```
-Un chauffeur s'est trompé de rue. Et près de vingt millions de personnes sont mortes.
+Vingt millions de morts. Et tout a commencé à cause d'une seule personne. Pas un roi. Pas un général. Un chauffeur… qui s'est trompé de rue.
 
 Sarajevo, 28 juin 1914. L'archiduc François-Ferdinand, héritier de l'empire d'Autriche-Hongrie, traverse la ville en voiture décapotable. Dans la foule, six jeunes hommes armés l'attendent.
 
@@ -23,10 +23,12 @@ Un mois après, jour pour jour, l'Autriche-Hongrie déclare la guerre à la Serb
 
 Et le plus troublant ? La plaque de la voiture : A III 118. Lue comme une date… onze, onze, dix-huit. Le 11 novembre 1918. Le jour de l'armistice.
 
-Un virage raté. Et le monde n'a plus jamais été le même.
+Vingt millions de morts. Et tout ça… à cause d'un virage raté.
 ```
 
 ## Vérification des faits
+- Accroche : « tout a commencé à cause » = l'enchaînement immédiat (l'erreur de trajet met l'archiduc face à
+  Princip) ; les causes profondes sont rappelées plus loin (« l'Europe était déjà une poudrière »).
 - 28 juin 1914, Sarajevo : François-Ferdinand et Sophie Chotek ; six conjurés armés postés le long du quai Appel
   (plus Danilo Ilić, coordinateur).
 - Bombe de Nedeljko Čabrinović : rebondit sur la capote repliée, explose sous la voiture suivante (une vingtaine de
