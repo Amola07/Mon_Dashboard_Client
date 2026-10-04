@@ -375,3 +375,31 @@ def musique(dur, sections, bpm=96):
     piste["arpege"] = arp
     mix = {"nappe": 0.10, "basse": 0.30, "arpege": 0.07, "caisse": 0.45, "charley": 0.05}
     return sum(piste[k] * gains[k] * mix[k] for k in piste)
+
+
+def bulles(d=1.2, amp=0.15, dens=14):
+    """Glouglous : petites bulles qui remontent (sable mouillé, succion)."""
+    n = int(d * SR)
+    out = np.zeros(n)
+    for _ in range(max(1, int(d * dens))):
+        f0 = RNG.uniform(160, 520)
+        t = _t(0.08)
+        b = np.sin(2 * np.pi * np.cumsum(f0 * (1 + 0.8 * t / 0.08)) / SR) * np.exp(-t / 0.025)
+        i = RNG.integers(0, max(1, n - len(b)))
+        out[i:i + len(b)] += b * RNG.uniform(0.4, 1)
+    return norm(out, amp)
+
+
+def vibration(d=1.2, amp=0.2):
+    """Grondement qui tremble (le sol qui vibre)."""
+    t = _t(d)
+    s = np.sin(2 * np.pi * 70 * t) * (0.5 + 0.5 * np.sin(2 * np.pi * 16 * t)) + 0.4 * pb(bruit(d), 220)
+    return norm(s * np.sin(np.pi * t / d) ** 0.7, amp)
+
+
+def grincement(d=1.0, amp=0.15):
+    """Effort qui force : grave tendu qui grince."""
+    t = _t(d)
+    am = 0.6 + 0.4 * np.sign(np.sin(2 * np.pi * (22 + 6 * np.sin(2 * np.pi * 1.3 * t)) * t))
+    s = sinus_glisse(95, 70, d) * am + 0.4 * bp(bruit(d), 300, 900) * am
+    return norm(pb(s, 1500) * np.minimum(1, t / 0.1) * np.minimum(1, (d - t) / 0.15), amp)

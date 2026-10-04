@@ -600,6 +600,14 @@ def ecran(c, t, flashs):
             c.drawRect(skia.Rect(0, 0, W, H), P((200, 255, 215), 0, 80, fill=True))
 
 
+def chocs():
+    """Instants de flash blanc et de secousse de l'image (les autres épisodes remplacent cette fonction)."""
+    t_rupture = e(0) - 0.55
+    flashs = [t_rupture, s(3) + 0.05, s(21) + 0.55, e(26) - 0.25]
+    secousses = [(t_rupture, 0.25), (s(3) + 0.05, 0.2), (s(21) + 0.55, 0.2), (e(26) - 0.25, 0.35)]
+    return flashs, secousses
+
+
 def preparer():
     v, N, _ = MI.tighten(MI.load_voice(VOIX), max_gap=0.40, thr_db=-38.0)
     SEG[:] = [(N(a), N(b), txt) for a, b, txt in json.load(open(SEGS))]
@@ -611,10 +619,7 @@ def render(out):
     voix = preparer()
     dur = SEG[-1][1] + 1.8
     tabs = tableaux()
-    t_rupture = e(0) - 0.55
-    impacts = [t_rupture, s(3) + 0.05, s(21) + 0.55, s(22) + 0.3, e(26) - 0.25, s(28) + 0.1, s(31)]
-    flashs = [t_rupture, s(3) + 0.05, s(21) + 0.55, e(26) - 0.25]
-    secousses = [(t_rupture, 0.25), (s(3) + 0.05, 0.2), (s(21) + 0.55, 0.2), (e(26) - 0.25, 0.35)]
+    flashs, secousses = chocs()
     tmp = tempfile.mkdtemp()
     ff = subprocess.Popen(["ffmpeg", "-y", "-v", "error", "-f", "rawvideo", "-pix_fmt", "bgra", "-s", f"{W}x{H}",
                            "-r", str(FPS), "-i", "-", "-c:v", "libx264", "-pix_fmt", "yuv420p", "-crf", "20",
@@ -672,7 +677,7 @@ def render(out):
             print(f"{t:5.1f} s", flush=True)
     ff.stdin.close()
     ff.wait()
-    mixage(f"{tmp}/a.wav", voix, dur, tabs, impacts)
+    mixage(f"{tmp}/a.wav", voix, dur, tabs)
     subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", f"{tmp}/v.mp4", "-i", f"{tmp}/a.wav", "-c:v", "copy",
                     "-af", volume_cible(f"{tmp}/a.wav"), "-ar", "48000", "-c:a", "aac", "-b:a", "192k",
                     "-shortest", "-movflags", "+faststart", out], check=True)
@@ -753,7 +758,7 @@ def effets(tabs):
     return ev
 
 
-def mixage(path, voix, dur, tabs, impacts):
+def mixage(path, voix, dur, tabs):
     n = int(dur * MI.SR)
     v = np.zeros(n)
     v[:min(n, len(voix))] = voix[:n]
