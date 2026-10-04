@@ -1,0 +1,21 @@
+# Crédits des archives (Wikimedia Commons ; images non versionnées, voir telecharger.py)
+
+- a01_depart : « Franz Ferdinand & Sophie Leave Sarajevo Guildhall.jpg » — Unknown photographer (1914) — CC0 — https://commons.wikimedia.org/wiki/File:Franz_Ferdinand_%26_Sophie_Leave_Sarajevo_Guildhall.jpg
+- a02_voiture : « Franz Ferdinand & Sophie Leave Sarajevo Guildhall in a Car.jpg » — Walter Tausch (1914) — Public domain — https://commons.wikimedia.org/wiki/File:Franz_Ferdinand_%26_Sophie_Leave_Sarajevo_Guildhall_in_a_Car.jpg
+- a03_rues : « Franz Ferdinand & Sophie in Sarajevo Streets.jpg » — Unknown photogrepher (1914) — CC0 — https://commons.wikimedia.org/wiki/File:Franz_Ferdinand_%26_Sophie_in_Sarajevo_Streets.jpg
+- a05_illustration : « DC-1914-27-d-Sarajevo-cropped.jpg » — Achille Beltrame — Public domain — https://commons.wikimedia.org/wiki/File:DC-1914-27-d-Sarajevo-cropped.jpg
+- a06_epicerie : « 1908-10-07 - Moritz Schiller's Delicatessen.jpg » — Unknown authorUnknown author — Public domain — https://commons.wikimedia.org/wiki/File:1908-10-07_-_Moritz_Schiller%27s_Delicatessen.jpg
+- a07_miljacka : « 1914 Miljacka Sarajevo.png » — Unknown authorUnknown author — Public domain — https://commons.wikimedia.org/wiki/File:1914_Miljacka_Sarajevo.png
+- a08_sarajevo : « Sarajevo c. 1914.jpg » — Internet Archive Book Images — No restrictions — https://commons.wikimedia.org/wiki/File:Sarajevo_c._1914.jpg
+- a09_princip : « Gavrilo Princip, cell, headshot, bw (cropped).jpg » — Unknown authorUnknown author — Public domain — https://commons.wikimedia.org/wiki/File:Gavrilo_Princip,_cell,_headshot,_bw_(cropped).jpg
+- a10_princip_proces : « Gavrilo Princip, outside court.jpg » — Unknown photographer — Public domain — https://commons.wikimedia.org/wiki/File:Gavrilo_Princip,_outside_court.jpg
+- a11_chaos : « Ferdinand Behr arrested in Sarajevo 1914.jpg » — Unknown authorUnknown author — Public domain — https://commons.wikimedia.org/wiki/File:Ferdinand_Behr_arrested_in_Sarajevo_1914.jpg
+- a13_voiture_avant : « Gräf & Stift automobile of Archduke Franz Ferdinand of Austria-0486.jpg » — Hubertl — CC BY-SA 4.0 — https://commons.wikimedia.org/wiki/File:Gr%C3%A4f_%26_Stift_automobile_of_Archduke_Franz_Ferdinand_of_Austria-0486.jpg
+- a14_voiture_cote : « Gräf & Stift automobile of Archduke Franz Ferdinand of Austria-0491.jpg » — Hubertl — CC BY-SA 4.0 — https://commons.wikimedia.org/wiki/File:Gr%C3%A4f_%26_Stift_automobile_of_Archduke_Franz_Ferdinand_of_Austria-0491.jpg
+- a15_voiture_3 : « Gräf & Stift automobile of Archduke Franz Ferdinand of Austria-0496.jpg » — Hubertl — CC BY-SA 4.0 — https://commons.wikimedia.org/wiki/File:Gr%C3%A4f_%26_Stift_automobile_of_Archduke_Franz_Ferdinand_of_Austria-0496.jpg
+- a16_tranchee : « Breastwork trench at Armentieres 1916.jpg » — Photo taken by a British official photographer. — Public domain — https://commons.wikimedia.org/wiki/File:Breastwork_trench_at_Armentieres_1916.jpg
+- a18_armistice_train : « Armisticetrain.jpg » — Unknown authorUnknown author — Public domain — https://commons.wikimedia.org/wiki/File:Armisticetrain.jpg
+- a19_carte : « Map Europe alliances 1914-fr.svg » — historicair — CC BY-SA 3.0 — https://commons.wikimedia.org/wiki/File:Map_Europe_alliances_1914-fr.svg
+- a04_arrivee : « Archduke Franz Ferdinand in Sarajevo, June 1914 Q91848.jpg » — Unknown authorUnknown author — Public domain — https://commons.wikimedia.org/wiki/File:Archduke_Franz_Ferdinand_in_Sarajevo,_June_1914_Q91848.jpg
+- a12_moment : « The Assassination of Archduke Franz Ferdinand, June 1914 Q79761.jpg » — Jaroslav Bruner-Dvořák — Public domain — https://commons.wikimedia.org/wiki/File:The_Assassination_of_Archduke_Franz_Ferdinand,_June_1914_Q79761.jpg
+- a17_front : « The British Army on the Western Front, 1914-1918 Q706.jpg » — Ernest Brooks — Public domain — https://commons.wikimedia.org/wiki/File:The_British_Army_on_the_Western_Front,_1914-1918_Q706.jpg
