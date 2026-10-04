@@ -35,3 +35,22 @@ Alors la prochaine fois que vous prenez l'ascenseur… respirez. La physique est
 - Betty Lou Oliver : 28 juillet 1945, un bombardier B-25 percute l'Empire State Building ; la cabine où elle se
   trouve chute de 75 étages ; elle survit (câbles enroulés au fond et air comprimé dans la gaine ont amorti) ;
   record du monde de la plus longue chute d'ascenseur survécue.
+
+## Version avec balises d'émotion (ElevenLabs, modèle Eleven v3, stabilité « Creative » ou « Natural »)
+```
+[curious] Si vous êtes dans un ascenseur qui chute, et que vous sautez juste avant l'impact… [short pause] est-ce que vous pouvez l'éviter ? [serious] La réponse est non. [mischievously] Et la raison va vous surprendre.
+
+[fast-paced] Après dix étages de chute, l'ascenseur file à près de quatre-vingt-dix kilomètres-heure. [dramatic pause] Et vous aussi.
+
+[matter-of-fact] Le meilleur saut humain, c'est à peine dix kilomètres-heure vers le haut. Même parfaitement synchronisé, vous toucheriez le sol à environ quatre-vingts kilomètres-heure. [sighs] Ça ne change presque rien.
+
+[intrigued] Mais le vrai problème, c'est que vous ne pourriez même pas sauter. Pendant la chute, vous tombez exactement à la même vitesse que la cabine. [whispers] Vous flottez. [whispers] Pas d'appui sous vos pieds. [tense] Et il faudrait deviner l'instant du choc… au millième de seconde près.
+
+[thoughtful] Alors que faire ? [calm] Beaucoup de physiciens conseillent de s'allonger à plat sur le sol. Le choc se répartit sur tout le corps, au lieu de se concentrer dans les jambes et la colonne.
+
+[reassuring] Mais rassurez-vous : ça n'arrive presque jamais. [storytelling] En 1854, l'inventeur Elisha Otis monte sur une plateforme suspendue devant la foule… [dramatic pause] et fait couper le câble. [impressed] La plateforme ne bouge pas. Son frein de sécurité l'a bloquée. Depuis, tous les ascenseurs en ont un. [short pause] Et plusieurs câbles.
+
+[amazed] Et en 1945, Betty Lou Oliver a chuté de soixante-quinze étages dans l'Empire State Building… [dramatic pause] et elle a survécu. C'est toujours le record du monde.
+
+[warm] Alors la prochaine fois que vous prenez l'ascenseur… [exhales] respirez. [smiling] La physique est de votre côté.
+```
