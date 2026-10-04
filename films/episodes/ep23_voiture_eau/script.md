@@ -8,7 +8,7 @@
 
 [intrigued] Mais il y a une bonne nouvelle. Au début, la voiture flotte. Pendant environ une minute, il reste de l'air dans l'habitacle. [tense] Et cette minute, il ne faut surtout pas la perdre au téléphone.
 
-[calm] Les spécialistes du sauvetage résument tout en quatre gestes. [fast-paced] Un : détachez votre ceinture. Deux : ouvrez la vitre. [reassuring] Essayez d'abord la commande électrique : souvent, elle fonctionne encore. [matter-of-fact] Sinon, brisez la vitre latérale, dans un coin, avec un brise-vitre. [whispers] Jamais le pare-brise : il est feuilleté, il ne casse pas.
+[calm] Les spécialistes du sauvetage résument tout en quatre gestes. [fast-paced] Un : détachez votre ceinture. Deux : ouvrez la vitre. [reassuring] Essayez d'abord la commande électrique : souvent, elle fonctionne encore. [matter-of-fact] Sinon, brisez la vitre latérale, dans un coin, avec un brise-vitre. [serious] Jamais le pare-brise : il est feuilleté, il ne casse pas.
 
 [serious] Trois : les enfants. Faites-les sortir en premier par la fenêtre. [fast-paced] Quatre : sortez. Montez sur le toit, et rejoignez la rive.
 
