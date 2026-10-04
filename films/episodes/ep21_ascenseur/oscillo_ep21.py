@@ -758,20 +758,7 @@ def mixage(path, voix, dur, tabs, impacts):
     v = np.zeros(n)
     v[:min(n, len(voix))] = voix[:n]
     v *= 10 ** (-16 / 20) / (np.sqrt((v[np.abs(v) > 0.01] ** 2).mean()) + 1e-9)
-    t_f = e(1) - 0.15
-    musique = Z.musique(dur, [(0.0, "tension"), (e(0) - 0.55, "chute"), (s(3) + 0.05, "chute"), (s(5) - 0.1, "pulsation"),
-                              (s(11) - 0.1, "flottant"), (s(16) - 0.1, "reflexion"), (s(19) - 0.1, "lumineux"),
-                              (s(26) - 0.1, "tension2"), (e(26) - 0.25, "silence"), (s(28), "chaleur")])
-    musique *= 10 ** (-27 / 20) / (np.sqrt((musique[np.abs(musique) > 1e-4] ** 2).mean()) + 1e-9)
-    tt = np.arange(n) / MI.SR
-    coupe = np.ones(n)
-    coupe[(tt > t_f) & (tt < s(3))] = 0.0                                  # arrêt sur image : plus rien
-    for r in (s(7), s(22), s(27), s(31)):                                  # silence avant chaque révélation
-        coupe[(tt > r - 0.55) & (tt < r)] = 0.0
-    lisse = int(0.06 * MI.SR)
-    coupe = Z.lisser(coupe, lisse)
-    env = Z.lisser(np.abs(v), int(0.2 * MI.SR))
-    a = v + musique[:n] * coupe * (1 - 0.35 * np.minimum(1, env / 0.03))
+    a = v                                                                  # pas de musique de fond
     ev = []
     for t0, kind, args in SONS.values():                                   # bips du faisceau et frappe
         if kind == "trace":
