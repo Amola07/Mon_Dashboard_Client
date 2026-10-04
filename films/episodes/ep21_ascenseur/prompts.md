@@ -1,181 +1,189 @@
-# Épisode 21 — Ascenseur qui tombe : images à générer
+# Épisode 21 — Ascenseur qui tombe : un film en 16 plans
 
-16 images (nomme-les `e01.jpg` … `e16.jpg`). Les 2 archives (gravure d'Elisha Otis en 1854, Empire State
-Building) seront téléchargées par moi. Pas de texte ni de chiffres dans les images : c'est le scanner qui
-affichera les vitesses, les étages et les chronomètres.
+Une seule histoire continue : le câble casse, il tente de sauter, il flotte, il s'allonge, le frein de sécurité
+le sauve. Chaque prompt d'animation **commence exactement sur son image** et **finit sur l'état qui ouvre le plan
+suivant**. Le personnage, la cabine et la gaine sont décrits à l'identique dans chaque prompt : ne les modifie pas.
 
-## e01 — « Tu es dans un ascenseur. »
+- **Personnage** : a man in his late twenties with short black hair, wearing a dark charcoal hoodie, black jeans, white sneakers and a small black backpack, his face kept in shadow or turned away from the camera.
+- **Cabine** : a modern elevator cabin with brushed steel walls, a dark mirror on the back wall, a horizontal steel handrail, a dark grey floor, a single round warm orange light in the ceiling and a small glowing orange arrow panel above the closed doors.
+- **Gaine** : a tall dark elevator shaft with concrete walls, two vertical steel guide rails, thick steel cables and teal fog drifting in the depths.
 
-**Image**
-```
-Inside a modern elevator cabin seen from a low angle, a faceless person in a hoodie standing alone, brushed metal walls, a single warm orange light panel on the ceiling, teal reflections, monumental minimalist sci-fi cinematic photography, deep teal fog and shadows, one single warm orange light source, volumetric haze, anamorphic lens, subtle film grain, tense and spectacular atmosphere, vertical 9:16 portrait format, no text, no numbers, no logo, no watermark.
-```
-**Animation**
-```
-The light flickers once, the cabin shakes slightly, the person looks up. Cinematic, physically plausible motion, no morphing, keep the exact same style, colors and lighting, no text, no logo, no watermark.
-```
+Nomme les images `f01.jpg` … `f16.jpg` et les clips `f01.mp4` … `f16.mp4`. Les 2 archives (Elisha Otis en 1854,
+l'Empire State Building) sont téléchargées par moi et intercalées au montage. Pas de texte ni de chiffres : le
+scanner affichera les vitesses, les étages et les chronomètres.
 
-## e02 — « Le câble casse. »
+## f01 — « Si vous êtes dans un ascenseur… »
 
 **Image**
 ```
-Extreme close-up of a thick steel elevator cable snapping in a dark elevator shaft, strands bursting apart with orange sparks, teal fog, monumental minimalist sci-fi cinematic photography, deep teal fog and shadows, one single warm orange light source, volumetric haze, anamorphic lens, subtle film grain, tense and spectacular atmosphere, vertical 9:16 portrait format, no text, no numbers, no logo, no watermark.
+Medium shot inside a modern elevator cabin with brushed steel walls, a dark mirror on the back wall, a horizontal steel handrail, a dark grey floor, a single round warm orange light in the ceiling and a small glowing orange arrow panel above the closed doors. A man in his late twenties with short black hair, wearing a dark charcoal hoodie, black jeans, white sneakers and a small black backpack, his face kept in shadow or turned away from the camera stands calmly in the middle of the cabin looking down at his phone, the doors closed behind the camera, everything perfectly normal and quiet, cinematic film still, shot on anamorphic lens, deep teal shadows and one warm orange light source, volumetric haze, subtle film grain, realistic, vertical 9:16 portrait format, no text, no numbers, no logo, no watermark.
 ```
-**Animation**
+**Vidéo (à partir de l'image)**
 ```
-The cable strands snap one by one and the cable whips upward with a burst of sparks. Cinematic, physically plausible motion, no morphing, keep the exact same style, colors and lighting, no text, no logo, no watermark.
-```
-
-## e03 — « Tu tombes. »
-
-**Image**
-```
-View looking straight down an extremely deep elevator shaft, the elevator cabin falling away into the darkness, orange sparks trailing along the guide rails, teal fog at the bottom, monumental minimalist sci-fi cinematic photography, deep teal fog and shadows, one single warm orange light source, volumetric haze, anamorphic lens, subtle film grain, tense and spectacular atmosphere, vertical 9:16 portrait format, no text, no numbers, no logo, no watermark.
-```
-**Animation**
-```
-The cabin plunges down the shaft, sparks streaming from the rails, the camera stays fixed. Cinematic, physically plausible motion, no morphing, keep the exact same style, colors and lighting, no text, no logo, no watermark.
+Starts exactly on the image: the man scrolls on his phone. After two seconds the ceiling light flickers twice, the whole cabin jolts violently downward, the man stumbles and grabs the handrail with his free hand, his phone almost slipping. Ends with him frozen, gripping the rail, looking up at the ceiling. The camera shakes with the jolt. Keep the exact same character, clothes, cabin, colors and lighting as the image. Realistic, physically plausible motion, no morphing, no extra people, no text. Ambient sound only, no dialogue. Duration about 6 seconds.
 ```
 
-## e04 — « sauter juste avant l'impact »
+## f02 — « …qui chute… »
 
 **Image**
 ```
-Inside the falling elevator cabin, a faceless person crouching and ready to jump, knees bent, hands slightly raised, hair floating upward, warm orange emergency light, teal shadows, tension, monumental minimalist sci-fi cinematic photography, deep teal fog and shadows, one single warm orange light source, volumetric haze, anamorphic lens, subtle film grain, tense and spectacular atmosphere, vertical 9:16 portrait format, no text, no numbers, no logo, no watermark.
+Low angle view looking up inside a tall dark elevator shaft with concrete walls, two vertical steel guide rails, thick steel cables and teal fog drifting in the depths, the top of the elevator cabin just below the camera, the main steel cable above it stretched tight and starting to fray, a few broken wire strands sticking out with tiny orange sparks, cinematic film still, shot on anamorphic lens, deep teal shadows and one warm orange light source, volumetric haze, subtle film grain, realistic, vertical 9:16 portrait format, no text, no numbers, no logo, no watermark.
 ```
-**Animation**
+**Vidéo (à partir de l'image)**
 ```
-The person bends their knees and prepares to jump while their hair and hood float upward. Cinematic, physically plausible motion, no morphing, keep the exact same style, colors and lighting, no text, no logo, no watermark.
-```
-
-## e05 — « Faisons le calcul. »
-
-**Image**
-```
-A tall building cut away like a cross-section diagram, showing the elevator shaft from top to bottom with ten floors, the cabin halfway down, clean cinematic 3D render, teal and orange lighting, fog around the base, monumental minimalist sci-fi cinematic photography, deep teal fog and shadows, one single warm orange light source, volumetric haze, anamorphic lens, subtle film grain, tense and spectacular atmosphere, vertical 9:16 portrait format, no text, no numbers, no logo, no watermark.
-```
-**Animation**
-```
-The cabin slides down the shaft floor after floor, camera slowly following it. Cinematic, physically plausible motion, no morphing, keep the exact same style, colors and lighting, no text, no logo, no watermark.
+Starts exactly on the image: the frayed cable vibrates, then snaps with a burst of orange sparks; the broken end whips upward out of frame and the cabin roof drops away from the camera. Ends with the empty shaft above and falling sparks. Keep the exact same character, clothes, cabin, colors and lighting as the image. Realistic, physically plausible motion, no morphing, no extra people, no text. Ambient sound only, no dialogue. Duration about 6 seconds.
 ```
 
-## e06 — « quatre-vingt-dix kilomètres-heure »
+## f03 — « …et que vous sautez juste avant l'impact… »
 
 **Image**
 ```
-Long exposure of an elevator cabin rushing down a shaft, intense orange motion streaks on the walls, extreme sense of speed, teal darkness, monumental minimalist sci-fi cinematic photography, deep teal fog and shadows, one single warm orange light source, volumetric haze, anamorphic lens, subtle film grain, tense and spectacular atmosphere, vertical 9:16 portrait format, no text, no numbers, no logo, no watermark.
+View looking straight down inside a tall dark elevator shaft with concrete walls, two vertical steel guide rails, thick steel cables and teal fog drifting in the depths: the roof of the elevator cabin falling away from the camera toward the foggy depths, bright orange sparks streaming from the guide rails on both sides, cinematic film still, shot on anamorphic lens, deep teal shadows and one warm orange light source, volumetric haze, subtle film grain, realistic, vertical 9:16 portrait format, no text, no numbers, no logo, no watermark.
 ```
-**Animation**
+**Vidéo (à partir de l'image)**
 ```
-The streaks of light rush upward past the camera faster and faster. Cinematic, physically plausible motion, no morphing, keep the exact same style, colors and lighting, no text, no logo, no watermark.
-```
-
-## e07 — « Le meilleur saut humain »
-
-**Image**
-```
-A faceless athlete frozen at the peak of a vertical jump in an empty dark gym, a thin warm orange spotlight from above, teal shadows, dust in the air, monumental minimalist sci-fi cinematic photography, deep teal fog and shadows, one single warm orange light source, volumetric haze, anamorphic lens, subtle film grain, tense and spectacular atmosphere, vertical 9:16 portrait format, no text, no numbers, no logo, no watermark.
-```
-**Animation**
-```
-The athlete rises in slow motion to the top of the jump and hangs in the air for a moment. Cinematic, physically plausible motion, no morphing, keep the exact same style, colors and lighting, no text, no logo, no watermark.
+Starts exactly on the image: the cabin plunges down the shaft and shrinks into the fog, two long trails of orange sparks streaming upward along the rails toward the camera. The camera stays fixed. Ends with only a faint orange glow deep below. Keep the exact same character, clothes, cabin, colors and lighting as the image. Realistic, physically plausible motion, no morphing, no extra people, no text. Ambient sound only, no dialogue. Duration about 6 seconds.
 ```
 
-## e08 — « Tu flottes. »
+## f04 — « …est-ce que vous pouvez l'éviter ? »
 
 **Image**
 ```
-Inside the elevator cabin in free fall, a faceless person floating weightlessly in the middle of the cabin, a phone and keys floating next to them, warm orange light, teal reflections on the metal walls, monumental minimalist sci-fi cinematic photography, deep teal fog and shadows, one single warm orange light source, volumetric haze, anamorphic lens, subtle film grain, tense and spectacular atmosphere, vertical 9:16 portrait format, no text, no numbers, no logo, no watermark.
+Inside the same falling cabin, a modern elevator cabin with brushed steel walls, a dark mirror on the back wall, a horizontal steel handrail, a dark grey floor, a single round warm orange light in the ceiling and a small glowing orange arrow panel above the closed doors, the ceiling light flickering orange. A man in his late twenties with short black hair, wearing a dark charcoal hoodie, black jeans, white sneakers and a small black backpack, his face kept in shadow or turned away from the camera crouches low on the floor with knees bent, ready to jump, one hand on the handrail, his hood and the straps of his backpack floating slightly upward, his phone hovering in the air next to him, cinematic film still, shot on anamorphic lens, deep teal shadows and one warm orange light source, volumetric haze, subtle film grain, realistic, vertical 9:16 portrait format, no text, no numbers, no logo, no watermark.
 ```
-**Animation**
+**Vidéo (à partir de l'image)**
 ```
-The person and the small objects drift gently in the air as if in space. Cinematic, physically plausible motion, no morphing, keep the exact same style, colors and lighting, no text, no logo, no watermark.
-```
-
-## e09 — « deviner, au millième de seconde près »
-
-**Image**
-```
-A giant stopwatch made of glass floating in teal fog, its hand frozen between two tiny marks, a warm orange glow behind it, monumental minimalist sci-fi cinematic photography, deep teal fog and shadows, one single warm orange light source, volumetric haze, anamorphic lens, subtle film grain, tense and spectacular atmosphere, vertical 9:16 portrait format, no text, no numbers, no logo, no watermark.
-```
-**Animation**
-```
-The stopwatch hand trembles but does not move, fog drifting around it. Cinematic, physically plausible motion, no morphing, keep the exact same style, colors and lighting, no text, no logo, no watermark.
+Starts exactly on the image: the man crouches lower, tensing his legs, staring at the glowing arrow panel above the doors, the phone drifting up past his face. The camera slowly pushes in toward him. Ends on a tense close-up of his bent legs ready to spring. Keep the exact same character, clothes, cabin, colors and lighting as the image. Realistic, physically plausible motion, no morphing, no extra people, no text. Ambient sound only, no dialogue. Duration about 6 seconds.
 ```
 
-## e10 — « t'allonger à plat sur le sol »
+## f05 — « Après dix étages de chute… »
 
 **Image**
 ```
-Top-down view of a faceless person lying flat on their back on the floor of an elevator cabin, arms protecting the head, warm orange light, teal reflections, cinematic, monumental minimalist sci-fi cinematic photography, deep teal fog and shadows, one single warm orange light source, volumetric haze, anamorphic lens, subtle film grain, tense and spectacular atmosphere, vertical 9:16 portrait format, no text, no numbers, no logo, no watermark.
+Exterior cutaway of a tall modern glass tower at dusk, its front wall cut open like an architectural section to reveal the full height of a vertical elevator shaft, the small illuminated elevator cabin halfway down the shaft, teal fog around the base of the tower, warm orange city lights in the background, cinematic film still, shot on anamorphic lens, deep teal shadows and one warm orange light source, volumetric haze, subtle film grain, realistic, vertical 9:16 portrait format, no text, no numbers, no logo, no watermark.
 ```
-**Animation**
+**Vidéo (à partir de l'image)**
 ```
-The camera slowly rotates above the person lying flat, the light flickering. Cinematic, physically plausible motion, no morphing, keep the exact same style, colors and lighting, no text, no logo, no watermark.
-```
-
-## e11 — « le choc se répartit sur tout ton corps »
-
-**Image**
-```
-A glowing translucent human body lying flat seen from above, a wave of orange light spreading evenly across the whole body, teal background, scientific visualization, monumental minimalist sci-fi cinematic photography, deep teal fog and shadows, one single warm orange light source, volumetric haze, anamorphic lens, subtle film grain, tense and spectacular atmosphere, vertical 9:16 portrait format, no text, no numbers, no logo, no watermark.
-```
-**Animation**
-```
-A ripple of orange light spreads across the entire body from head to toe. Cinematic, physically plausible motion, no morphing, keep the exact same style, colors and lighting, no text, no logo, no watermark.
+Starts exactly on the image: the illuminated cabin falls quickly down the open shaft past floor after floor, a thin trail of orange sparks behind it. The camera tilts down slowly following it. Ends as the cabin nears the lower floors. Keep the exact same character, clothes, cabin, colors and lighting as the image. Realistic, physically plausible motion, no morphing, no extra people, no text. Ambient sound only, no dialogue. Duration about 6 seconds.
 ```
 
-## e12 — « ça n'arrive presque jamais »
+## f06 — « …près de quatre-vingt-dix kilomètres-heure. »
 
 **Image**
 ```
-Close-up of a modern elevator safety brake mechanism clamping onto a steel guide rail, sparks and metal teeth gripping, teal shadows, orange highlights, monumental minimalist sci-fi cinematic photography, deep teal fog and shadows, one single warm orange light source, volumetric haze, anamorphic lens, subtle film grain, tense and spectacular atmosphere, vertical 9:16 portrait format, no text, no numbers, no logo, no watermark.
+Close shot of the outside wall of the falling elevator cabin inside a tall dark elevator shaft with concrete walls, two vertical steel guide rails, thick steel cables and teal fog drifting in the depths, extreme motion blur on the concrete walls, steel guide shoes scraping the rail and throwing long orange sparks, sense of extreme speed, cinematic film still, shot on anamorphic lens, deep teal shadows and one warm orange light source, volumetric haze, subtle film grain, realistic, vertical 9:16 portrait format, no text, no numbers, no logo, no watermark.
 ```
-**Animation**
+**Vidéo (à partir de l'image)**
 ```
-The brake jaws snap shut on the rail and the sparks stop instantly. Cinematic, physically plausible motion, no morphing, keep the exact same style, colors and lighting, no text, no logo, no watermark.
-```
-
-## e13 — « plusieurs câbles »
-
-**Image**
-```
-Looking up an elevator shaft at the top of a cabin hanging from several thick parallel steel cables, warm orange light from above, teal fog, monumental minimalist sci-fi cinematic photography, deep teal fog and shadows, one single warm orange light source, volumetric haze, anamorphic lens, subtle film grain, tense and spectacular atmosphere, vertical 9:16 portrait format, no text, no numbers, no logo, no watermark.
-```
-**Animation**
-```
-The cables tighten slightly and the cabin hangs perfectly still. Cinematic, physically plausible motion, no morphing, keep the exact same style, colors and lighting, no text, no logo, no watermark.
+Starts exactly on the image: the camera falls together with the cabin, the shaft walls streaking upward faster and faster, sparks spraying. Ends with the blur becoming almost total. Keep the exact same character, clothes, cabin, colors and lighting as the image. Realistic, physically plausible motion, no morphing, no extra people, no text. Ambient sound only, no dialogue. Duration about 6 seconds.
 ```
 
-## e14 — « Betty Lou Oliver… soixante-quinze étages »
+## f07 — « Le meilleur saut humain… »
 
 **Image**
 ```
-The Empire State Building at dusk in 1945 rising above the fog of New York, seen from below, warm orange glow at the top, teal sky, majestic, monumental minimalist sci-fi cinematic photography, deep teal fog and shadows, one single warm orange light source, volumetric haze, anamorphic lens, subtle film grain, tense and spectacular atmosphere, vertical 9:16 portrait format, no text, no numbers, no logo, no watermark.
+Inside the falling cabin, a modern elevator cabin with brushed steel walls, a dark mirror on the back wall, a horizontal steel handrail, a dark grey floor, a single round warm orange light in the ceiling and a small glowing orange arrow panel above the closed doors. A man in his late twenties with short black hair, wearing a dark charcoal hoodie, black jeans, white sneakers and a small black backpack, his face kept in shadow or turned away from the camera pushes off the floor in a jump, captured at the very start of the jump, his body only a few centimetres above the floor, arms raised, backpack floating, the orange light flickering, cinematic film still, shot on anamorphic lens, deep teal shadows and one warm orange light source, volumetric haze, subtle film grain, realistic, vertical 9:16 portrait format, no text, no numbers, no logo, no watermark.
 ```
-**Animation**
+**Vidéo (à partir de l'image)**
 ```
-Slow tilt up along the building from the street to the spire. Cinematic, physically plausible motion, no morphing, keep the exact same style, colors and lighting, no text, no logo, no watermark.
-```
-
-## e15 — « elle a survécu »
-
-**Image**
-```
-An open elevator door at the bottom of a dusty shaft, warm orange light pouring out, rescuers' silhouettes reaching in, hopeful atmosphere, teal shadows, monumental minimalist sci-fi cinematic photography, deep teal fog and shadows, one single warm orange light source, volumetric haze, anamorphic lens, subtle film grain, tense and spectacular atmosphere, vertical 9:16 portrait format, no text, no numbers, no logo, no watermark.
-```
-**Animation**
-```
-The dust slowly settles as the light grows warmer. Cinematic, physically plausible motion, no morphing, keep the exact same style, colors and lighting, no text, no logo, no watermark.
+Starts exactly on the image: in slow motion the man rises only a tiny bit above the floor, much less than a normal jump, and hangs there almost motionless, surprised. Ends with him still hovering just above the floor. Keep the exact same character, clothes, cabin, colors and lighting as the image. Realistic, physically plausible motion, no morphing, no extra people, no text. Ambient sound only, no dialogue. Duration about 6 seconds.
 ```
 
-## e16 — « La physique est de ton côté. »
+## f08 — « …vous toucheriez le sol à environ quatre-vingts kilomètres-heure. »
 
 **Image**
 ```
-A faceless person stepping calmly out of a modern elevator into a bright lobby, warm orange light, teal reflections, peaceful and confident, monumental minimalist sci-fi cinematic photography, deep teal fog and shadows, one single warm orange light source, volumetric haze, anamorphic lens, subtle film grain, tense and spectacular atmosphere, vertical 9:16 portrait format, no text, no numbers, no logo, no watermark.
+Side cutaway diagram of the falling elevator cabin rendered as a cinematic 3D visualization: the cabin drawn as a translucent glass box falling down a dark shaft, the small silhouette of a man inside floating just above the cabin floor, a long orange motion trail behind the cabin, teal background, cinematic film still, shot on anamorphic lens, deep teal shadows and one warm orange light source, volumetric haze, subtle film grain, realistic, vertical 9:16 portrait format, no text, no numbers, no logo, no watermark.
 ```
-**Animation**
+**Vidéo (à partir de l'image)**
 ```
-The doors slide open and the person walks out calmly. Cinematic, physically plausible motion, no morphing, keep the exact same style, colors and lighting, no text, no logo, no watermark.
+Starts exactly on the image: the translucent cabin keeps falling with the man inside; the man moves up only a tiny distance relative to the cabin while both keep plunging together. Ends with the bottom of the shaft appearing in the fog below. Keep the exact same character, clothes, cabin, colors and lighting as the image. Realistic, physically plausible motion, no morphing, no extra people, no text. Ambient sound only, no dialogue. Duration about 6 seconds.
+```
+
+## f09 — « Vous flottez. »
+
+**Image**
+```
+Inside the falling cabin, a modern elevator cabin with brushed steel walls, a dark mirror on the back wall, a horizontal steel handrail, a dark grey floor, a single round warm orange light in the ceiling and a small glowing orange arrow panel above the closed doors. A man in his late twenties with short black hair, wearing a dark charcoal hoodie, black jeans, white sneakers and a small black backpack, his face kept in shadow or turned away from the camera floats completely weightless in the middle of the cabin, his feet off the floor, his phone, his keys and a coin floating around him, his hood drifting, calm and eerie atmosphere, orange light, cinematic film still, shot on anamorphic lens, deep teal shadows and one warm orange light source, volumetric haze, subtle film grain, realistic, vertical 9:16 portrait format, no text, no numbers, no logo, no watermark.
+```
+**Vidéo (à partir de l'image)**
+```
+Starts exactly on the image: the man slowly tumbles in the air like an astronaut, trying in vain to reach the floor with his feet, the small objects drifting around him. Ends with him upside down, hand stretched toward the floor. Keep the exact same character, clothes, cabin, colors and lighting as the image. Realistic, physically plausible motion, no morphing, no extra people, no text. Ambient sound only, no dialogue. Duration about 6 seconds.
+```
+
+## f10 — « Pas d'appui sous vos pieds. »
+
+**Image**
+```
+Extreme close-up at floor level inside the cabin: the man's white sneakers hovering a few centimetres above the dark grey cabin floor, a coin floating between the soles and the floor, warm orange light, teal reflections on the steel walls, cinematic film still, shot on anamorphic lens, deep teal shadows and one warm orange light source, volumetric haze, subtle film grain, realistic, vertical 9:16 portrait format, no text, no numbers, no logo, no watermark.
+```
+**Vidéo (à partir de l'image)**
+```
+Starts exactly on the image: the sneakers kick and paddle in the air but cannot touch the floor, the coin slowly rotates in the gap. Ends with the toes still hovering just above the floor. Keep the exact same character, clothes, cabin, colors and lighting as the image. Realistic, physically plausible motion, no morphing, no extra people, no text. Ambient sound only, no dialogue. Duration about 6 seconds.
+```
+
+## f11 — « …deviner l'instant du choc au millième de seconde près. »
+
+**Image**
+```
+Extreme close-up of the man's eye in the dark, a reflection of the small glowing orange arrow panel in his pupil, sweat on his skin, teal shadows, face otherwise in darkness, cinematic film still, shot on anamorphic lens, deep teal shadows and one warm orange light source, volumetric haze, subtle film grain, realistic, vertical 9:16 portrait format, no text, no numbers, no logo, no watermark.
+```
+**Vidéo (à partir de l'image)**
+```
+Starts exactly on the image: the eye darts between the arrow panel and the floor, the orange reflection flickering faster and faster. Ends with the eye squeezing shut. Keep the exact same character, clothes, cabin, colors and lighting as the image. Realistic, physically plausible motion, no morphing, no extra people, no text. Ambient sound only, no dialogue. Duration about 6 seconds.
+```
+
+## f12 — « …s'allonger à plat sur le sol. »
+
+**Image**
+```
+Top-down view from the cabin ceiling: a man in his late twenties with short black hair, wearing a dark charcoal hoodie, black jeans, white sneakers and a small black backpack, his face kept in shadow or turned away from the camera lying flat on his back on the cabin floor, arms crossed over his face to protect his head, legs straight, backpack beside him, warm orange light, steel walls framing him, cinematic film still, shot on anamorphic lens, deep teal shadows and one warm orange light source, volumetric haze, subtle film grain, realistic, vertical 9:16 portrait format, no text, no numbers, no logo, no watermark.
+```
+**Vidéo (à partir de l'image)**
+```
+Starts exactly on the image: the man presses himself flat against the floor and holds still, the camera slowly rotates above him. Ends with him perfectly still, arms over his face. Keep the exact same character, clothes, cabin, colors and lighting as the image. Realistic, physically plausible motion, no morphing, no extra people, no text. Ambient sound only, no dialogue. Duration about 6 seconds.
+```
+
+## f13 — « Le choc se répartit sur tout le corps… »
+
+**Image**
+```
+The same top-down view rendered as a scientific visualization: the man lying flat appears as a translucent glowing body on the floor, a wave of orange light spreading evenly across the whole body from head to toe, teal background, cinematic film still, shot on anamorphic lens, deep teal shadows and one warm orange light source, volumetric haze, subtle film grain, realistic, vertical 9:16 portrait format, no text, no numbers, no logo, no watermark.
+```
+**Vidéo (à partir de l'image)**
+```
+Starts exactly on the image: a ripple of orange light spreads evenly across the whole body and fades, showing the force shared everywhere. Ends with the body glowing softly and evenly. Keep the exact same character, clothes, cabin, colors and lighting as the image. Realistic, physically plausible motion, no morphing, no extra people, no text. Ambient sound only, no dialogue. Duration about 6 seconds.
+```
+
+## f14 — « Mais rassurez-vous : ça n'arrive presque jamais. »
+
+**Image**
+```
+Close-up inside a tall dark elevator shaft with concrete walls, two vertical steel guide rails, thick steel cables and teal fog drifting in the depths of the safety brake mounted under the falling cabin: two steel jaws on either side of the guide rail, a bright burst of orange sparks as the jaws start to clamp the rail, cinematic film still, shot on anamorphic lens, deep teal shadows and one warm orange light source, volumetric haze, subtle film grain, realistic, vertical 9:16 portrait format, no text, no numbers, no logo, no watermark.
+```
+**Vidéo (à partir de l'image)**
+```
+Starts exactly on the image: the jaws snap shut on the rail with a shower of sparks, the cabin decelerates hard, the sparks fade. Ends with the brake locked and the cabin completely still. Keep the exact same character, clothes, cabin, colors and lighting as the image. Realistic, physically plausible motion, no morphing, no extra people, no text. Ambient sound only, no dialogue. Duration about 6 seconds.
+```
+
+## f15 — « Depuis, tous les ascenseurs en ont un. Et plusieurs câbles. »
+
+**Image**
+```
+Looking up inside a tall dark elevator shaft with concrete walls, two vertical steel guide rails, thick steel cables and teal fog drifting in the depths at the top of the stopped elevator cabin held perfectly still, several thick parallel steel cables above it and the safety brake locked on the rails, dust floating in a warm orange light, calm after the storm, cinematic film still, shot on anamorphic lens, deep teal shadows and one warm orange light source, volumetric haze, subtle film grain, realistic, vertical 9:16 portrait format, no text, no numbers, no logo, no watermark.
+```
+**Vidéo (à partir de l'image)**
+```
+Starts exactly on the image: dust slowly settles, the cabin hangs perfectly still, a gentle swing of the cables stops. Ends in total calm. Keep the exact same character, clothes, cabin, colors and lighting as the image. Realistic, physically plausible motion, no morphing, no extra people, no text. Ambient sound only, no dialogue. Duration about 6 seconds.
+```
+
+## f16 — « La physique est de votre côté. »
+
+**Image**
+```
+Front view of the elevator doors opening onto a bright modern lobby with warm orange light, a man in his late twenties with short black hair, wearing a dark charcoal hoodie, black jeans, white sneakers and a small black backpack, his face kept in shadow or turned away from the camera standing up inside the cabin, dusting off his hoodie, backpack on one shoulder, relieved, cinematic film still, shot on anamorphic lens, deep teal shadows and one warm orange light source, volumetric haze, subtle film grain, realistic, vertical 9:16 portrait format, no text, no numbers, no logo, no watermark.
+```
+**Vidéo (à partir de l'image)**
+```
+Starts exactly on the image: the doors slide open, the man takes a deep breath, steps out of the cabin and walks calmly into the lobby, his back to the camera. Ends with him walking away into the warm light. Keep the exact same character, clothes, cabin, colors and lighting as the image. Realistic, physically plausible motion, no morphing, no extra people, no text. Ambient sound only, no dialogue. Duration about 6 seconds.
 ```
