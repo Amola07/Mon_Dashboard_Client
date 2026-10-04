@@ -38,7 +38,7 @@ Alors la prochaine fois que vous prenez l'ascenseur… respirez. La physique est
 
 ## Version avec balises d'émotion (ElevenLabs, modèle Eleven v3, stabilité « Creative » ou « Natural »)
 ```
-[curious] Si vous êtes dans un ascenseur qui chute, et que vous sautez juste avant l'impact… [short pause] est-ce que vous pouvez l'éviter ? [serious] La réponse est non. [mischievously] Et la raison va vous surprendre.
+[curious] Si vous êtes dans un ascenseur qui chute, et que vous sautez juste avant l'impact… est-ce que vous pouvez l'éviter ? [serious] La réponse est non. [mischievously] Et la raison va vous surprendre.
 
 [fast-paced] Après dix étages de chute, l'ascenseur file à près de quatre-vingt-dix kilomètres-heure. [dramatic pause] Et vous aussi.
 
@@ -48,7 +48,7 @@ Alors la prochaine fois que vous prenez l'ascenseur… respirez. La physique est
 
 [thoughtful] Alors que faire ? [calm] Beaucoup de physiciens conseillent de s'allonger à plat sur le sol. Le choc se répartit sur tout le corps, au lieu de se concentrer dans les jambes et la colonne.
 
-[reassuring] Mais rassurez-vous : ça n'arrive presque jamais. [storytelling] En 1854, l'inventeur Elisha Otis monte sur une plateforme suspendue devant la foule… [dramatic pause] et fait couper le câble. [impressed] La plateforme ne bouge pas. Son frein de sécurité l'a bloquée. Depuis, tous les ascenseurs en ont un. [short pause] Et plusieurs câbles.
+[reassuring] Mais rassurez-vous : ça n'arrive presque jamais. [storytelling] En 1854, l'inventeur Elisha Otis monte sur une plateforme suspendue devant la foule… [dramatic pause] et fait couper le câble. [impressed] La plateforme ne bouge pas. Son frein de sécurité l'a bloquée. Depuis, tous les ascenseurs en ont un. Et plusieurs câbles.
 
 [amazed] Et en 1945, Betty Lou Oliver a chuté de soixante-quinze étages dans l'Empire State Building… [dramatic pause] et elle a survécu. C'est toujours le record du monde.
 
