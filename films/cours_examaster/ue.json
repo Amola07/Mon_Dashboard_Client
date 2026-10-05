@@ -1,0 +1,14 @@
+{
+  "nom": "Animation en code : le style oscilloscope",
+  "description": "Apprenez à créer vous-même des vidéos animées en Python, dans un style d'écran d'oscilloscope : des traits verts lumineux qui se dessinent au rythme d'une voix off. Ce style a doublé le temps de visionnage de nos vidéos TikTok. Vous partez d'un moteur prêt à l'emploi et vous n'écrivez que ce qu'on voit à l'écran, où et à quel moment. Prérequis : des bases en Python (variables, fonctions, listes). Sept exercices corrigés.",
+  "prix": 0,
+  "chapitres": [
+    {"nom": "1. Découvrir le style", "cours": ["01_decouvrir.md", "02_retention.md"]},
+    {"nom": "2. Installer et lancer", "cours": ["03_installer.md", "04_premier_rendu.md"]},
+    {"nom": "3. Les trois idées de base", "cours": ["05_coordonnees.md", "06_temps.md", "07_traits.md"]},
+    {"nom": "4. Les outils de dessin", "cours": ["08_tracer_ecrire.md", "09_personnages_compteurs.md"]},
+    {"nom": "5. Monter un épisode complet", "cours": ["10_deroule.md", "11_transitions_sons.md"]},
+    {"nom": "6. Exercices corrigés", "cours": ["12_exercices_1_4.md", "13_exercices_5_7.md"]},
+    {"nom": "7. Dépannage", "cours": ["14_depannage.md"]}
+  ]
+}
