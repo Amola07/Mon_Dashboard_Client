@@ -115,13 +115,16 @@ def tab_accroche(c, t):
     if t < 0.5:                                                             # gerbe d'eau à l'impact
         for _ in range(10):
             M.ETINCELLES.append([RNG.uniform(250, 820), NIV, RNG.uniform(-7, 7), RNG.uniform(-22, -9), 1.0])
-    titres(c, t, [(-1.0, "VOITURE À L'EAU", VERT_PALE, 84), (s(1), "N'APPELEZ PAS !", AMBRE, 80)], halo=2.0)
+    if t < s(1):                                                            # la surprise affirmée dès l'image 0
+        ecrit(c, t, -1.0, "N'OUVREZ PAS", W / 2, 300, 88, AMBRE, True, 2.2, vitesse=0.0)
+        ecrit(c, t, -1.0, "LA PORTIÈRE", W / 2, 400, 88, AMBRE, True, 2.2, vitesse=0.0)
+        ecrit(c, t, -1.0, "VOITURE À L'EAU", W / 2, 470, 40, VERT_PALE, vitesse=0.0)
+    titres(c, t, [(s(1), "N'APPELEZ PAS !", AMBRE, 80)], halo=2.0)
     tp = s(0) + 2.6                                                         # « … ouvrir la portière »
     if t > tp:
         faisceau(c, v["porte"], 1.0, AMBRE, 1.8, 0.7 + 0.3 * math.sin(t * 10))
         cx, cy = v["T"]([(65, -55)])[0]
         trace(c, t, tp + 0.2, 0.2, croix(cx, cy, 70), AMBRE, 2.4, bip=500)
-        ecrit(c, t, tp + 0.3, "PAS LA PORTIÈRE", W / 2, 470, 50, AMBRE)
     if t > s(1):
         trace(c, t, s(1) + 0.1, 0.3, telephone(880, 640, 1.0), VERT_PALE, 1.2, bip=1600)
         trace(c, t, s(1) + 0.9, 0.2, croix(880, 640, 75), AMBRE, 2.2, bip=500)

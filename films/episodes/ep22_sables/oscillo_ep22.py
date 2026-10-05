@@ -85,9 +85,11 @@ def tab_accroche(c, t):
         faisceau(c, [[(540, pieds - 102), (510, pieds - 51), (509, pieds - 7)],
                      [(540, pieds - 102), (584, pieds - 51), (574, pieds - 10)]], 1.0, AMBRE, 2.0, clign)
         ecrit(c, t, s(3) + 0.4, "?", 700, pieds - 20, 110, AMBRE, False, 1.8, vitesse=0.0)
-    titres(c, t, [(-1.0, "SABLES MOUVANTS", VERT_PALE, 84), (s(3), "LE VRAI DANGER ?", AMBRE, 76)], halo=2.0)
-    if s(1) <= t < s(3):
-        ecrit(c, t, s(1), "VOUS NE POUVEZ PAS COULER", W / 2, 420, 44, AMBRE)
+    if t < s(3):                                                            # la surprise affirmée dès l'image 0
+        ecrit(c, t, -1.0, "VOUS NE POUVEZ", W / 2, 300, 88, AMBRE, True, 2.2, vitesse=0.0)
+        ecrit(c, t, -1.0, "PAS COULER", W / 2, 400, 88, AMBRE, True, 2.2, vitesse=0.0)
+        ecrit(c, t, -1.0, "SABLES MOUVANTS", W / 2, 470, 40, VERT_PALE, vitesse=0.0)
+    titres(c, t, [(s(3), "LE VRAI DANGER ?", AMBRE, 76)], halo=2.0)
     if s(2) + 0.5 <= t < s(3):
         trace(c, t, s(2) + 0.5, 0.0, [rect_pts(170, 560, 910, 720)], AMBRE, 1.6, bip=0)
         ecrit(c, t, s(2) + 0.5, "IMPOSSIBLE", W / 2, 680, 120, AMBRE, True, 2.0, vitesse=0.0)
