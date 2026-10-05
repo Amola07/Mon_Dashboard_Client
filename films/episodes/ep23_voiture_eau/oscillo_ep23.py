@@ -113,7 +113,7 @@ def tab_accroche(c, t):
     for k in ("caisse", "vitre_ar", "vitre_av", "roues"):
         faisceau(c, v[k], 1.0, VERT_PALE, 1.3 * gras)
     px, py = v["T"]([(45, -62)])[0]
-    faisceau(c, MV.figure("assis_panique", t, px, py, 1.35 * 110, 1, rot=ang, boucle="aller-retour"), 1.0, VERT_PALE,
+    MV.dessiner(c, MV.corps("assis_panique", t, px, py, 1.35 * 110, 1, rot=ang, boucle="aller-retour"), VERT_PALE,
              1.1 * gras)
     eau(c, NIV, t, amp=7 + 18 * max(0.0, 1 - t / 1.2), intense=gras)
     if t < 0.5:                                                             # gerbe d'eau à l'impact
@@ -145,9 +145,9 @@ def tab_pression(c, t):
     pousse = t > s(6)
     if t > t0 + 0.3:
         tr = 3 * math.sin(t * 50) if pousse else 0.0
-        fig = (MV.figure("pousse_assis", t - s(6), CX - 110 * K + tr, BY - 110 * K, 260, -1, fin=1.6, boucle="aller-retour")
-               if pousse else MV.figure("assis_panique", t - t0, CX - 60 * K, BY - 110 * K, 260, -1, boucle="aller-retour"))
-        faisceau(c, fig, 1.0, VERT_PALE, 1.2)
+        fig = (MV.corps("pousse_assis", t - s(6), CX - 110 * K + tr, BY - 110 * K, 260, -1, fin=1.6, boucle="aller-retour")
+               if pousse else MV.corps("assis_panique", t - t0, CX - 60 * K, BY - 110 * K, 260, -1, boucle="aller-retour"))
+        MV.dessiner(c, fig, VERT_PALE, 1.2)
     y_vitre, y_toit = BY - 150 * K, BY - 280 * K
     q1 = ease((t - s(4)) / 2.6)
     q2 = ease((t - s(5) - 0.3) / 1.6)
@@ -254,7 +254,7 @@ def tab_gestes(c, t):
     E = 1.35 * 110                                                         # pixels par mètre dans la voiture
     if t < s(19) + 0.5:
         px, py = T([(45, -62)])[0]
-        faisceau(c, MV.figure("assis_sangle", t - s(12), px, py, E, 1, boucle="aller-retour"), 1.0, VERT_PALE, 1.1)
+        MV.dessiner(c, MV.corps("assis_sangle", t - s(12), px, py, E, 1, boucle="aller-retour"), VERT_PALE, 1.1)
     retire = ease((t - s(12) - 0.7) / 0.5)
     if retire < 1:
         a, b = T([(72, -150)])[0], T([(28, -68)])[0]
@@ -265,10 +265,10 @@ def tab_gestes(c, t):
         x1, y1 = T([(10, -180)])[0]
         y1 -= 0.9 * E * 0.62
         if t < s(18):
-            fig = MV.figure("assis_panique", t, x0, y0, E * 0.62, 1, boucle="aller-retour")
+            fig = MV.corps("assis_panique", t, x0, y0, E * 0.62, 1, boucle="aller-retour")
         else:
-            fig = MV.figure("grimpe", t - s(18), x0 + (x1 - x0) * u, y0 + (y1 - y0) * u, E * 0.62, 1, debut=0.8, fin=4.0)
-        faisceau(c, fig, 1.0, VERT_PALE, 1.1)
+            fig = MV.corps("grimpe", t - s(18), x0 + (x1 - x0) * u, y0 + (y1 - y0) * u, E * 0.62, 1, debut=0.8, fin=4.0)
+        MV.dessiner(c, fig, VERT_PALE, 1.1)
         if t < s(19):
             trace(c, t, s(18), 0.3, fleche(x0 + 40, y0 - 30, x1 + 40, y1 - 90, 18), AMBRE, 1.1, bip=1700)
     if t > s(19) + 0.5:                                                     # vous, sur le toit, puis vers la rive
@@ -277,17 +277,12 @@ def tab_gestes(c, t):
         ty -= 0.9 * E
         t_plonge = s(20) + 1.0
         if t < t_plonge:                                                    # il grimpe sur le toit
-            fig = MV.figure("grimpe", t - s(19) - 0.5, px + (tx - px) * sortie, py + (ty - py) * sortie, E, 1,
+            fig = MV.corps("grimpe", t - s(19) - 0.5, px + (tx - px) * sortie, py + (ty - py) * sortie, E, 1,
                             debut=0.8, fin=4.0)
-        else:                                                               # plonge, puis nage vers la rive
+        else:                                                               # puis nage vers la rive
             k = ease((t - t_plonge) / 2.4)
-            pb = MV.points("nage", t - t_plonge, 640 + 230 * k, NIV + 6, E * 0.9, 1, fin=2.0, boucle="aller-retour")
-            fondu = ease((t - t_plonge) / 0.45)
-            if fondu < 1:
-                pa = MV.points("grimpe", t - s(19) - 0.5, tx, ty, E, 1, debut=0.8, fin=4.0)
-                pb = MV.melange(pa, pb, fondu)
-            fig = MV.traits(pb, E)
-        faisceau(c, fig, 1.0, AMBRE, 1.3)
+            fig = MV.corps("nage", t - t_plonge, 640 + 230 * k, NIV + 6, E * 0.9, 1, fin=2.0, boucle="aller-retour")
+        MV.dessiner(c, fig, AMBRE, 1.3)
     if t > s(20) + 0.6:
         trace(c, t, s(20) + 0.6, 0.5, [[(860, NIV), (920, NIV - 40), (1060, NIV - 70)]], VERT_PALE, 1.4, bip=1100)
         ecrit(c, t, s(20) + 0.9, "RIVE", 960, NIV - 100, 34, VERT_PALE)
@@ -301,7 +296,7 @@ def tab_portiere(c, t):
     CX, BY, K = 540, 1330, 1.45
     f = face(CX, BY, K)
     trace(c, t, t0, 0.5, f["bas"] + f["haut"] + f["roues"], VERT_PALE, 1.3, bip=1100)
-    faisceau(c, MV.figure("assis_panique", t - t0, CX - 60 * K, BY - 110 * K, 260, -1, boucle="aller-retour"), 1.0,
+    MV.dessiner(c, MV.corps("assis_panique", t - t0, CX - 60 * K, BY - 110 * K, 260, -1, boucle="aller-retour"),
              VERT_PALE, 1.2)
     eau(c, 560, t, amp=5)
     interieur = BY - (280 * K - 4) * ease((t - s(22) - 1.4) / 2.0)
@@ -338,7 +333,7 @@ def tab_fenetre(c, t):
     hx, hy = v["T"]([(60, -134)])[0]
     u = ease((t - t0 - 0.6) / 1.4)
     E = 1.35 * 110
-    faisceau(c, MV.figure("grimpe", t - t0 - 0.6, hx - 15 + 135 * u, hy + 95 - 260 * u, E, 1, debut=0.8, fin=4.0), 1.0,
+    MV.dessiner(c, MV.corps("grimpe", t - t0 - 0.6, hx - 15 + 135 * u, hy + 95 - 260 * u, E, 1, debut=0.8, fin=4.0),
              VERT_PALE, 1.3)
     trace(c, t, t0 + 0.4, 0.3, fleche(hx + 30, hy - 20, hx + 150, hy - 220, 22), AMBRE, 1.4, bip=1700)
     ecrit(c, t, t0 + 1.4, "AU-DESSUS DE L'EAU", W / 2, 470, 44, VERT_PALE)
