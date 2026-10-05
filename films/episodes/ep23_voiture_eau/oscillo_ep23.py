@@ -15,6 +15,7 @@ import skia
 from films.episodes.ep21_ascenseur import oscillo_ep21 as M
 from films.episodes.ep21_ascenseur.oscillo_ep21 import (AMBRE, VERT, VERT_PALE, P, W, bonhomme, cercle_pts, ease,
                                                          ecrit, faisceau, fleche, pointilles, rect_pts, titres, trace)
+from films.styles import mouvement as MV
 from films.styles import oscillo_son as Z
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -111,6 +112,9 @@ def tab_accroche(c, t):
     v = cote(520, by, 1.35, ang)
     for k in ("caisse", "vitre_ar", "vitre_av", "roues"):
         faisceau(c, v[k], 1.0, VERT_PALE, 1.3 * gras)
+    px, py = v["T"]([(45, -62)])[0]
+    faisceau(c, MV.figure("assis_panique", t, px, py, 1.35 * 110, 1, rot=ang, boucle="aller-retour"), 1.0, VERT_PALE,
+             1.1 * gras)
     eau(c, NIV, t, amp=7 + 18 * max(0.0, 1 - t / 1.2), intense=gras)
     if t < 0.5:                                                             # gerbe d'eau à l'impact
         for _ in range(10):
@@ -138,7 +142,12 @@ def tab_pression(c, t):
     CX, BY, K = 540, 1330, 1.45
     f = face(CX, BY, K)
     trace(c, t, t0, 0.5, f["bas"] + f["haut"] + f["roues"], VERT_PALE, 1.3, bip=1100)
-    trace(c, t, t0 + 0.3, 0.3, f["tete"], VERT_PALE, 1.0, bip=0)
+    pousse = t > s(6)
+    if t > t0 + 0.3:
+        tr = 3 * math.sin(t * 50) if pousse else 0.0
+        fig = (MV.figure("pousse_assis", t - s(6), CX - 110 * K + tr, BY - 110 * K, 260, -1, fin=1.6, boucle="aller-retour")
+               if pousse else MV.figure("assis_panique", t - t0, CX - 60 * K, BY - 110 * K, 260, -1, boucle="aller-retour"))
+        faisceau(c, fig, 1.0, VERT_PALE, 1.2)
     y_vitre, y_toit = BY - 150 * K, BY - 280 * K
     q1 = ease((t - s(4)) / 2.6)
     q2 = ease((t - s(5) - 0.3) / 1.6)
@@ -154,9 +163,6 @@ def tab_pression(c, t):
         ecrit(c, t, s(4) + 0.5, "FORCE SUR LA PORTIÈRE", W / 2, 470, 34, VERT)
         ecrit(c, t, s(4) + 0.5, txt, W / 2, 580, 100, AMBRE, True, 1.8, vitesse=0.0)
     if t > s(6):                                                            # quelqu'un pousse, rien ne bouge
-        tr = 3 * math.sin(t * 50)
-        hx, hy = CX - 70 * K, BY - 205 * K
-        faisceau(c, [[(hx, hy + 40), (CX - 222 * K + 8 + tr, BY - 120 * K)]], 1.0, VERT_PALE, 1.4)
         ecrit(c, t, s(6) + 0.3, "IMPOSSIBLE", CX, BY - 40, 54, AMBRE, True, 1.6)
 
 
@@ -245,25 +251,38 @@ def tab_gestes(c, t):
     # conducteur, ceinture, puis les enfants et vous qui sortez
     hx, hy = T([(60, -130)])[0]
     sortie = ease((t - s(19) - 0.5) / 1.0)
+    E = 1.35 * 110                                                         # pixels par mètre dans la voiture
     if t < s(19) + 0.5:
-        faisceau(c, [cercle_pts(hx, hy, 18 * 1.35, 18), [(hx - 6, hy + 24), (hx - 26, hy + 90)]], 1.0, VERT_PALE, 1.1)
+        px, py = T([(45, -62)])[0]
+        faisceau(c, MV.figure("assis_sangle", t - s(12), px, py, E, 1, boucle="aller-retour"), 1.0, VERT_PALE, 1.1)
     retire = ease((t - s(12) - 0.7) / 0.5)
     if retire < 1:
         a, b = T([(72, -150)])[0], T([(28, -68)])[0]
         faisceau(c, [[a, (a[0] + (b[0] - a[0]) * (1 - retire), a[1] + (b[1] - a[1]) * (1 - retire))]], 1.0, AMBRE, 1.6)
     if s(17) <= t:                                                          # l'enfant sort par la fenêtre
         u = ease((t - s(18)) / 1.4)
-        x0, y0 = T([(-60, -120)])[0]
-        x1, y1 = T([(40, -200)])[0]
-        x1, y1 = x1 + 40, y1 - 40
-        faisceau(c, bonhomme(x0 + (x1 - x0) * u, y0 + 40 + (y1 - y0) * u, 0.9, "debout", "flotte", u), 1.0, VERT_PALE, 1.1)
+        x0, y0 = T([(-60, -62)])[0]
+        x1, y1 = T([(10, -180)])[0]
+        y1 -= 0.9 * E * 0.62
+        if t < s(18):
+            fig = MV.figure("assis_panique", t, x0, y0, E * 0.62, 1, boucle="aller-retour")
+        else:
+            fig = MV.figure("grimpe", t - s(18), x0 + (x1 - x0) * u, y0 + (y1 - y0) * u, E * 0.62, 1, debut=0.8, fin=4.0)
+        faisceau(c, fig, 1.0, VERT_PALE, 1.1)
         if t < s(19):
             trace(c, t, s(18), 0.3, fleche(x0 + 40, y0 - 30, x1 + 40, y1 - 90, 18), AMBRE, 1.1, bip=1700)
     if t > s(19) + 0.5:                                                     # vous, sur le toit, puis vers la rive
-        tx, ty = T([(-20, -180)])[0]
-        glisse = 330 * ease((t - s(20) - 1.0) / 1.5)
-        faisceau(c, bonhomme(hx + (tx - hx) * sortie + glisse, (hy + 60) + (ty - hy - 60) * sortie, 1.35, "flotte", "debout",
-                             sortie), 1.0, AMBRE, 1.3)
+        px, py = T([(45, -62)])[0]
+        tx, ty = T([(-60, -180)])[0]
+        ty -= 0.9 * E
+        t_plonge = s(20) + 1.0
+        if t < t_plonge:                                                    # il grimpe sur le toit
+            fig = MV.figure("grimpe", t - s(19) - 0.5, px + (tx - px) * sortie, py + (ty - py) * sortie, E, 1,
+                            debut=0.8, fin=4.0)
+        else:                                                               # puis nage vers la rive
+            k = ease((t - t_plonge) / 2.4)
+            fig = MV.figure("nage", t - t_plonge, 640 + 230 * k, NIV + 6, E * 0.9, 1, fin=2.0, boucle="aller-retour")
+        faisceau(c, fig, 1.0, AMBRE, 1.3)
     if t > s(20) + 0.6:
         trace(c, t, s(20) + 0.6, 0.5, [[(860, NIV), (920, NIV - 40), (1060, NIV - 70)]], VERT_PALE, 1.4, bip=1100)
         ecrit(c, t, s(20) + 0.9, "RIVE", 960, NIV - 100, 34, VERT_PALE)
@@ -276,7 +295,9 @@ def tab_portiere(c, t):
                   (s(23), "NOIR · SOUS L'EAU · SANS AIR", AMBRE, 46)])
     CX, BY, K = 540, 1330, 1.45
     f = face(CX, BY, K)
-    trace(c, t, t0, 0.5, f["bas"] + f["haut"] + f["roues"] + f["tete"], VERT_PALE, 1.3, bip=1100)
+    trace(c, t, t0, 0.5, f["bas"] + f["haut"] + f["roues"], VERT_PALE, 1.3, bip=1100)
+    faisceau(c, MV.figure("assis_panique", t - t0, CX - 60 * K, BY - 110 * K, 260, -1, boucle="aller-retour"), 1.0,
+             VERT_PALE, 1.2)
     eau(c, 560, t, amp=5)
     interieur = BY - (280 * K - 4) * ease((t - s(22) - 1.4) / 2.0)
     if t > s(22) + 1.4:                                                     # l'habitacle se remplit
@@ -311,7 +332,9 @@ def tab_fenetre(c, t):
     faisceau(c, v["vitre_av"], 1.0, AMBRE, 2.0, 0.7 + 0.3 * math.sin(t * 8))
     hx, hy = v["T"]([(60, -134)])[0]
     u = ease((t - t0 - 0.6) / 1.4)
-    faisceau(c, bonhomme(hx + 120 * u, hy + 50 - 230 * u, 1.35, "flotte", "debout", u), 1.0, VERT_PALE, 1.3)
+    E = 1.35 * 110
+    faisceau(c, MV.figure("grimpe", t - t0 - 0.6, hx - 15 + 135 * u, hy + 95 - 260 * u, E, 1, debut=0.8, fin=4.0), 1.0,
+             VERT_PALE, 1.3)
     trace(c, t, t0 + 0.4, 0.3, fleche(hx + 30, hy - 20, hx + 150, hy - 220, 22), AMBRE, 1.4, bip=1700)
     ecrit(c, t, t0 + 1.4, "AU-DESSUS DE L'EAU", W / 2, 470, 44, VERT_PALE)
 
@@ -374,7 +397,9 @@ def effets(tabs):
            (t_coin, Z.craquement(0.4)), (t_coin, Z.crepitement(0.9, 0.22, 200)), (t_coin + 0.02, Z.cloche(2637, 0.12, 0.6)),
            (s(16) + 0.2, Z.alarme(0.07, 1)), (s(17) - 0.1, Z.cloche(880, 0.08)), (s(18), Z.whoosh(0.8, 0.08)),
            (s(18) + 0.3, Z.chirp(500, 1100, 0.6, 0.06)), (s(19) - 0.1, Z.cloche(988, 0.08)), (s(19) + 0.5, Z.whoosh(0.8, 0.09)),
-           (s(19) + 0.6, Z.bulles(0.8, 0.07)), (s(20) + 0.6, Z.chirp(300, 800, 0.5, 0.06)), (s(20) + 1.0, Z.cloche(1046.5, 0.1))]
+           (s(19) + 0.6, Z.bulles(0.8, 0.07)), (s(20) + 0.6, Z.chirp(300, 800, 0.5, 0.06)),
+           (s(20) + 1.0, Z.whoosh(0.4, 0.1, False)), (s(20) + 1.3, Z.crepitement(0.5, 0.15, 150)),
+           (s(20) + 1.3, Z.bulles(1.5, 0.1)), (s(20) + 1.0, Z.cloche(1046.5, 0.1))]
     # la portière
     ev += [(s(22) + 1.4, Z.bulles(2.2, 0.1)), (s(22) + 1.4, Z.vent(2.0, 0.08, 100, 500)),
            (s(22) + 3.4, Z.grincement(0.8, 0.1)), (s(23), Z.boom(0.4, 50)), (s(23) + 0.4, Z.coeur(0.2)),
