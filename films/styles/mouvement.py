@@ -38,28 +38,77 @@ def instant(t, debut=0.0, fin=None, boucle=None, n=None):
     return debut + min(max(t, 0.0), d)
 
 
-def figure(nom, t, cx, cy, ech, sens=1, ancre="bassin", debut=0.0, fin=None, boucle=None, rot=0.0, profondeur=0.3):
-    """Les traits du personnage à l'instant t. (cx, cy) = position du bassin (ou du sol sous lui si ancre='pieds')."""
-    j, avant, cote = charger(nom)
-    f = instant(t, debut, fin, boucle, len(j)) * 20
-    f = min(max(f, 0.0), len(j) - 1.001)
+# Les extrémités suivent avec un léger retard (secondes) : la main traîne derrière le coude, la tête derrière le buste.
+RETARD = {18: 0.03, 19: 0.03, 20: 0.07, 21: 0.07, 15: 0.05, 12: 0.02}
+
+
+def _pose3d(j, tm):
+    f = min(max(tm * 20, 0.0), len(j) - 1.001)
     i = int(f)
-    a = j[i] + (j[i + 1] - j[i]) * (f - i)
+    return j[i] + (j[i + 1] - j[i]) * (f - i)
+
+
+def points(nom, t, cx, cy, ech, sens=1, ancre="bassin", debut=0.0, fin=None, boucle=None, rot=0.0, profondeur=0.3):
+    """Les 22 articulations projetées à l'écran, avec le retard des extrémités."""
+    j, avant, cote = charger(nom)
+    tm = instant(t, debut, fin, boucle, len(j))
+    a = _pose3d(j, tm)
     r = a[0].copy()
     if ancre == "pieds":
         r[1] = 0.0
     cr, sr = math.cos(rot), math.sin(rot)
     pts = []
-    for p in a:
+    for k in range(len(a)):
+        p = a[k]
+        if k in RETARD:                                          # la même articulation, un peu plus tôt
+            b = _pose3d(j, tm - RETARD[k])
+            p = b[k] - b[0] + a[0]
         d = p - r
         x = sens * (d @ avant + profondeur * (d @ cote)) * ech
         y = -d[1] * ech
         pts.append((cx + x * cr - y * sr, cy + x * sr + y * cr))
-    tr = [[pts[k] for k in ch] for ch in CHAINES]
+    return pts
+
+
+def melange(pa, pb, k):
+    """Fond une pose dans une autre (k de 0 à 1) : pas de saut d'un geste au suivant."""
+    return [(a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k) for a, b in zip(pa, pb)]
+
+
+def _courbe(pts, n=8):
+    """Courbe souple (Catmull-Rom) qui passe par tous les points : une ligne d'action, pas des bâtons."""
+    if len(pts) < 3:
+        return list(pts)
+    q = [pts[0]] + list(pts) + [pts[-1]]
+    out = []
+    for i in range(1, len(q) - 2):
+        p0, p1, p2, p3 = q[i - 1], q[i], q[i + 1], q[i + 2]
+        for s in range(n):
+            u = s / n
+            u2, u3 = u * u, u * u * u
+            out.append(tuple(0.5 * ((2 * p1[c]) + (-p0[c] + p2[c]) * u + (2 * p0[c] - 5 * p1[c] + 4 * p2[c] - p3[c]) * u2
+                                    + (-p0[c] + 3 * p1[c] - 3 * p2[c] + p3[c]) * u3) for c in (0, 1)))
+    out.append(pts[-1])
+    return out
+
+
+def traits(pts, ech):
+    """Les traits du personnage : colonne, bras et jambes en courbes continues, tête, mains."""
+    chaines = [[0, 3, 6, 9, 12], [9, 14, 17, 19, 21], [9, 13, 16, 18, 20], [0, 2, 5, 8, 11], [0, 1, 4, 7, 10]]
+    tr = [_courbe([pts[k] for k in ch]) for ch in chaines]
+    for c_, m in ((19, 21), (18, 20)):                            # la main prolonge l'avant-bras
+        u, v = pts[c_], pts[m]
+        tr.append([v, (v[0] + (v[0] - u[0]) * 0.3, v[1] + (v[1] - u[1]) * 0.3)])
     cou, tete = np.array(pts[12]), np.array(pts[15])
-    centre = tete + (tete - cou) * 0.6
+    centre = tete + (tete - cou) * 0.55
+    tr.append([tuple(cou), tuple(tete)])
     tr.append(cercle_pts(centre[0], centre[1], 0.1 * ech, 18))
     return tr
+
+
+def figure(nom, t, cx, cy, ech, sens=1, ancre="bassin", debut=0.0, fin=None, boucle=None, rot=0.0, profondeur=0.3):
+    """Les traits du personnage à l'instant t. (cx, cy) = position du bassin (ou du sol sous lui si ancre='pieds')."""
+    return traits(points(nom, t, cx, cy, ech, sens, ancre, debut, fin, boucle, rot, profondeur), ech)
 
 
 # ------------------------------------------------------------------------------------------------ corps en volume
