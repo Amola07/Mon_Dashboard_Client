@@ -16,6 +16,7 @@ import skia
 from films.episodes.ep21_ascenseur import oscillo_ep21 as M
 from films.episodes.ep21_ascenseur.oscillo_ep21 import (AMBRE, VERT, VERT_PALE, P, W, cercle_pts, ease, ecrit, faisceau,
                                                          fleche, pointilles, titres, trace)
+from films.outils.feuille_animation import pose_anim
 from films.outils.image_en_traits import DOSSIER, dessin
 from films.styles import oscillo_son as Z
 
@@ -39,6 +40,27 @@ def perso(nom, cx, haut, pied=SOL, miroir=False):
     """Un personnage de hauteur donnée, posé sur la glace (pieds en `pied`)."""
     larg = haut / ratio(nom)
     return dessin(nom, cx - larg / 2, pied - haut, larg, miroir)
+
+
+def anim(nom, u, x, haut=560, pied=SOL, fps=8, miroir=False, boucle=True):
+    """Une feuille d'animation jouée en boucle (ou une seule fois, puis tenue sur la dernière image)."""
+    k = int(max(0.0, u) * fps)
+    return pose_anim(nom, k % 8 if boucle else min(k, 7), x, pied, haut, miroir)
+
+
+def anim_durees(nom, u, x, durees, haut=560, pied=SOL, miroir=False):
+    """Une feuille jouée une fois, avec le temps de chaque image ; la dernière est tenue."""
+    k = 0
+    while k < 7 and u >= durees[k]:
+        u -= durees[k]
+        k += 1
+    return pose_anim(nom, k, x, pied, haut, miroir)
+
+
+def recentre(traits, cx, cy):
+    xs = [p[0] for l in traits for p in l]
+    ys = [p[1] for l in traits for p in l]
+    return bouge(traits, cx - (min(xs) + max(xs)) / 2, cy - (min(ys) + max(ys)) / 2)
 
 
 def bouge(traits, dx=0.0, dy=0.0):
@@ -88,7 +110,7 @@ def tab_accroche(c, t):
     gras = 1.0 + 0.8 * (1 - ease(t / 2.0))
     lac(c, t, intense=0.6 + 0.4 * (1 - ease(t / 2.0)))
     tremble = 6 * math.sin(t * 9) * (1 - ease((t - 0.2) / 3.0)) if t < 3.2 else 0
-    faisceau(c, perso("perso_debout", 540 + tremble, 600), 1.0, VERT_PALE, 1.2 * gras)
+    faisceau(c, anim("inquiet", t, 540 + tremble, 600, fps=6), 1.0, VERT_PALE, 1.2 * gras)
     faisceau(c, reflets(t, 540), 1.0, VERT, 0.7, 0.5)
     if t < s(2):
         k = 1 + 0.06 * abs(math.sin(t * 6)) if t > s(1) else 1.0
@@ -106,6 +128,8 @@ def tab_accroche(c, t):
         ecrit(c, t, s(2) + 1.8, "BORD", 940, SOL - 225, 30, VERT)
 
 
+LANCER = [0.6, 0.18, 0.18, 0.08, 0.08, 0.12, 0.16]                     # temps de chaque image du lancer
+VICTOIRE = [0.3, 0.2, 0.15, 0.15, 0.35, 0.15, 0.3]
 ESSAIS = [("MARCHER", 3), ("RAMPER", 4), ("SAUTER", 5)]
 
 
@@ -119,19 +143,18 @@ def tab_essais(c, t):
                 trace(c, t, s(i) + 0.9, 0.2, croix(x, 312, 40), AMBRE, 2.0, bip=500)
     if t < s(4):                                                              # marcher : les pieds patinent
         u = t - s(3)
-        faisceau(c, perso("perso_glisse", 540 + 18 * math.sin(u * 14), 470), 1.0, VERT_PALE, 1.2)
+        faisceau(c, anim("patine", u, 540, 560, fps=10), 1.0, VERT_PALE, 1.2)
         for k in range(3):
             faisceau(c, [[(380 + 60 * k + 20 * math.sin(u * 14 + k), SOL + 20), (440 + 60 * k + 20 * math.sin(u * 14 + k), SOL + 20)]],
                      1.0, VERT, 0.8, 0.6)
         ecrit(c, t, s(3) + 0.6, "LES PIEDS GLISSENT SUR PLACE", W / 2, 1480, 38, VERT)
     elif t < s(5):                                                            # ramper : pareil
         u = t - s(4)
-        faisceau(c, perso("perso_rampe", 540 + 14 * math.sin(u * 12), 300), 1.0, VERT_PALE, 1.2)
+        faisceau(c, anim("ramper", u, 540, 560, fps=10), 1.0, VERT_PALE, 1.2)
         ecrit(c, t, s(4) + 0.5, "PAREIL", W / 2, 1480, 52, AMBRE, True, 1.6)
     else:                                                                     # sauter : on retombe au même endroit
         u = t - s(5)
-        h = 260 * abs(math.sin(u * 2.6))
-        faisceau(c, perso("perso_saut", 540, 500, SOL - h), 1.0, VERT_PALE, 1.2)
+        faisceau(c, anim("saut", u, 540, 560, fps=6), 1.0, VERT_PALE, 1.2)
         faisceau(c, [[(440, SOL + 12), (640, SOL + 12)]], 1.0, AMBRE, 1.6)
         trace(c, t, s(5) + 0.4, 0.4, fleche(800, SOL - 380, 800, SOL - 60, 24), VERT, 1.0, bip=900)
         ecrit(c, t, s(5) + 0.9, "MÊME ENDROIT", W / 2, 1480, 52, AMBRE, True, 1.6)
@@ -141,7 +164,7 @@ def tab_defi(c, t):
     t0 = s(6)
     ecrit(c, t, t0, "UN SEUL GESTE", W / 2, 360, 92, AMBRE, True, 2.2, vitesse=0.0)
     ecrit(c, t, t0 + 0.5, "PEUT VOUS SAUVER", W / 2, 460, 64, VERT_PALE, True, 1.6)
-    trace(c, t, t0 + 0.2, 0.9, perso("perso_reflechit", 540, 640, 1300), VERT_PALE, 1.2, bip=1100)
+    trace(c, t, t0 + 0.2, 0.9, anim("reflechir", t - t0, 540, 640, 1300, fps=4), VERT_PALE, 1.2, bip=1100)
     for k, (x, y) in enumerate(((330, 760), (770, 720), (800, 940))):         # des points d'interrogation qui flottent
         if t > t0 + 0.8 + 0.25 * k:
             ecrit(c, t, t0 + 0.8 + 0.25 * k, "?", x, y + 14 * math.sin(t * 2 + k), 96 - 16 * k, AMBRE, True, 1.8,
@@ -160,9 +183,7 @@ def tab_pistes(c, t):
                   (s(10), "ATTENDRE ?", VERT_PALE, 66)])
     if t < s(9):                                                              # le corps bouge, le centre de gravité non
         u = t - s(8)
-        a = 0.22 * math.sin(u * 7)
-        corps = tourne(perso("perso_debout", 540, 520), 540, SOL - 260, a)
-        faisceau(c, bouge(corps, -60 * math.sin(u * 7) * 0.4), 1.0, VERT_PALE, 1.2)
+        faisceau(c, anim("tortiller", u, 540, 560, fps=8), 1.0, VERT_PALE, 1.2)
         if t > s(8) + 1.2:
             g = (540, SOL - 270)
             trace(c, t, s(8) + 1.2, 0.3, [cercle_pts(*g, 16, 20), [(g[0] - 34, g[1]), (g[0] + 34, g[1])],
@@ -172,18 +193,14 @@ def tab_pistes(c, t):
     elif t < s(10):                                                           # souffler : presque rien
         u = t - s(9)
         dx = 3 * u
-        faisceau(c, perso("perso_debout", 540 - dx, 520, miroir=True), 1.0, VERT_PALE, 1.2)
-        for k in range(4):
-            ph = (u * 1.6 + k / 4) % 1
-            x0 = 600 - dx + 280 * ph
-            faisceau(c, [[(x0, SOL - 540 + 24 * k), (x0 + 90, SOL - 540 + 24 * k)]], 1.0, VERT_PALE, 1.2, 1 - ph)
-        trace(c, t, s(9) + 0.6, 0.3, fleche(480 - dx, SOL - 520, 400 - dx, SOL - 520, 18), AMBRE, 1.0, bip=1200)
+        faisceau(c, anim("souffler", u, 540 - dx, 560, fps=5), 1.0, VERT_PALE, 1.2)
+        trace(c, t, s(9) + 0.6, 0.3, fleche(380 - dx, SOL - 560, 260 - dx, SOL - 560, 22), AMBRE, 1.0, bip=1200)
         ecrit(c, t, s(9) + 1.4, "À PEINE…", W / 2, 1450, 52, AMBRE, True, 1.6)
         ecrit(c, t, s(9) + 3.0, "DES HEURES", W / 2, 1520, 44, VERT_PALE)
     else:                                                                     # attendre : des mois
         u = ease((t - s(10)) / 1.6)
         jours = int(1 + 180 * u)
-        faisceau(c, perso("perso_reflechit", 540, 520), 1.0, VERT_PALE, 1.0, 0.8)
+        faisceau(c, anim("grelotter", t - s(10), 540, 560, fps=8), 1.0, VERT_PALE, 1.0, 0.85)
         ecrit(c, t, s(10), f"JOUR {jours}", W / 2, 620, 100, AMBRE, True, 2.0, vitesse=0.0)
         ecrit(c, t, s(10) + 1.6, "DES MOIS", W / 2, 1460, 60, AMBRE, True, 1.8)
 
@@ -196,7 +213,7 @@ def tab_pousser(c, t):
     if t < s(14):
         faisceau(c, [[(80, SOL), (1000, SOL)]], 1.0, VERT, 1.0, 0.8)          # le sol
         u = t - t0
-        faisceau(c, perso("perso_debout", 540, 560), 1.0, VERT_PALE, 1.1)
+        faisceau(c, anim("inquiet", u, 540, 600, fps=4), 1.0, VERT_PALE, 1.1)
         if t > s(12):                                                         # action et réaction du sol
             ecrit(c, t, s(12) + 0.2, "VOUS POUSSEZ LE SOL", 330, 1420, 40, AMBRE, True, 1.4)
             trace(c, t, s(12) + 0.2, 0.4, fleche(520, SOL + 30, 300, SOL + 30, 26), AMBRE, 2.0, bip=800)
@@ -211,7 +228,7 @@ def tab_pousser(c, t):
         return
     ecrit(c, t, s(14) + 0.9, "SAUF CE QUE VOUS", W / 2, 460, 64, VERT_PALE, True, 1.6)   # l'indice
     ecrit(c, t, s(14) + 1.3, "AVEZ SUR VOUS", W / 2, 540, 64, AMBRE, True, 1.8)
-    trace(c, t, s(14) + 0.7, 0.8, perso("perso_debout", 540, 760, 1420), VERT_PALE, 1.2, bip=1100)
+    trace(c, t, s(14) + 0.7, 0.8, anim("inquiet", t - s(14), 540, 760, 1420, fps=4), VERT_PALE, 1.2, bip=1100)
     for k, (x, y) in enumerate(((620, 700), (420, 990), (660, 1060), (430, 1400), (650, 1400))):
         if t > s(14) + 1.4 + 0.15 * k:
             ecrit(c, t, s(14) + 1.4 + 0.15 * k, "?", x, y + 8 * math.sin(t * 3 + k), 60, AMBRE, True, 1.6, vitesse=0.0)
@@ -224,8 +241,7 @@ def tab_station(c, t):
     titres(c, t, [(t0, "LES ASTRONAUTES", VERT_PALE, 66), (s(16), "LOIN DES PAROIS", AMBRE, 72),
                   (s(17), "LA MÊME SOLUTION", AMBRE, 72)])
     u = t - t0
-    a = 0.25 * math.sin(u * 0.9)
-    astro = tourne(centre("astronaute_flotte", 540, 980 + 20 * math.sin(u * 1.3), 420), 540, 980, a)
+    astro = recentre(anim("astronaute", u, 0, 360, pied=0, fps=5), 540, 980 + 20 * math.sin(u * 1.3))
     trace(c, t, t0 + 0.4, 0.9, astro, VERT_PALE, 1.2, bip=1300)
     if t > s(16) + 1.2:                                                       # les parois, hors d'atteinte
         for x0, x1 in ((330, 90), (750, 990)):
@@ -242,27 +258,24 @@ def tab_solution(c, t):
     titres(c, t, [(s(18), "ENLEVEZ VOTRE CHAUSSURE", AMBRE, 58), (s(19), "LANCEZ-LA !", AMBRE, 84),
                   (s(20), "VOUS PARTEZ", VERT_PALE, 76)])
     if t < s(19):
-        trace(c, t, s(18), 0.7, perso("perso_enleve", 540, 560), VERT_PALE, 1.2, bip=1100)
-        if t > s(18) + 0.5:
-            trace(c, t, s(18) + 0.5, 0.3, [cercle_pts(395, SOL - 205, 70, 30)], AMBRE, 1.6, bip=1700)
+        d = (s(19) - s(18)) / 8
+        faisceau(c, anim("enlever", t - s(18), 540, 600, fps=1 / d, boucle=False), 1.0, VERT_PALE, 1.2)
         return
     if t < s(20):                                                             # le lancer, à l'opposé du bord
-        corps = [l for l in perso("perso_lance", 600, 470, miroir=True)                # sans la chaussure du dessin
-                 if not (max(p[0] for p in l) < 388 + 0.3 * 423 and max(p[1] for p in l) < SOL - 470 + 0.11 * 423)]
-        trace(c, t, s(19), 0.4, corps, VERT_PALE, 1.2, bip=1100)
-        u = max(0.0, t - s(19) - 0.6)
-        x = 420 - 560 * u
-        if x > -120:
-            faisceau(c, tourne(centre("chaussure", x, 900 + 60 * u * u, 120), x, 900, -u * 9), 1.0, AMBRE, 1.4)
+        u = t - s(19)
+        recul = 150 * max(0.0, u - 1.4)                                       # après le lancer, il recule déjà
+        faisceau(c, anim_durees("lancer", u, 600 + recul, LANCER, 600, miroir=True), 1.0, VERT_PALE, 1.2)
+        v = max(0.0, u - 1.12)
+        x = 130 - 600 * v
+        if v > 0 and x > -120:                                                # la chaussure file vers la gauche
+            faisceau(c, tourne(centre("chaussure", x, SOL - 470 + 60 * v * v, 120), x, SOL - 470, -v * 9), 1.0, AMBRE, 1.4)
         ecrit(c, t, s(19) + 1.4, "À L'OPPOSÉ DU BORD", W / 2, 1460, 46, VERT_PALE, True, 1.5)
         trace(c, t, s(19) + 1.6, 0.3, pointilles(880, SOL - 120, 1040, SOL - 120), VERT, 0.8, bip=0)
         ecrit(c, t, s(19) + 1.6, "BORD", 960, SOL - 140, 30, VERT)
         return
     u = t - s(20)                                                             # il glisse dans l'autre sens
     x = 420 + 90 * u
-    faisceau(c, perso("perso_glisse_dos", x, 400), 1.0, VERT_PALE, 1.2)
-    for k in range(4):
-        faisceau(c, [[(x - 300 - 40 * k, SOL - 60 - 50 * k), (x - 200 - 40 * k, SOL - 60 - 50 * k)]], 1.0, VERT, 0.8, 0.6)
+    faisceau(c, anim("glisse_dos", u, x, 560, fps=6, miroir=True), 1.0, VERT_PALE, 1.2)
     trace(c, t, s(20) + 0.3, 0.3, fleche(x + 180, SOL - 420, x + 330, SOL - 420, 26), VERT_PALE, 2.0, bip=1500)
     ecrit(c, t, s(20) + 0.4, "DANS L'AUTRE SENS", W / 2, 1460, 54, AMBRE, True, 1.6)
 
@@ -274,7 +287,7 @@ def tab_newton(c, t):
                   (s(23), "COMME UNE FUSÉE", AMBRE, 72)])
     if t < s(22):                                                             # le schéma : deux flèches opposées
         faisceau(c, [[(80, SOL), (1000, SOL)]], 1.0, VERT, 1.0, 0.6)
-        faisceau(c, perso("perso_debout", 640, 480), 1.0, VERT_PALE, 1.1)
+        faisceau(c, anim("inquiet", t - t0, 640, 520, fps=4), 1.0, VERT_PALE, 1.1)
         faisceau(c, centre("chaussure", 220, SOL - 260, 170), 1.0, AMBRE, 1.3)
         trace(c, t, t0 + 0.1, 0.4, fleche(380, SOL - 300, 280, SOL - 300, 26) + [[(380, SOL - 330), (380, SOL - 270)]],
               AMBRE, 2.0, bip=800)
@@ -287,7 +300,7 @@ def tab_newton(c, t):
         lac(c, t, intense=0.45)
         u = ease((t - s(22)) / (s(23) - s(22)))
         x = 300 + 560 * u
-        faisceau(c, perso("perso_glisse_dos", x, 330), 1.0, VERT_PALE, 1.1)
+        faisceau(c, anim("glisse_dos", t - s(22), x, 480, fps=6, miroir=True), 1.0, VERT_PALE, 1.1)
         trace(c, t, s(22) + 0.2, 0.3, pointilles(930, SOL - 240, 1060, SOL - 240), VERT, 0.8, bip=0)
         ecrit(c, t, s(22) + 0.2, "BORD", 990, SOL - 260, 30, VERT)
         ecrit(c, t, s(22) + 0.5, "7 CM/S", W / 2, 1460, 60, AMBRE, True, 1.6)
@@ -306,7 +319,7 @@ def tab_newton(c, t):
 def tab_fin(c, t):
     t0 = s(24)
     lac(c, t, intense=0.4)
-    trace(c, t, t0, 0.6, perso("perso_victoire", 540, 520), VERT_PALE, 1.2, bip=1100)
+    trace(c, t, t0, 0.4, anim_durees("victoire", t - t0, 540, VICTOIRE, 600), VERT_PALE, 1.2, bip=1100)
     ecrit(c, t, t0 + 0.1, "VOUS AVIEZ", W / 2, 330, 96, AMBRE, True, 2.2, vitesse=0.0)
     ecrit(c, t, t0 + 0.3, "TROUVÉ ?", W / 2, 440, 96, AMBRE, True, 2.2, vitesse=0.0)
     ecrit(c, t, t0 + 0.9, "DITES-LE EN COMMENTAIRE", 500, 1420, 40, VERT_PALE, True, 1.5)

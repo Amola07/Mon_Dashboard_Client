@@ -71,7 +71,9 @@ def decouper(chemin, cols, rangs):
             lignes = ordonner(simplifier(suivre(amincir(masque)), eps=1.1))
             x0 = c * cl                                           # repère de la case : coin gauche, ligne de sol
             images.append([[(x - x0, y - y_sol) for x, y in l] for l in lignes])
-    hauteur = -min(y for l in images[0] for _, y in l)            # échelle : la hauteur de la première image
+    hauteur = -min(y for l in images[0] for _, y in l)            # échelle : la hauteur de la première image (debout)
+    if hauteur < 0.5 * ch:                                        # personnage allongé ou à quatre pattes : on prend la
+        hauteur = 0.63 * ch                                       # taille habituelle d'un personnage debout dans une case
     larg = cl / hauteur
     return {"largeur_case": larg,
             "images": [[[(round(x / hauteur, 4), round(y / hauteur, 4)) for x, y in l] for l in im] for im in images]}
