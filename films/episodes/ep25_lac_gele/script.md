@@ -2,11 +2,9 @@
 
 ## Texte avec balises (ElevenLabs v3 — sans [short pause], sans [whispers])
 
-[serious] Vous êtes au milieu d'un lac gelé. La glace est parfaitement lisse. [tense] Vous essayez de marcher… vos pieds glissent sur place. Vous ne bougez pas d'un centimètre.
+[tense] Sur une glace parfaitement lisse, vous pourriez rester bloqué… pour toujours. [dramatic pause] [serious] Marcher ? Vos pieds glissent sur place. Ramper ? Pareil. Sauter ? Vous retombez exactement au même endroit.
 
-[curious] Ramper ? Pareil. Sauter ? Vous retombez exactement au même endroit. [dramatic pause] Comment vous en sortez-vous ?
-
-[mischievously] Prenez trois secondes. Écrivez votre réponse en commentaire.
+[mischievously] Un seul geste peut vous sauver. Trouvez-le avant la fin… et écrivez-le en commentaire.
 
 [matter-of-fact] Pour avancer, il faut pousser quelque chose. Quand vous marchez, vous poussez le sol vers l'arrière, et le sol vous pousse vers l'avant. Sans frottement, vos pieds ne poussent plus rien.
 
