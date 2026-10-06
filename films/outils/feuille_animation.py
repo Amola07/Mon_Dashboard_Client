@@ -151,6 +151,7 @@ def decouper(chemin, cols, rangs):
     noir = sans_poussieres(noir & ~masque)                        # on efface tous les traits de sol, flocons, débris
     ys = [float(np.median([m[0] for m in g])) for g in groupes] if groupes else None
     bornes = coupures(noir, rangs)
+    vus = []
     rangees = []
     for r in range(rangs):
         if ys:                                                    # bande : du dessous du sol précédent à son sol
@@ -173,11 +174,22 @@ def decouper(chemin, cols, rangs):
             else:                                                 # sans sol : le bas des personnages de la rangée
                 bas = [y0 + np.nonzero(m.any(1))[0].max() for m in masques if m.any()]
                 sols = [float(np.median(bas))] * cols
+        if len(segs) != cols and len(masques) == cols:            # sans sol par case : on garde les masques pour
+            vus.append([float(np.median(np.nonzero(m)[1])) if m.any() else np.nan for m in masques])  # recaler la grille
         rangee = []
         for c, m in enumerate(masques):
             lignes = ordonner(simplifier(suivre(amincir(m)), eps=1.1))
             rangee.append([[(x - centres[c], y + y0 - sols[c]) for x, y in l] for l in lignes])
         rangees.append(rangee)
+    if len(vus) == rangs:                                         # grille réelle : x = a + b·colonne (moindres carrés)
+        cs = np.array([c for _ in vus for c in range(cols)], float)
+        xs = np.array([x for r in vus for x in r], float)
+        ok = ~np.isnan(xs)
+        b, a = np.polyfit(cs[ok], xs[ok], 1)
+        ancien = [(c + 0.5) * L / cols for c in range(cols)]
+        rangees = [[[[(x + ancien[c] - (a + b * c), y) for x, y in l] for l in im] for c, im in enumerate(rg)]
+                   for rg in rangees]
+
     def taille(im):
         ys = [y for l in im for _, y in l]
         return max(ys) - min(ys) if ys else 1.0
@@ -247,8 +259,17 @@ def suite(noms):
             k = _haut(images[-1]) / max(_haut(ims[0]), 1e-6)
             dy = _bas(images[-1]) - _bas(ims[0]) * k
             images += [[[(px * k, py * k + dy) for px, py in l] for l in im] for im in ims[1:]]
-        _SUITES[cle] = images
+        _SUITES[cle] = stabiliser(images)
     return _SUITES[cle]
+
+
+def stabiliser(images, fen=7):
+    """Retire le tremblement gauche-droite d'une image à l'autre (l'IA ne place jamais le personnage exactement au
+    même endroit) en gardant le vrai déplacement : la position suit sa moyenne glissante sur `fen` images."""
+    xs = np.array([np.median([x for l in im for x, _ in l]) if im else 0.0 for im in images])
+    n = len(xs)
+    lisse = np.array([xs[max(0, k - fen // 2):k + fen // 2 + 1].mean() for k in range(n)])
+    return [[[(x + lisse[k] - xs[k], y) for x, y in l] for l in im] for k, im in enumerate(images)]
 
 
 def plan(noms, u, x, pied, haut, fps=24, miroir=False, vitesse=1.0):
