@@ -2,7 +2,7 @@
 
 ## Texte avec balises (ElevenLabs v3 — sans [short pause], sans [whispers]) — la solution n'arrive qu'à la fin
 
-[serious] Si vous êtes coincé au milieu d'un lac gelé parfaitement lisse… ne faites surtout pas ce que tout le monde ferait. [dramatic pause] [tense] Vous pourriez y rester pour toujours. [serious] Marcher ? Vos pieds glissent sur place. Ramper ? Pareil. Sauter ? Vous retombez exactement au même endroit.
+[serious] Si vous êtes coincé sur un lac gelé, surtout… [dramatic pause] ne marchez pas. [tense] Sur une glace parfaitement lisse, vous pourriez y rester pour toujours. [serious] Marcher ? Vos pieds glissent sur place. Ramper ? Pareil. Sauter ? Vous retombez exactement au même endroit.
 
 [mischievously] Un seul geste peut vous sauver. Trouvez-le avant la fin… et écrivez-le en commentaire.
 
