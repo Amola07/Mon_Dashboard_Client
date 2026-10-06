@@ -76,3 +76,15 @@ les joue image par image (`image_anim`, 12 i/s par défaut, durée réglable par
 Le convertisseur amincit les traits à 1 pixel (squelette), les suit en lignes continues, les simplifie, et les range
 dans un ordre de tracé naturel (de proche en proche). Il marche le mieux sur des traits nets, d'épaisseur régulière,
 sans aplats ni ombres.
+
+## Piste — modèle d'intervalles (image de début + description ou image de fin → 24 images)
+
+Idée du 6 octobre. Ne pas entraîner de zéro (il faudrait des millions de clips) : adapter un modèle existant
+d'interpolation générative de dessin animé (ToonCrafter, libre : image de début + image de fin → images entre les deux)
+ou un modèle vidéo libre (Wan, LTX-Video, CogVideoX) avec un LoRA dans notre style.
+
+1. Test sans entraînement : ToonCrafter sur nos cases de début et de fin (il faut une carte graphique louée).
+2. Constituer le jeu de données au fil des épisodes : chaque feuille de 24 cases réussie = une séquence (24 images +
+   la description de chaque groupe de 3 cases + le nom de l'action). On garde les feuilles brutes hors du dépôt public.
+3. Entraîner un LoRA quand on aura 150 à 300 séquences réussies (3 600 à 7 200 images), réparties sur 30 à 50
+   actions différentes, avec 10 à 20 % gardés pour l'évaluation. Une carte de 24 à 48 Go, quelques heures.
