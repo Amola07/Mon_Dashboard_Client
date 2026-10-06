@@ -2,9 +2,9 @@
 
 ## Texte avec balises (ElevenLabs v3 — sans [short pause], sans [whispers])
 
-[curious] En 1952, un étudiant a enfermé des éclairs dans un bocal… [dramatic pause] [amazed] et il a obtenu les briques de la vie.
+[surprised] Il a enfermé des éclairs dans un bocal. [dramatic pause] [amazed] Et il a obtenu les briques de la vie.
 
-[storytelling] Il s'appelle Stanley Miller, il a vingt-deux ans. Sa question est vertigineuse : comment la vie a-t-elle pu apparaître sur une Terre sans vie ?
+[storytelling] Nous sommes en 1952. Il s'appelle Stanley Miller, il a vingt-deux ans. Sa question est vertigineuse : comment la vie a-t-elle pu apparaître sur une Terre sans vie ?
 
 [intrigued] Alors il recrée la Terre primitive en miniature. Un ballon d'eau qui bout : l'océan. Du méthane, de l'ammoniac, de l'hydrogène : l'atmosphère. [fast-paced] Et deux électrodes qui lancent des étincelles, jour et nuit : les éclairs.
 
@@ -15,6 +15,13 @@
 [mischievously] Et le plus fou, c'est la suite. [storytelling] En 2008, des chercheurs retrouvent ses vieux flacons, oubliés dans des cartons. Avec des machines modernes, ils y découvrent plus de vingt acides aminés. Bien plus que ce que Miller avait pu voir.
 
 [curious] Et vous, vous pensez qu'on recréera un jour la vie en laboratoire ? [warm] Dites-le en commentaire. [smiling] Et abonnez-vous pour la prochaine expérience qui a changé le monde.
+
+## Image d'accroche (image 0)
+
+Un bocal fermé avec un éclair à l'intérieur, déjà tracé à la première image, l'éclair en ambre qui clignote.
+Prompt : « a closed glass jar with a metal lid, a bright zigzag lightning bolt trapped inside the jar, minimal
+single-weight black line drawing on pure white background, clean continuous strokes of uniform thickness, no shading,
+no fill, no gradients, no texture, no text, no frame, centered, simple and readable »
 
 ## Vérification des faits
 
