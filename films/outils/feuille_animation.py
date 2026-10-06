@@ -59,14 +59,14 @@ def lignes_de_sol(noir, rangs):
     """Les lignes de sol de la feuille : des rangées très remplies (les rangées de cases ne sont pas toujours égales)."""
     H, L = noir.shape
     cnt = noir.sum(1)
-    ys = [y for y in range(H) if cnt[y] > 0.3 * L]
+    ys = [y for y in range(H) if cnt[y] > 0.15 * L]
     groupes = []
     for y in ys:
         if groupes and y - groupes[-1][-1] <= 3:
             groupes[-1].append(y)
         else:
             groupes.append([y])
-    sols = [int(np.median(g)) for g in groupes]
+    sols = [g[0] for g in groupes]                                # le haut du trait de sol
     return sols if len(sols) == rangs else None
 
 
@@ -109,11 +109,11 @@ def decouper(chemin, cols, rangs):
         if sols:                                                  # bande : de la ligne de sol précédente à la sienne
             y0 = sols[r - 1] + 4 if r else 0
             y_sol = sols[r]
-            centres = centres_de_cases(noir[y_sol] | noir[y_sol + 1], cols, L)
+            centres = centres_de_cases(noir[y_sol] | noir[y_sol + 1] | noir[y_sol + 2], cols, L)
         else:                                                     # sans sol (apesanteur) : bandes égales
             y0, y_sol = r * H // rangs, (r + 1) * H // rangs
             centres = [(c + 0.5) * L / cols for c in range(cols)]
-        haut = cv2.morphologyEx(noir[y0:y_sol - 3].astype(np.uint8), cv2.MORPH_CLOSE, np.ones((3, 3), np.uint8))
+        haut = cv2.morphologyEx(noir[y0:y_sol - 2].astype(np.uint8), cv2.MORPH_CLOSE, np.ones((3, 3), np.uint8))
         rangee = []
         for c, masque in enumerate(personnages(haut, cols)):
             lignes = ordonner(simplifier(suivre(amincir(masque)), eps=1.1))
