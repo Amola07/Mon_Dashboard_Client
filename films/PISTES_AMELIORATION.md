@@ -109,3 +109,18 @@ dessins en pixels, une idée par écran (≈ toutes les 3-4 s), chiffres rendus 
   3. Partage lié au sujet : « Si vous connaissez quelqu'un qui ne me connaît pas, envoyez-lui cette vidéo : ça lui fera
      toujours un souvenir de plus. » (la vidéo parlait des souvenirs).
   Pas de « abonnez-vous » ni de « dites-le en commentaire » plat : l'envie de la suite fait le travail.
+
+### L'enchaînement logique des éléments (le point fort de ces vidéos)
+
+Un nouvel élément toutes les 3-4 s (≈ 30 écrans en 2 min), et chacun **naît du précédent** :
+- un même objet porte plusieurs phrases et se transforme : la grille de carrés du combustible devient « 95 % uranium »,
+  puis « 4 % le vrai déchet », puis « 0,2 % des déchets / 95 % de la radioactivité » ; la courbe « éternité » devient
+  « ÷ 1000 » ; la coupe du sol passe de 0 m à 500 m ;
+- des motifs reviennent (le cerveau quand il « retourne le cerveau », l'usine à charbon, le cube) ;
+- le chiffre se construit à l'écran (compteur, carrés qui s'allument, +36 %) au lieu d'être écrit d'un bloc ;
+- presque pas de coupe franche : on zoome, on remplit, on barre, on tamponne FAUX / FICTION.
+
+Chez nous : un tableau par idée, remplacé d'un coup (neige, glitch), et des textes posés à côté du dessin.
+Règle pour la suite : écrire le découpage comme une chaîne « l'élément A devient B parce que… » ; garder au moins un
+élément d'un tableau au suivant ; montrer chaque chiffre en grille ou en compteur ; transitions par transformation
+(zoom, déplacement, remplissage) plutôt que par effet.
