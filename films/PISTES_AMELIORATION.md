@@ -10,7 +10,16 @@
 - Effets sonores synthétisés variés (`films/styles/oscillo_son.py`), sans musique de fond.
 - Question finale à l'écran et dans la voix.
 
-## En production — feuilles d'animation pour toutes les actions
+## En production — réalisation (décision du 6 octobre, après l'épisode 25)
+
+- Animation à 24 images/s, une image différente à chaque image (« sur les uns »).
+- Aucune action en boucle : chaque plan raconte une action complète (début → fin), calée sur sa phrase.
+- Découpage technique écrit avant le montage (`decoupage.md` dans l'épisode) : grosseurs de plan variées (ensemble,
+  moyen, insert), coupe dans le mouvement, raccords de mouvement, arrêts sur image, ralentis.
+- Clips générés en vidéo par IA (image de départ = une case de feuille, caméra fixe, fond blanc), convertis en traits
+  par `films/outils/video_en_traits.py` ; les mouvements de caméra sont faits au montage, sur les traits.
+
+## Feuilles d'animation (avant le passage aux clips vidéo)
 
 Décision du 6 octobre : chaque action du personnage, importante ou non, a sa feuille d'animation (8 à 12 cases).
 Les poses fixes ne servent plus qu'en secours. Les actions qui durent (patiner, flotter, attendre) sont des boucles :
