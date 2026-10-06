@@ -16,8 +16,10 @@
 - Aucune action en boucle : chaque plan raconte une action complète (début → fin), calée sur sa phrase.
 - Découpage technique écrit avant le montage (`decoupage.md` dans l'épisode) : grosseurs de plan variées (ensemble,
   moyen, insert), coupe dans le mouvement, raccords de mouvement, arrêts sur image, ralentis.
-- Clips générés en vidéo par IA (image de départ = une case de feuille, caméra fixe, fond blanc), convertis en traits
-  par `films/outils/video_en_traits.py` ; les mouvements de caméra sont faits au montage, sur les traits.
+- Feuilles d'animation de 24 cases (6 × 4) = 1 seconde par feuille, enchaînées pour les plans plus longs
+  (`plan()` dans `films/outils/feuille_animation.py`) ; caméra fixe dans les feuilles, mouvements de caméra au montage.
+- Testé et écarté : interpolation automatique entre cases (flux optique) → contours dédoublés dès que le mouvement est
+  grand ; générateur vidéo → refusé (on garde les images générées).
 
 ## Feuilles d'animation (avant le passage aux clips vidéo)
 

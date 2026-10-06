@@ -1,14 +1,14 @@
 """Feuille d'animation (une image IA en grille : la même action à plusieurs instants) → images successives en traits.
 
-    python -m films.outils.feuille_animation feuille.png nom 4x2
+    python -m films.outils.feuille_animation feuille.png nom 6x4
     → films/animations/nom.json  (une liste de dessins, dans l'ordre de lecture)
 
 Chaque case garde sa position dans sa propre case (le personnage peut s'y déplacer) ; toutes les cases sont recalées
 sur leur ligne de sol et mises à la même échelle. Le trait de sol et ce qui est dessous sont retirés.
 
 Dans un tableau :
-    from films.outils.feuille_animation import image_anim
-    faisceau(c, image_anim("lancer", t - t0, x=540, pied=1330, haut=520), 1.0, VERT_PALE, 1.2)
+    from films.outils.feuille_animation import plan
+    faisceau(c, plan(["p04_1", "p04_2"], t - t0, x=540, pied=1330, haut=560), 1.0, VERT_PALE, 1.2)
 """
 import json
 import os
@@ -105,6 +105,46 @@ def image_anim(nom, u, x, pied, haut, durees=None, miroir=False):
         u -= durees[k]
         k += 1
     return pose_anim(nom, k, x, pied, haut, miroir)
+
+
+def _haut(im):
+    ys = [y for l in im for _, y in l]
+    return max(ys) - min(ys)
+
+
+def _bas(im):
+    return max(y for l in im for _, y in l)
+
+
+_SUITES = {}
+
+
+def suite(noms):
+    """Les images de plusieurs feuilles enchaînées (un plan) : la case 1 d'une feuille de suite reprend la dernière
+    de la précédente, on la retire, et on recale l'échelle et le bas sur cette dernière image."""
+    cle = tuple(noms)
+    if cle not in _SUITES:
+        images = list(animation(noms[0])["images"])
+        for nom in noms[1:]:
+            ims = animation(nom)["images"]
+            k = _haut(images[-1]) / max(_haut(ims[0]), 1e-6)
+            dy = _bas(images[-1]) - _bas(ims[0]) * k
+            images += [[[(px * k, py * k + dy) for px, py in l] for l in im] for im in ims[1:]]
+        _SUITES[cle] = images
+    return _SUITES[cle]
+
+
+def plan(noms, u, x, pied, haut, fps=24, miroir=False, vitesse=1.0):
+    """Le dessin d'un plan au temps u : un dessin par image à 24 i/s, la dernière image est tenue (jamais de boucle).
+    `vitesse` < 1 donne un ralenti."""
+    images = suite([noms] if isinstance(noms, str) else noms)
+    k = min(len(images) - 1, max(0, int(u * fps * vitesse)))
+    sx = -1 if miroir else 1
+    return [[(x + sx * px * haut, pied + py * haut) for px, py in l] for l in images[k]]
+
+
+def duree(noms, fps=24):
+    return len(suite([noms] if isinstance(noms, str) else noms)) / fps
 
 
 def main():
