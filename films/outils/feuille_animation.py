@@ -55,27 +55,83 @@ def personnages(img, n):
     return [np.isin(lab, [i for i, j in groupe.items() if j == c]) for c in range(n)]
 
 
+def lignes_de_sol(noir, rangs):
+    """Les lignes de sol de la feuille : des rangées très remplies (les rangées de cases ne sont pas toujours égales)."""
+    H, L = noir.shape
+    cnt = noir.sum(1)
+    ys = [y for y in range(H) if cnt[y] > 0.3 * L]
+    groupes = []
+    for y in ys:
+        if groupes and y - groupes[-1][-1] <= 3:
+            groupes[-1].append(y)
+        else:
+            groupes.append([y])
+    sols = [int(np.median(g)) for g in groupes]
+    return sols if len(sols) == rangs else None
+
+
+def centres_de_cases(ligne, cols, L):
+    """Le centre de chaque case, d'après les morceaux du trait de sol."""
+    segs, x = [], 0
+    while x < L:
+        if ligne[x]:
+            a = x
+            while x < L and ligne[x]:
+                x += 1
+            segs.append((a, x))
+        x += 1
+    segs = [sg for sg in segs if sg[1] - sg[0] > L / cols * 0.3]
+    if len(segs) != cols:
+        return [(c + 0.5) * L / cols for c in range(cols)]
+    return [(a + b) / 2 for a, b in segs]
+
+
+def lisser_tailles(images, fen=5, tol=0.15):
+    """L'IA dessine parfois une case un peu plus grande ou plus petite : on ramène chaque image vers la taille médiane
+    de ses voisines (un vrai changement de taille, comme s'accroupir, dure plusieurs images et n'est pas touché)."""
+    hs = [max(1e-6, -min(y for l in im for _, y in l)) for im in images]
+    out = []
+    for k, im in enumerate(images):
+        m = float(np.median(hs[max(0, k - fen // 2):k + fen // 2 + 1]))
+        f = m / hs[k]
+        f = f if abs(f - 1) <= tol else 1.0
+        out.append([[(x * f, y * f) for x, y in l] for l in im])
+    return out
+
+
 def decouper(chemin, cols, rangs):
     img = cv2.imread(chemin, cv2.IMREAD_GRAYSCALE)
     noir = img < 128
     H, L = noir.shape
-    ch, cl = H // rangs, L // cols
-    images = []
+    sols = lignes_de_sol(noir, rangs)
+    rangees = []
     for r in range(rangs):
-        bande = noir[r * ch:(r + 1) * ch]
-        sols = [sol(bande[:, c * cl:(c + 1) * cl]) for c in range(cols)]
-        trait = np.median([bande[y, c * cl:(c + 1) * cl].sum() for c, y in enumerate(sols)])
-        y_sol = int(np.median(sols)) if trait > 0.25 * cl else ch + 3   # sans ligne de sol (en apesanteur) : le bas de la case
-        haut = cv2.morphologyEx(bande[:y_sol - 3].astype(np.uint8), cv2.MORPH_CLOSE, np.ones((3, 3), np.uint8))
+        if sols:                                                  # bande : de la ligne de sol précédente à la sienne
+            y0 = sols[r - 1] + 4 if r else 0
+            y_sol = sols[r]
+            centres = centres_de_cases(noir[y_sol] | noir[y_sol + 1], cols, L)
+        else:                                                     # sans sol (apesanteur) : bandes égales
+            y0, y_sol = r * H // rangs, (r + 1) * H // rangs
+            centres = [(c + 0.5) * L / cols for c in range(cols)]
+        haut = cv2.morphologyEx(noir[y0:y_sol - 3].astype(np.uint8), cv2.MORPH_CLOSE, np.ones((3, 3), np.uint8))
+        rangee = []
         for c, masque in enumerate(personnages(haut, cols)):
             lignes = ordonner(simplifier(suivre(amincir(masque)), eps=1.1))
-            x0 = c * cl                                           # repère de la case : coin gauche, ligne de sol
-            images.append([[(x - x0, y - y_sol) for x, y in l] for l in lignes])
+            rangee.append([[(x - centres[c], y + y0 - y_sol) for x, y in l] for l in lignes])
+        rangees.append(rangee)
+    # une rangée dessinée plus petite ou plus grande que les autres par l'IA : on la remet à l'échelle commune
+    med = [np.median([-min(y for l in im for _, y in l) for im in rg]) for rg in rangees]
+    ref = float(np.median(med))
+    images = []
+    for rg, m in zip(rangees, med):
+        k = ref / m if abs(ref / m - 1) > 0.08 else 1.0
+        images += [[[(x * k, y * k) for x, y in l] for l in im] for im in rg]
+    images = lisser_tailles(images)
+    ch = H / rangs
     hauteur = -min(y for l in images[0] for _, y in l)            # échelle : la hauteur de la première image (debout)
     if hauteur < 0.5 * ch:                                        # personnage allongé ou à quatre pattes : on prend la
         hauteur = 0.63 * ch                                       # taille habituelle d'un personnage debout dans une case
-    larg = cl / hauteur
-    return {"largeur_case": larg,
+    return {"largeur_case": 0.0,
             "images": [[[(round(x / hauteur, 4), round(y / hauteur, 4)) for x, y in l] for l in im] for im in images]}
 
 
