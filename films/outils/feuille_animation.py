@@ -63,7 +63,9 @@ def decouper(chemin, cols, rangs):
     images = []
     for r in range(rangs):
         bande = noir[r * ch:(r + 1) * ch]
-        y_sol = int(np.median([sol(bande[:, c * cl:(c + 1) * cl]) for c in range(cols)]))
+        sols = [sol(bande[:, c * cl:(c + 1) * cl]) for c in range(cols)]
+        trait = np.median([bande[y, c * cl:(c + 1) * cl].sum() for c, y in enumerate(sols)])
+        y_sol = int(np.median(sols)) if trait > 0.25 * cl else ch + 3   # sans ligne de sol (en apesanteur) : le bas de la case
         haut = cv2.morphologyEx(bande[:y_sol - 3].astype(np.uint8), cv2.MORPH_CLOSE, np.ones((3, 3), np.uint8))
         for c, masque in enumerate(personnages(haut, cols)):
             lignes = ordonner(simplifier(suivre(amincir(masque)), eps=1.1))

@@ -4,13 +4,19 @@
 
 ## En production
 
-- Personnages : bonshommes en traits d'origine (`bonhomme()` de l'épisode 21). Décision du 5 octobre : on garde cette
-  version, les autres restent en réserve.
+- Personnages : dessins IA convertis en traits, animés par feuilles d'animation (voir plus bas). Les bonshommes en
+  traits d'origine (`bonhomme()` de l'épisode 21) restent utilisables pour les schémas.
 - Image 0 pleine et en mouvement ; la surprise écrite en grand dès l'image 0 (épisodes 22 et 23).
 - Effets sonores synthétisés variés (`films/styles/oscillo_son.py`), sans musique de fond.
 - Question finale à l'écran et dans la voix.
 
-## En test — feuilles d'animation (mouvements fluides)
+## En production — feuilles d'animation pour toutes les actions
+
+Décision du 6 octobre : chaque action du personnage, importante ou non, a sa feuille d'animation (8 à 12 cases).
+Les poses fixes ne servent plus qu'en secours. Les actions qui durent (patiner, flotter, attendre) sont des boucles :
+la dernière case ramène à la première.
+
+### Détails de l'outil
 
 Une image IA en grille montre la même action à 8 instants (ou plus). `films/outils/feuille_animation.py` découpe
 les cases (chaque objet lancé rejoint le personnage le plus proche), recale chaque image sur sa ligne de sol, et
