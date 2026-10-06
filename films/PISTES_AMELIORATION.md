@@ -10,6 +10,14 @@
 - Effets sonores synthétisés variés (`films/styles/oscillo_son.py`), sans musique de fond.
 - Question finale à l'écran et dans la voix.
 
+## En test — feuilles d'animation (mouvements fluides)
+
+Une image IA en grille montre la même action à 8 instants (ou plus). `films/outils/feuille_animation.py` découpe
+les cases (chaque objet lancé rejoint le personnage le plus proche), recale chaque image sur sa ligne de sol, et
+les joue image par image (`image_anim`, 12 i/s par défaut, durée réglable par image). Essai : `lancer` (épisode 25),
+`films/outils/demo_feuille_animation.py`. Limite : les détails bougent un peu d'une image à l'autre (lignes qui
+« vibrent ») ; 8 cases au minimum, 12 c'est mieux.
+
 ## En réserve — animation des personnages
 
 | Piste | Où | État | Notes |
