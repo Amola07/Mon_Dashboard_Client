@@ -88,3 +88,24 @@ ou un modèle vidéo libre (Wan, LTX-Video, CogVideoX) avec un LoRA dans notre s
    la description de chaque groupe de 3 cases + le nom de l'action). On garde les feuilles brutes hors du dépôt public.
 3. Entraîner un LoRA quand on aura 150 à 300 séquences réussies (3 600 à 7 200 images), réparties sur 30 à 50
    actions différentes, avec 10 à 20 % gardés pour l'évaluation. Une carte de 24 à 48 Go, quelques heures.
+
+## Analyse de 3 vidéos d'un autre créateur, qui marchent (6 octobre)
+
+Leçons seulement (aucun contenu repris). Durée 1 min 50 à 2 min. Fond noir, une seule couleur d'accent (rouge),
+dessins en pixels, une idée par écran (≈ toutes les 3-4 s), chiffres rendus visibles (grilles de carrés).
+
+- **Accroche** : une scène concrète + un enjeu chiffré dès la 1re phrase (« Cet homme est en train de tomber de 45 m »,
+  « Ce cube contient tous les déchets… », « Une énergie 800 fois plus meurtrière… et elle ne fait peur à personne »).
+- **Image fausse puis vraie** : « Vous imaginiez plutôt ça ? » (cliché montré, tamponné FICTION), puis « Sauf qu'en vrai ».
+- **Relances toutes les 15-20 s** : « Normal. Moi aussi. », « À votre avis ? », « Mais attendez », « Je vais vous
+  retourner le cerveau », « je brise le suspense » ; une promesse lancée tôt et tenue plus tard.
+- **Deuxième rebondissement plus fort** dans le dernier tiers (le réacteur naturel du Gabon, les morts de l'évacuation).
+- **Fins** (le plus intéressant) :
+  1. Coupé au milieu d'une phrase : « Mais je n'ai plus le temps, donc je vous poste la suite demain, et vous allez
+     voir à quel point… » + carton « LA SUITE DEMAIN ▶ ». → on revoit, on s'abonne pour la suite.
+  2. Il anticipe l'objection du spectateur : « Je sais ce que vous allez me dire : et les déchets, alors ?
+     Justement, c'est le sujet de la prochaine vidéo. Et vous allez voir que… » + « PROCHAINE VIDÉO ▶ ».
+     Les vidéos s'enchaînent en série (énergie → déchets → « encore un truc que personne ne sait »).
+  3. Partage lié au sujet : « Si vous connaissez quelqu'un qui ne me connaît pas, envoyez-lui cette vidéo : ça lui fera
+     toujours un souvenir de plus. » (la vidéo parlait des souvenirs).
+  Pas de « abonnez-vous » ni de « dites-le en commentaire » plat : l'envie de la suite fait le travail.
