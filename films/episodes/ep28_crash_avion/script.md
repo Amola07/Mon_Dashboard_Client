@@ -76,27 +76,95 @@ visage vide), **la flèche ambre** (inertie, force), **le chronomètre**, **la s
 
 Relances : écrans 1 (chiffre), 4 (« troisième loi »), 5 (« voilà pourquoi votre sac est un danger »), 6 (chrono), 8 (suite).
 
-## Dessins à générer (3 planches)
+## Dessins à générer (12 planches, 81 dessins)
 
-Chaque prompt est un bloc complet, style à la fin. Le passager est notre bonhomme habituel (bonnet, doudoune, sans visage).
+Chaque prompt est un bloc complet, style à la fin. Le passager est notre bonhomme habituel (bonnet, doudoune, sans visage) ;
+tous les autres personnages sont dessinés de la même façon (visage vide, sans insigne ni texte). Les avions n'ont ni logo ni texte.
 
-### Planche 1 — le passager, 9 poses (grille 3 × 3)
-
-```
-Character sheet, 9 poses of the same person in a 3 columns × 3 rows grid, generous empty space between cells, no frame borders, no numbers: a young man in a knitted beanie and a puffer jacket over a hoodie, with a blank face (no eyes, no nose, no mouth), shown in full body or seated as described, side view facing right, same size and same proportions in every pose. Pose 1: seated upright in an airplane seat, hands on his knees. Pose 2: seated, pulling a seat belt tight across his hips with both hands. Pose 3: seated, bent forward with his head close to the seat in front, arms down along his legs (brace position). Pose 4: seated, head tilted to look toward the aisle. Pose 5: standing in the aisle, leaning forward, carrying a small backpack in one hand. Pose 6: standing in the aisle, hands empty, running toward the right. Pose 7: crouching low, one hand touching the seat backs beside him. Pose 8: crawling low on the floor, head down. Pose 9: standing with both hands raised in surprise. Minimal single-weight black line drawing on pure white background, no shading, no fill, no gray, no text, clean continuous strokes, consistent line thickness.
-```
-
-### Planche 2 — cabine et objets (grille 3 × 2)
+### Planche 1 — le passager assis, 9 poses (grille 3 × 3)
 
 ```
-Object sheet, 6 separate objects in a 3 columns × 2 rows grid, generous empty space between cells, no frame borders, no numbers, each object drawn at a similar size: a side view of a row of three airplane seats with headrests and seat backs; a close view of a lap belt buckle and strap lying open; a small carry-on backpack with two straps; an airplane emergency exit door with a handle and a small window and a blank rectangular sign above it, no text; an overhead luggage bin, open, with a suitcase inside; an inflatable life vest with a cord and two straps. Minimal single-weight black line drawing on pure white background, no shading, no fill, no gray, no text, clean continuous strokes, consistent line thickness.
+Character sheet, 9 poses of the same person in a 3 columns × 3 rows grid, generous empty space between cells, no frame borders, no numbers: a young man in a knitted beanie and a puffer jacket over a hoodie, with a blank face (no eyes, no nose, no mouth), seated in an airplane seat with only the seat and the seat in front of him drawn, side view facing right, same size and same proportions in every pose. Pose 1: seated upright, hands on his knees. Pose 2: seated, head tilted back, looking up at the ceiling, startled. Pose 3: seated, pulling a seat belt tight across his hips with both hands. Pose 4: seated, belt fastened, both hands gripping the armrests. Pose 5: seated, bent forward with his head close to the seat in front, arms down along his legs. Pose 6: seated, head turned to look toward the aisle. Pose 7: seated, holding a small backpack on his lap. Pose 8: seated, pushing the backpack away from him with both hands. Pose 9: seated, one arm stretched out pointing forward. Minimal single-weight black line drawing on pure white background, no shading, no fill, no gray, no text, clean continuous strokes, consistent line thickness.
 ```
 
-### Planche 3 — avion et décor (grille 3 × 2)
+### Planche 2 — le passager debout et en évacuation, 9 poses (grille 3 × 3)
 
 ```
-Object sheet, 6 separate scenes in a 3 columns × 2 rows grid, generous empty space between cells, no frame borders, no numbers, each drawn at a similar size: a side view of a passenger airplane on the ground with its landing gear down; the same airplane floating on calm water with a few wave lines; the long interior of an airplane cabin seen from the side, showing many rows of seats and overhead luggage bins; a top view of an airplane cabin aisle with two rows of seats on each side; a thick cloud of smoke rising along a cabin ceiling; a line of flames at the back of a cabin. Minimal single-weight black line drawing on pure white background, no shading, no fill, no gray, no text, clean continuous strokes, consistent line thickness.
+Character sheet, 9 poses of the same person in a 3 columns × 3 rows grid, generous empty space between cells, no frame borders, no numbers: a young man in a knitted beanie and a puffer jacket over a hoodie, with a blank face (no eyes, no nose, no mouth), full body, side view facing right, same size and same proportions in every pose. Pose 1: standing, arms down, hands empty. Pose 2: running toward the right, hands empty. Pose 3: bent over, hurrying, one hand touching a seat back beside him. Pose 4: crouching low, head down, one hand on the floor. Pose 5: crawling on hands and knees. Pose 6: standing, carrying a backpack in one hand, blocking the way. Pose 7: standing, both hands raised in surprise. Pose 8: standing, looking back over his shoulder. Pose 9: sitting on a slide with arms crossed on his chest, sliding down. Minimal single-weight black line drawing on pure white background, no shading, no fill, no gray, no text, clean continuous strokes, consistent line thickness.
 ```
+
+### Planche 3 — le passager et l'eau, 9 poses (grille 3 × 3)
+
+```
+Character sheet, 9 poses of the same person in a 3 columns × 3 rows grid, generous empty space between cells, no frame borders, no numbers: a young man in a knitted beanie and a puffer jacket over a hoodie, with a blank face (no eyes, no nose, no mouth), full body, side view facing right, same size and same proportions in every pose. Pose 1: standing, wearing a deflated life vest around his neck. Pose 2: standing, pulling the cord of the life vest with one hand. Pose 3: floating on the water with an inflated life vest, head above the water, wave lines around him. Pose 4: lying flat horizontally, pushed against a straight horizontal line above him, with an inflated life vest on his chest. Pose 5: taking a deep breath, chest raised. Pose 6: swimming forward under a horizontal line, arms stretched. Pose 7: climbing over the edge of an inflatable raft. Pose 8: waving both arms above his head. Pose 9: sitting inside an inflatable raft. Minimal single-weight black line drawing on pure white background, no shading, no fill, no gray, no text, clean continuous strokes, consistent line thickness.
+```
+
+### Planche 4 — l'avion vu de l'extérieur (grille 3 × 2)
+
+```
+Scene sheet, 6 separate drawings in a 3 columns × 2 rows grid, generous empty space between cells, no frame borders, no numbers, each drawn at a similar size, side view of a passenger airplane with no logo and no text: the airplane in flight, level, with a few cloud lines; the airplane descending with its nose tilted down toward a runway line; the airplane touching a runway with its landing gear down; the airplane stopped on the ground with its nose slightly crumpled; the airplane floating on calm water with a few wave lines; the airplane stopped on the grass with an inflatable slide deployed from one door. Minimal single-weight black line drawing on pure white background, no shading, no fill, no gray, no text, clean continuous strokes, consistent line thickness.
+```
+
+### Planche 5 — l'intérieur de la cabine (grille 3 × 2)
+
+```
+Scene sheet, 6 separate drawings in a 3 columns × 2 rows grid, generous empty space between cells, no frame borders, no numbers, each drawn at a similar size, the interior of an airplane cabin with no text: the long cabin seen from the side, many rows of seats and overhead luggage bins; the cabin with the ceiling lights drawn as short zigzag flicker lines; a top view of the aisle with two rows of three seats on each side; the cabin with small oxygen masks hanging from the ceiling on their cords; a closed overhead luggage bin with a latch; the same bin open with a suitcase inside. Minimal single-weight black line drawing on pure white background, no shading, no fill, no gray, no text, clean continuous strokes, consistent line thickness.
+```
+
+### Planche 6 — le siège et la ceinture (grille 3 × 2)
+
+```
+Object sheet, 6 separate objects in a 3 columns × 2 rows grid, generous empty space between cells, no frame borders, no numbers, each object drawn at a similar size: a side view of a single airplane seat with a headrest and a tray table folded up; a lap belt lying open with its buckle and strap; the lap belt closed, buckled, shown from above; a close view of a buckle being pressed with a thumb; a side view of the seat showing a spring and a metal frame underneath, like a cutaway; two rows of seats seen from the side with a small gap between the seat back and the next seat. Minimal single-weight black line drawing on pure white background, no shading, no fill, no gray, no text, clean continuous strokes, consistent line thickness.
+```
+
+### Planche 7 — la physique du choc (grille 3 × 2)
+
+```
+Object sheet, 6 separate objects in a 3 columns × 2 rows grid, generous empty space between cells, no frame borders, no numbers, each object drawn at a similar size: a crash test dummy seated upright in profile, with jointed limbs and round head, no face; a ball hitting a hard wall and another ball hitting a soft cushion, side by side; a crumpled accordion-like fuselage section, folded in the middle like a squashed can; a spring compressed between a block and a wall; a stack of 16 identical flat weights piled up; a heavy iron kettlebell weight, no marking. Minimal single-weight black line drawing on pure white background, no shading, no fill, no gray, no text, clean continuous strokes, consistent line thickness.
+```
+
+### Planche 8 — les sacs (grille 3 × 2)
+
+```
+Object sheet, 6 separate objects in a 3 columns × 2 rows grid, generous empty space between cells, no frame borders, no numbers, each object drawn at a similar size: a small backpack with two straps; a cabin suitcase with a telescopic handle and two wheels; a handbag with a short handle; a laptop bag with a shoulder strap; a pile of four bags blocking a narrow aisle between two rows of seats seen from above; a suitcase flying through the air with a few motion lines behind it. Minimal single-weight black line drawing on pure white background, no shading, no fill, no gray, no text, clean continuous strokes, consistent line thickness.
+```
+
+### Planche 9 — l'évacuation (grille 3 × 2)
+
+```
+Object sheet, 6 separate objects in a 3 columns × 2 rows grid, generous empty space between cells, no frame borders, no numbers, each object drawn at a similar size: an airplane emergency exit door, open, with a handle and a small window; an inflatable evacuation slide leaning from an open door to the ground; a blank rectangular exit sign hanging above a door, no text, with an arrow shape; a strip of small floor-level lights along an aisle, seen from the side; a stopwatch with a button on top and a plain dial, no numbers; an hourglass. Minimal single-weight black line drawing on pure white background, no shading, no fill, no gray, no text, clean continuous strokes, consistent line thickness.
+```
+
+### Planche 10 — le feu et la fumée (grille 3 × 2)
+
+```
+Scene sheet, 6 separate drawings in a 3 columns × 2 rows grid, generous empty space between cells, no frame borders, no numbers, each drawn at a similar size: a thick cloud of smoke rising in a curling column; a line of flames at the back of a cabin; a cabin cross-section seen from the side with a thick layer of smoke along the ceiling and clear space near the floor; a hand reaching out to touch the back of a seat in the dark, with a few short lines around it; a fire extinguisher with a hose, no marking; a fire truck seen from the side with a ladder on the roof, no text. Minimal single-weight black line drawing on pure white background, no shading, no fill, no gray, no text, clean continuous strokes, consistent line thickness.
+```
+
+### Planche 11 — l'eau et le gilet (grille 3 × 2)
+
+```
+Object sheet, 6 separate objects in a 3 columns × 2 rows grid, generous empty space between cells, no frame borders, no numbers, each object drawn at a similar size: a deflated life vest with a cord and two straps; the same life vest inflated, round and puffy, with two small tubes; a side view of an airplane cabin half filled with water, a straight wave line near the ceiling and seats under water; a side view of an airplane cabin filled with water up to the ceiling, with one door at the bottom; an inflatable round life raft with a canopy; an emergency exit door seen from inside the cabin with water level lines below it. Minimal single-weight black line drawing on pure white background, no shading, no fill, no gray, no text, clean continuous strokes, consistent line thickness.
+```
+
+### Planche 12 — les passagers en groupe (grille 3 × 2)
+
+```
+Scene sheet, 6 separate drawings in a 3 columns × 2 rows grid, generous empty space between cells, no frame borders, no numbers, each drawn at a similar size, all people with blank faces (no eyes, no nose, no mouth), simple clothes, no text: five passengers standing in a single file in an aisle, side view; two passengers pushing against each other at a narrow door; four passengers sliding one after another down an inflatable slide; a group of six passengers standing together on the grass, seen from the front; one passenger holding out a hand to help another passenger stand up; rows of seats seen from behind with a few passengers' heads and beanies showing over the seat backs. Minimal single-weight black line drawing on pure white background, no shading, no fill, no gray, no text, clean continuous strokes, consistent line thickness.
+```
+
+### Où chaque planche sert
+
+| Écran | Planches |
+|---|---|
+| 1 Accroche | 5 (cabine, lumières, masques), 1 (passager), 4 (avion en descente) |
+| 2 Inertie, ceinture | 4 (avion arrêté), 1 (poses 3-4), 6 (ceinture) |
+| 3 Position de sécurité | 1 (pose 5), 6 (siège, espace entre rangées) |
+| 4 Le temps, 16 g | 7 (mannequin, balle, accordéon, ressort, poids), 4, 6 (siège en coupe) |
+| 5 Le sac, 7 kg → 112 kg | 8 (sacs), 5 (coffre), 7 (7 kg et 16 poids, kettlebell) |
+| 6 Chrono, Dubaï | 9 (porte, toboggan, chronomètre), 2 (évacuation), 12 (file, bousculade), 10 (flammes) |
+| 7 Fumée, rangées | 10 (fumée au plafond), 2 (ramper), 5 (vue de dessus), 9 (sortie, lumières au sol) |
+| 8 Eau, gilet | 11 (gilet, cabine inondée, radeau), 3 (passager et eau), 4 (avion sur l'eau) |
 
 ## Description TikTok
 
