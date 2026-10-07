@@ -22,7 +22,7 @@ Information générale : en vol, on suit toujours les consignes de l'équipage e
 
 ## Texte avec balises (ElevenLabs v3 — sans [short pause], sans [whispers]) — ≈ 290 mots
 
-[serious] Si vous êtes dans un avion qui est sur le point de s'écraser, vous avez plus de chances que vous ne croyez. [tense] Aux États-Unis, quatre-vingt-quinze passagers sur cent ont survécu aux accidents. [matter-of-fact] Et ce n'est pas de la chance : c'est de la physique. Voilà les gestes qui vous sauvent.
+[serious] Si vous êtes dans un avion qui est sur le point de s'écraser, il vous reste quelques secondes. [tense] Et la physique va décider de ce qui se passe. [matter-of-fact] Bonne nouvelle : aux États-Unis, quatre-vingt-quinze passagers sur cent ont survécu aux accidents. Voilà les gestes qui font la différence.
 
 [curious] D'abord, l'inertie. Quand l'avion s'arrête, votre corps veut continuer à la même vitesse. [serious] La ceinture, serrée bas sur les hanches, vous fait ralentir avec le siège. Sans elle, c'est le dossier devant vous, ou le mur, qui vous arrête.
 
@@ -100,7 +100,7 @@ Object sheet, 6 separate scenes in a 3 columns × 2 rows grid, generous empty sp
 
 ## Description TikTok
 
-Si tu es dans un avion sur le point de s'écraser, la physique peut te sauver. 🛫 Quelle loi t'a surpris ? 👇
+Si tu es dans un avion sur le point de s'écraser, il te reste quelques secondes. La physique décide. 🛫 Quelle loi t'a surpris ? 👇
 Information générale : suivez toujours les consignes de l'équipage.
 
 #survie #science #physique #lesaviezvous #apprendresurtiktok
