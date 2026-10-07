@@ -6,11 +6,11 @@ pas de révélation finale, fin coupée qui annonce l'épisode suivant. Durée v
 
 Information générale, pas un conseil juridique (à dire dans la description et à l'écran, petit, une fois).
 
-## Texte avec balises (ElevenLabs v3 — sans [short pause], sans [whispers]) — ≈ 257 mots
+## Texte avec balises (ElevenLabs v3 — sans [short pause], sans [whispers]) — ≈ 262 mots
 
-[serious] Téléphone en main au volant : depuis le 29 septembre, votre permis peut être suspendu jusqu'à six mois… sans juge. [tense] Et le policier qui vous arrête va vous dire des choses vraies… et des choses fausses.
+[serious] Six mois de suspension du permis, sans juge, pour un téléphone en main. [tense] Depuis le 29 septembre, ça peut vous arriver. [matter-of-fact] Et le policier qui vous arrête va vous dire des choses vraies… et des choses fausses. Voilà comment les reconnaître.
 
-[matter-of-fact] Première phrase : « Votre permis peut être suspendu six mois. » [impressed] Vrai. Mais c'est un maximum : de quinze jours à six mois, et c'est le préfet qui décide.
+[matter-of-fact] Première phrase : « Vous allez perdre six mois de permis. » [impressed] Pas forcément. Six mois, c'est le maximum : de quinze jours à six mois, et c'est le préfet qui décide.
 
 [curious] Deuxième phrase : « Et les trois points ? » Toujours là. Cent trente-cinq euros et trois points. [serious] La suspension vient en plus.
 
@@ -43,15 +43,15 @@ fermée à la fin), **le permis** (carte à 12 points), **le téléphone** (en m
 
 | # | Phrase | Écran | Ce qui passe au suivant |
 |---|---|---|---|
-| 1 | Téléphone en main… permis suspendu 6 mois… sans juge | titre « TÉLÉPHONE EN MAIN » dès l'image 0 ; la fenêtre de voiture ; le téléphone en main du conducteur ; « 29 SEPT. » ; « PERMIS : 6 MOIS » | le téléphone, la fenêtre |
+| 1 | Six mois de suspension du permis, sans juge, pour un téléphone en main | titre « 6 MOIS DE SUSPENSION » en grand dès l'image 0 ; la fenêtre de voiture ; le téléphone en main du conducteur ; « 29 SEPT. » ; « PERMIS : 6 MOIS » | le téléphone, la fenêtre |
 | 2 | …sans juge | un marteau de juge apparaît et se barre ; un bâtiment de préfecture se dessine à sa place | le bâtiment |
 | 3 | Le policier va dire des choses vraies et fausses | le policier se penche à la fenêtre, lève l'index ; le tableau des 5 verdicts se dessine, vide | le tableau |
-| 4 | 1re phrase : suspendu 6 mois — vrai, c'est un maximum | bulle du policier ; tampon VRAI ; case 1 se remplit ; une barre de calendrier avec un curseur qui va de 15 jours à 6 mois | la barre de calendrier |
+| 4 | 1re phrase : « six mois » — pas forcément, c'est un maximum | bulle du policier ; tampon PAS FORCÉMENT ; case 1 se remplit ; une barre de calendrier avec un curseur qui va de 15 jours à 6 mois | la barre de calendrier |
 | 5 | 2e phrase : et les trois points ? Toujours là | la barre se range sous la carte du permis ; 3 points sur 12 s'éteignent ; un billet de 135 € ; « EN PLUS » (la barre reste) ; tampon VRAI ; case 2 | le permis |
 | 6 | 3e phrase : 2 ans de prison — vrai, après la notification | bulle ; la porte de prison à barreaux ; elle ne se ferme que quand une lettre arrive (la lettre apparaît, « NOTIFIÉE ») ; tampon VRAI SI NOTIFIÉ ; case 3 | la lettre |
 | 7 | 4e phrase : suspendu maintenant — faux, c'est le préfet | bulle du policier ; tampon BLUFF qui l'écrase ; la lettre voyage de la préfecture à la fenêtre ; « VOUS POUVEZ RÉPONDRE » ; « CONSEIL D'ÉTAT 24/05/2024 » ; « SAUF URGENCE » ; case 4 | la lettre, le téléphone |
 | 8 | 5e phrase : touché pas tenu — piège | bulle du conducteur ; le téléphone passe en main → sur support, avec une carte de navigation ; une main touche l'écran ; tampon PIÈGE ; trois pastilles « SUPPORT ✓ NAVIGATION ✓ ÉCRAN ✗ » ; case 5 | le tableau complet |
-| 9 | Récap (sous-titres seulement) | les 5 tampons alignés : VRAI, VRAI, VRAI SI NOTIFIÉ, BLUFF, PIÈGE | la lettre |
+| 9 | Récap (sous-titres seulement) | les 5 tampons alignés : PAS FORCÉMENT, VRAI, VRAI SI NOTIFIÉ, BLUFF, PIÈGE | la lettre |
 | 10 | Et quand la lettre arrive ? L'erreur que tout le monde commet… | la lettre en gros plan, enveloppe fermée, un « ? » ; phrase coupée ; carton « LA SUITE DEMAIN ▶ » | — |
 
 Relances : écrans 3 (« vraies et fausses »), 7 (« la grosse »), 8 (« la tentation »), 10 (« l'erreur que tout le monde
