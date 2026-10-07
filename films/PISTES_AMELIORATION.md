@@ -164,3 +164,28 @@ Lecture :
   l'animation est le problème : les 3 premières vidéos utilisent des dessins fixes.
 - Échantillon très petit (4 vidéos très différentes, 464 vues pour la dernière) : indices, pas preuves.
 À demander : courbe de rétention de chaque vidéo, sources de trafic, heure de publication, description et hashtags.
+
+## Public touché : vidéo 1 (ascenseur) contre vidéo 4 (permis suspendu) — 7 octobre 2026
+
+Captures TikTok Studio, onglet Spectateurs.
+
+| | Vidéo 1 (ascenseur) | Vidéo 4 (permis suspendu) |
+|---|---|---|
+| Hommes / femmes | 56 % / 43 % | 57 % / 43 % |
+| Âge | 18-24 : 40 %, 25-34 : 31 %, 35-44 : 11 %, 45-54 : 9 %, 55+ : 9 % | non affiché (trop peu de données) |
+| Réunion | 26,2 % | **59,1 %** |
+| France | 31,4 % | 23,0 % |
+| Belgique + Suisse + Luxembourg | 28,1 % | 1,6 % |
+| Antilles, Guyane, Mayotte | 7,2 % | 12,3 % |
+| Total outre-mer | 33,4 % | 71,4 % |
+| Nouveaux spectateurs / non-abonnés | 99 % / 100 % | – / 100 % |
+
+Lecture :
+- Le sexe est identique : ce n'est pas la différence.
+- Le public de la vidéo 1 est jeune (71 % ont 18-34 ans) et francophone d'Europe (France, Belgique, Suisse, Luxembourg ≈ 60 %).
+- La vidéo 4 est restée enfermée dans l'outre-mer (71 %, dont 59 % La Réunion) et n'a presque pas touché la Belgique et la Suisse.
+- TikTok ne donne pas les centres d'intérêt : on ne voit que l'âge, le sexe, le pays et les mots des commentaires.
+- Sur la vidéo 1, les « j'aime » arrivent surtout à 0:00 (le début plaît) avec une petite bosse sur la fin.
+- Hypothèses à tester : l'heure de publication (le groupe de test vient des gens actifs à ce moment-là) et le sujet (droit routier) montré à un autre public.
+
+À demander pour confirmer : l'heure de publication de chaque vidéo, les sources de trafic, la même capture « Emplacements » pour les vidéos 2 et 3 (où commence le décalage ?), la courbe de rétention des vidéos 1 et 4.
