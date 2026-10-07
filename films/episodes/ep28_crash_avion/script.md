@@ -22,7 +22,7 @@ Information générale : en vol, on suit toujours les consignes de l'équipage e
 
 ## Texte avec balises (ElevenLabs v3 — sans [short pause], sans [whispers]) — ≈ 290 mots
 
-[serious] Votre avion de ligne va s'écraser. Vous pensez que c'est fini ? [tense] Faux. Aux États-Unis, quatre-vingt-quinze passagers sur cent ont survécu aux accidents. [matter-of-fact] Et ce n'est pas de la chance : c'est de la physique. Voilà comment.
+[serious] Si vous êtes dans un avion qui est sur le point de s'écraser, vous avez plus de chances que vous ne croyez. [tense] Aux États-Unis, quatre-vingt-quinze passagers sur cent ont survécu aux accidents. [matter-of-fact] Et ce n'est pas de la chance : c'est de la physique. Voilà les gestes qui vous sauvent.
 
 [curious] D'abord, l'inertie. Quand l'avion s'arrête, votre corps veut continuer à la même vitesse. [serious] La ceinture, serrée bas sur les hanches, vous fait ralentir avec le siège. Sans elle, c'est le dossier devant vous, ou le mur, qui vous arrête.
 
@@ -65,7 +65,7 @@ visage vide), **la flèche ambre** (inertie, force), **le chronomètre**, **la s
 
 | # | Phrase | Écran | Ce qui passe au suivant |
 |---|---|---|---|
-| 1 | Votre avion va s'écraser… 95 % ont survécu… c'est de la physique | image 0 : la cabine vue de côté, le passager assis, la lumière clignote ; un compteur monte de 0 à 95 % ; mention petite « avions de ligne, USA, 1983-2000 » | le passager, la rangée |
+| 1 | Si vous êtes dans un avion sur le point de s'écraser… 95 % ont survécu… c'est de la physique | image 0 : la cabine vue de côté, le passager assis, la lumière clignote ; un compteur monte de 0 à 95 % ; mention petite « avions de ligne, USA, 1983-2000 » | le passager, la rangée |
 | 2 | L'inertie : la ceinture | l'avion (vue extérieure) s'arrête net ; une flèche ambre « ce que veut faire le corps » part vers l'avant ; la sangle se tend et la retient | la flèche ambre |
 | 3 | La position de sécurité | il se penche, tête près du siège devant ; une cote « distance » entre la tête et le dossier rétrécit ; la flèche ambre devient courte | la cote |
 | 4 | Le temps : écraser pour freiner | un graphe : choc court = pic haut, choc long = pic bas et aplati ; « 16 G » sur le siège | la courbe plate |
@@ -100,7 +100,7 @@ Object sheet, 6 separate scenes in a 3 columns × 2 rows grid, generous empty sp
 
 ## Description TikTok
 
-Votre avion de ligne va s'écraser. La physique vous sauve. 🛫 Quelle loi t'a surpris ? 👇
+Si tu es dans un avion sur le point de s'écraser, la physique peut te sauver. 🛫 Quelle loi t'a surpris ? 👇
 Information générale : suivez toujours les consignes de l'équipage.
 
 #survie #science #physique #lesaviezvous #apprendresurtiktok
