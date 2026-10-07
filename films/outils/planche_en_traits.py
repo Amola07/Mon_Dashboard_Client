@@ -13,18 +13,35 @@ import sys
 import tempfile
 
 import cv2
+import numpy as np
 
 from films.outils.image_en_traits import DOSSIER, ordonner, simplifier, suivre, amincir, binaire
 
 
+def coupures(img, n, axe):
+    """Limites des n bandes (lignes si axe = 0, colonnes si axe = 1) : là où il y a le moins d'encre près de la
+    coupe régulière. Une chaussure qui déborde un peu de sa case n'est plus coupée en deux."""
+    taille = img.shape[axe]
+    encre = (img < 128).sum(axis=1 - axe).astype(float)
+    encre = np.convolve(encre, np.ones(5) / 5, mode="same")
+    bornes = [0]
+    for k in range(1, n):
+        c = k * taille // n
+        lo, hi = max(c - int(0.12 * taille / n), 0), min(c + int(0.12 * taille / n), taille)
+        zone = encre[lo:hi]
+        creux = np.flatnonzero(zone <= zone.min() + 1e-9)
+        bornes.append(lo + int(creux[len(creux) // 2]))
+    bornes.append(taille)
+    return bornes
+
+
 def planche_en_traits(chemin, cols, rangs, noms):
     img = cv2.imread(chemin, cv2.IMREAD_GRAYSCALE)
-    H, L = img.shape
-    ch, cl = H // rangs, L // cols
+    bl, br = coupures(img, cols, 1), coupures(img, rangs, 0)
     os.makedirs(DOSSIER, exist_ok=True)
     for k, nom in enumerate(noms):
         r, c = divmod(k, cols)
-        cellule = img[r * ch:(r + 1) * ch, c * cl:(c + 1) * cl]
+        cellule = img[br[r]:br[r + 1], bl[c]:bl[c + 1]]
         with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as f:
             cv2.imwrite(f.name, cellule)
         lignes = ordonner(simplifier(suivre(amincir(binaire(f.name)))))
