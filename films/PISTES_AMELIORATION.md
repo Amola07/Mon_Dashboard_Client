@@ -139,3 +139,21 @@ Règle remplacée : « la solution n'est révélée qu'à la fin » → **la sol
 (comment ? à quelle vitesse ? et si on n'a rien ?). Plan type : hook (0-10 s) → solution annoncée (10-25 s) → première
 question qui en découle (25-45 s) → généralisation / deuxième rebondissement (45-65 s) → objection du spectateur + fin
 coupée (65-90 s).
+
+## Statistiques au 7 octobre 2026 (4 vidéos publiées)
+
+| Vidéo | Vues | Visionnage moyen | % moyen suivi | % qui vont au bout | Abonnés | J'aime | J'aime / vue | Abonnés / 1000 vues |
+|---|---|---|---|---|---|---|---|---|
+| Ép. 21 ascenseur | 4 800 | 30 s | 38 % | 7 % | 5 | 138 | 2,9 % | 1,0 |
+| Ép. 23 voiture à l'eau | 3 000 | 28,6 s | 37 % | 3 % | 3 | 161 | 5,4 % | 1,0 |
+| Ép. 22 sables mouvants | 353 | 26 s | 33 % | 4 % | 0 | 31 | 8,8 % | 0 |
+| Ép. 24 Miller | 464 | 10 s | 12 % | 3 % | 1 | 18 | 3,9 % | 2,2 (bruit) |
+
+Lecture : (1) les 3 premières ont le même visionnage moyen (26-30 s) : les gens partent vers 30 s, quel que soit le sujet ;
+(2) l'ép. 24 s'effondre dès le début (10 s) : l'accroche n'a pas tenu ; (3) les j'aime par vue sont bons : ceux qui restent
+aiment ; (4) ≈ 1 abonné pour 1000 vues : rien ne donne envie de suivre (les fins « la suite demain » ne sont pas encore
+publiées) ; (5) les vues chutent d'un facteur 10 sur les 2 dernières : c'est de la distribution (test sur un petit groupe),
+pas seulement de la qualité (l'ép. 22 a des chiffres proches de l'ép. 23). Les 2 meilleures : scénario de survie à la
+2e personne (« tu es dans un ascenseur qui tombe », « ta voiture tombe à l'eau »). Rien dans ces chiffres ne dit que la
+fluidité de l'animation est le problème. À demander : courbe de rétention de chaque vidéo, sources de trafic, heure de
+publication, description et hashtags utilisés.
