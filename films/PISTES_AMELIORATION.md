@@ -124,3 +124,18 @@ Chez nous : un tableau par idée, remplacé d'un coup (neige, glitch), et des te
 Règle pour la suite : écrire le découpage comme une chaîne « l'élément A devient B parce que… » ; garder au moins un
 élément d'un tableau au suivant ; montrer chaque chiffre en grille ou en compteur ; transitions par transformation
 (zoom, déplacement, remplissage) plutôt que par effet.
+
+### Pas de révélation finale : une chaîne de révélations (7 octobre, constat de l'utilisateur)
+
+Dans les vidéos de référence, toute la vidéo est une révélation : chaque segment de 15-20 s répond à une question et en
+ouvre une autre (ex. temps : 22 s « personne ne lit les chiffres » → 38 s « le temps n'a pas ralenti » → 42 s « et c'est
+pourquoi le temps passe plus vite quand on vieillit » → 83 s « le scroll » → 91 s conclusion pratique). Il n'y a aucun
+moment où le spectateur a « tout compris » et peut partir.
+
+Notre format énigme (épisode 25 v2) tient une seule question jusqu'à 59 s sur 107 : quand la solution tombe, la tension
+s'effondre et le spectateur scrolle (même cause que les 2,5 % de visionnage complet de l'épisode 23).
+
+Règle remplacée : « la solution n'est révélée qu'à la fin » → **la solution arrive tôt et ouvre les questions suivantes**
+(comment ? à quelle vitesse ? et si on n'a rien ?). Plan type : hook (0-10 s) → solution annoncée (10-25 s) → première
+question qui en découle (25-45 s) → généralisation / deuxième rebondissement (45-65 s) → objection du spectateur + fin
+coupée (65-90 s).
