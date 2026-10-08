@@ -12,6 +12,13 @@ Ce qui change, sans réécrire les écrans :
 
     python -m films.episodes.ep28_crash_avion.oscillo_ep28_pro output/ep28_pro.mp4
     python -m films.episodes.ep28_crash_avion.oscillo_ep28_pro output/ep28_pro_extrait.mp4 53 61   (un extrait)
+
+Calé sur le mot (audio/mots.json, films/outils/mots_voix.py) :
+  - ACCENTS : sur les mots forts, la caméra donne un coup (« pop »), un choc (secousse + flash), ou marque un arrêt :
+    l'image se fige presque 0,3 s avant le mot, recule un peu (anticipation), puis frappe sur le mot ;
+  - RECALAGE : une apparition prévue « début de phrase + x s » est déplacée sur le mot qu'elle illustre ; l'image
+    (et ses sons) est accélérée ou ralentie autour, les débuts d'écran ne bougent pas.
+Rendu à 60 images/s (mouvements de caméra fluides) ; les traits « vivants » restent à 12 i/s (style dessin animé).
 """
 import math
 import re
@@ -22,6 +29,7 @@ import skia
 from films.episodes.ep28_crash_avion import inertie_pro as I
 from films.episodes.ep28_crash_avion import oscillo_ep28 as E
 from films.episodes.ep28_crash_avion.oscillo_ep28 import AMBRE, VERT, VERT_PALE, W, Z, faisceau, info, objet, trace
+from films.outils import mots_voix as MV
 from films.outils.extrait import rendre_extrait
 from films.styles import anim_pro as A
 
@@ -225,16 +233,104 @@ def cameras():
     }
 
 
+# ------------------------------------------------------------------------------------------------ calage au mot
+FPS = 60
+
+
+def accents():
+    """[(instant du mot, genre)] — genre : "pop" (petit coup de caméra), "choc" (secousse + flash),
+    "arret" (l'image se fige avant le mot, puis frappe)."""
+    m = MV.mot
+    return [(m("s'écraser"), "choc"), (m("secondes", s(1)), "pop"), (m("physique", s(2)), "pop"),
+            (m("quatre", s(5)), "arret"), (m("survécu", s(5)), "choc"), (m("gestes", s(6)), "pop"),
+            (m("l'inertie", s(8)), "pop"), (m("continuer", s(9)), "pop"), (m("dossier", s(11)), "choc"),
+            (m("mur", s(12)), "choc"), (m("tête", s(16)), "pop"), (m("bras", s(18)), "pop"),
+            (m("fort", s(20)), "choc"), (m("temps", s(22)), "pop"), (m("seize", s(29)), "arret"),
+            (m("poids", s(30)), "pop"), (m("danger", s(31)), "arret"), (m("seize", s(32)), "pop"),
+            (m("douze", s(32)), "choc"), (m("dessus", s(32)), "choc"), (m("chronomètre", s(34)), "pop"),
+            (m("quatre", s(35)), "arret"), (m("s'étende", s(36)), "pop"), (m("sept", s(39)), "choc"),
+            (m("tue", s(43)), "arret"), (m("monte", s(44)), "pop"), (m("bas", s(45)), "pop"),
+            (m("cinq", s(49)), "arret"), (m("l'eau", s(50)), "pop"), (m("surtout", s(52)), "arret"),
+            (m("physique", s(53)), "pop")]
+
+
+def recalages():
+    """[(instant prévu dans l'écran, instant du mot)] : ce qui apparaissait à l'instant prévu arrive sur le mot."""
+    m = MV.mot
+    return [(s(5) + 2.4, m("survécu", s(5))), (s(6), m("gestes", s(6))), (I.T_CHOC(), m("dossier", s(11))),
+            (s(12) + 0.15, m("mur", s(12))), (s(20) + 0.4, m("fort", s(20))), (s(32), m("sept", s(32))), (s(32) + 1.2, m("c'est", s(32) + 1.5)),
+            (s(32) + 2.0, m("douze", s(32))), (s(32) + 3.5 + 0.95, m("dessus", s(32))),
+            (s(36) + 0.6, m("s'étende", s(36))), (s(39) + 1.2, m("sept", s(39))), (s(43) + 0.5, m("tue", s(43))),
+            (s(49), m("cinq", s(49)))]
+
+
+REEL, PREVU, ACC = [], [], []
+
+
+def preparer_calage(debuts):
+    """Construit la correspondance temps réel → temps prévu (linéaire par morceaux, croissante)."""
+    import numpy as np
+    MV.charger(M)
+    pts = {round(t, 4): t for t in debuts + [0.0, M.SEG[-1][1] + 5]}               # débuts d'écran : inchangés
+    paires = sorted([(t, t) for t in pts.values()] + [(w, p) for p, w in recalages()])
+    reel, prevu = [], []
+    for r, p in paires:
+        if reel and (r <= reel[-1] + 0.05 or p <= prevu[-1] + 0.05):
+            continue                                                              # garde la fonction croissante
+        reel.append(r)
+        prevu.append(p)
+    REEL[:], PREVU[:] = np.array(reel), np.array(prevu)
+    ACC[:] = accents()
+
+
+def prevu(t):
+    """Instant réel → instant prévu par les écrans (avec les arrêts avant les mots forts)."""
+    import numpy as np
+    for tw, genre in ACC:
+        if genre == "arret" and tw - 0.3 <= t < tw:
+            t = tw - 0.3 + 0.1 * (t - tw + 0.3)
+            break
+    return float(np.interp(t, REEL, PREVU))
+
+
+def reel(tp):
+    import numpy as np
+    return float(np.interp(tp, PREVU, REEL))
+
+
+def coup(c, t):
+    """La couche d'accents de la caméra (temps réel) : recul avant un arrêt, coup de zoom et secousse sur le mot."""
+    z, dx, dy = 1.0, 0.0, 0.0
+    for tw, genre in ACC:
+        if genre == "arret" and tw - 0.3 <= t < tw:
+            z -= 0.03 * A.lisse((t - tw + 0.3) / 0.3)
+        d = t - tw
+        if 0 <= d < 0.6:
+            amp = {"pop": 0.035, "choc": 0.07, "arret": 0.08}[genre]
+            z += amp * A.sortie(d / 0.06) * math.exp(-6 * d)
+            if genre != "pop":
+                a = 14 * (1 - d / 0.6) ** 2
+                dx += a * A._bruit(int(t * 60), 11)
+                dy += 0.6 * a * A._bruit(int(t * 60), 12)
+    c.translate(W / 2 + dx, H / 2 + dy)
+    c.scale(z, z)
+    c.translate(-W / 2, -H / 2)
+
+
 # ------------------------------------------------------------------------------------------------ montage
 HAUT = 330                                # sous le titre : l'image filmée commence ici, avec un fondu
 
 
 def avec_camera(fn, cam, lois=True, haut=HAUT):
-    def g(c, t):
+    def g(c, tr):
+        t = prevu(tr)                                                     # le temps des écrans
         TITRES.clear()
         c.save()
         if cam is not None:
             c.clipRect(skia.Rect(0, haut, W, H))
+        if fn is not E.e12:
+            coup(c, tr)
+        if cam is not None:
             cam.appliquer(c, t)
         fn(c, t)
         c.restore()
@@ -254,6 +350,7 @@ def tableaux():
     cams = cameras()
     out = []
     origine = E.tableaux()
+    preparer_calage([x[0] for x in origine])
     ecrans = [E.e1, E.e2, I.e4_pro, E.e5, E.e6a, E.e6b, E.e6c, E.e7, e7b, E.e8a, E.e8b, E.e9, E.e10, E.e11, E.e12]
     for (t0, _, tr), fn in zip(origine, ecrans):
         fin = ([x[0] for x in origine if x[0] > t0] + [t0 + 5])[0]
@@ -267,7 +364,9 @@ def tableaux():
 
 def chocs():
     flashs, _ = E.chocs()
-    return flashs + [I.T_CHOC(), s(32) + 3.5 + 0.95], []                # les secousses passent par les caméras
+    flashs = [reel(x) for x in flashs + [I.T_CHOC(), s(32) + 3.5 + 0.95]]
+    flashs += [tw for tw, genre in ACC if genre != "pop"]
+    return flashs, []                                                    # les secousses passent par les caméras
 
 
 def effets(tabs):
@@ -276,12 +375,27 @@ def effets(tabs):
     ev = [x for x in ev if not (s(32) + 4.5 <= x[0] < s(32) + 4.7)]       # l'ancien choc du sac
     ev += [(tb, Z.boom(0.6, 55)), (tb, Z.thump(0.45)), (tb, Z.craquement(0.3)), (s(32) + 3.5, Z.whoosh(0.9, 0.1)),
            (s(30) + 0.1, Z.thump(0.3)), (s(32) + 2.0, Z.thump(0.35))]
+    ev = [(reel(t0), snd) for t0, snd in ev]                              # sons des écrans : suivent le recalage
+    ev += [(tw, Z.thump(0.3)) for tw, genre in ACC if genre == "choc"]
+    ev += [(tw, Z.boom(0.45, 70)) for tw, genre in ACC if genre == "arret"]
     return ev
+
+
+_mixage = M.mixage
+
+
+def mixage(path, voix, dur, tabs):
+    """Les bips de tracé et la frappe des textes sont notés en temps des écrans : on les remet en temps réel."""
+    for cle, (t0, kind, args) in list(M.SONS.items()):
+        M.SONS[cle] = (reel(t0), kind, args)
+    _mixage(path, voix, dur, tabs)
 
 
 def installer():
     E.ecrit, E.titre, E.apres, E.suite = ecrit, titre, apres, suite
-    M.tableaux, M.chocs, M.effets = tableaux, chocs, effets
+    M.tableaux, M.chocs, M.effets, M.mixage = tableaux, chocs, effets, mixage
+    M.FPS = FPS
+    M.ALPHA_PERSISTANCE = 255 * (150 / 255) ** (24 / FPS)               # même traînée par seconde qu'à 24 i/s
 
 
 if __name__ == "__main__":

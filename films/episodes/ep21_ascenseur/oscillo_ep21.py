@@ -25,6 +25,7 @@ from films.styles import oscillo_son as Z
 from films.styles.oscillo_ascenseur import AMBRE, MONO, VERT, VERT_PALE, P, cercle_pts, ease, faisceau, rect_pts
 
 W, H, FPS = 1080, 1920, 30
+ALPHA_PERSISTANCE = 150   # part de l'image précédente gardée à chaque image (traînée phosphore)
 HERE = os.path.dirname(os.path.abspath(__file__))
 VOIX = os.path.join(HERE, "audio", "voix.mp3")
 SEGS = os.path.join(HERE, "audio", "voix.json")
@@ -636,7 +637,7 @@ def render(out):
         if trans == "noir" and dt < 0.05:
             prec = None
         if prec is not None:
-            c.drawImage(prec, 0, 0, skia.SamplingOptions(), P((0, 0, 0), 0, 150, fill=True))
+            c.drawImage(prec, 0, 0, skia.SamplingOptions(), P((0, 0, 0), 0, ALPHA_PERSISTANCE, fill=True))
         c.save()
         for ts, d in secousses:
             if ts <= t < ts + d:

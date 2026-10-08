@@ -34,7 +34,7 @@ def rendre_extrait(M, t0, t1, out, tableaux=None, chocs=None):
         c = surf.getCanvas()
         c.clear(skia.Color(2, 8, 4))
         if prec is not None:
-            c.drawImage(prec, 0, 0, skia.SamplingOptions(), P((0, 0, 0), 0, 150, fill=True))
+            c.drawImage(prec, 0, 0, skia.SamplingOptions(), P((0, 0, 0), 0, getattr(M, "ALPHA_PERSISTANCE", 150), fill=True))
         c.save()
         for ts, d in secousses:
             if ts <= t < ts + d:
