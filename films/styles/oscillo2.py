@@ -269,3 +269,111 @@ def finition(img, t, fps=30):
     g = np.random.default_rng(int(t * fps)).normal(0, 2.5, (H // 2, W // 2, 1)).repeat(2, 0).repeat(2, 1)
     a[..., :3] += g
     return np.clip(a, 0, 255).astype(np.uint8)
+
+
+# ------------------------------------------------------------------------------------------------ icônes → vecteurs
+# Les icônes pixel générées (films/illustrations_pixel/px_*.png, palette pixel_info.PALETTE_ICONES) deviennent des
+# formes vectorielles lissées, remplies de hachures : orange → ambre, bleu-vert → vert, blanc et gris → vert pâle ;
+# les tons sombres reçoivent des hachures croisées (le volume), les tons clairs des hachures plus espacées.
+import os as _os
+
+_ICI = _os.path.dirname(_os.path.abspath(__file__))
+_DOSSIER_PX = _os.path.join(_ICI, "..", "illustrations_pixel")
+# (famille, ton) pour chaque couleur de la palette des icônes, dans l'ordre de PALETTE_ICONES
+_FAMILLES = {(40, 175, 175): ("vert", 1), (26, 110, 112): ("vert", 2), (14, 52, 56): ("vert", 3),
+             (128, 214, 214): ("vert", 0), (255, 138, 61): ("ambre", 1), (255, 196, 140): ("ambre", 0),
+             (168, 72, 26): ("ambre", 2), (236, 242, 240): ("pale", 0), (120, 130, 132): ("pale", 2),
+             (188, 198, 198): ("pale", 1), (66, 76, 80): ("pale", 3)}
+COULEURS = {"vert": VERT, "ambre": AMBRE, "pale": VERT_PALE}
+_VECT = {}
+
+
+def _contours_masque(m, ech, lisse_n=2):
+    import cv2
+    grand = cv2.resize(m.astype(np.uint8) * 255, (m.shape[1] * 8, m.shape[0] * 8), interpolation=cv2.INTER_NEAREST)
+    grand = cv2.GaussianBlur(grand, (0, 0), 4)
+    _, grand = cv2.threshold(grand, 127, 255, cv2.THRESH_BINARY)
+    cs, _ = cv2.findContours(grand, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_NONE)
+    out = []
+    for cnt in cs:
+        if cv2.contourArea(cnt) < 40:
+            continue
+        cnt = cv2.approxPolyDP(cnt, 2.5, True)[:, 0, :].astype(float) / 8 * ech
+        pts = [tuple(p) for p in cnt] + [tuple(cnt[0])]
+        out.append(lisser(pts, lisse_n))
+    return out
+
+
+def icone_vecteur(nom):
+    """{famille: {ton: [contours]}}, contour de la silhouette, (largeur, hauteur) en pixels de l'icône."""
+    if nom not in _VECT:
+        from PIL import Image
+        a = np.asarray(Image.open(_os.path.join(_DOSSIER_PX, nom + ".png")).convert("RGBA"))
+        rgb, al = a[..., :3], a[..., 3] > 0
+        zones = {}
+        for col, (fam, ton) in _FAMILLES.items():
+            m = al & np.all(rgb == np.array(col, np.uint8), axis=2)
+            if m.sum() >= 3:
+                zones.setdefault(fam, {})[ton] = _contours_masque(m, 1.0)
+        _VECT[nom] = (zones, _contours_masque(al, 1.0, 3), (a.shape[1], a.shape[0]))
+    return _VECT[nom]
+
+
+def _place(traits, x0, y0, k):
+    return [[(x0 + px * k, y0 + py * k) for px, py in l] for l in traits]
+
+
+def _chemin_plein(traits):
+    p = chemin([l for l in traits])
+    p.close()
+    p.setFillType(skia.PathFillType.kEvenOdd)
+    return p
+
+
+ANGLES = {"vert": 0, "ambre": -35, "pale": 35}
+
+
+def dessiner_icone_sobre(c, nom, cx, bas, hauteur, a=1.0, u=1.0):
+    """Version sobre : silhouette au faisceau, contours des grandes zones en trait fin, hachures sur l'ambre seulement."""
+    zones, sil, (lw, lh) = icone_vecteur(nom)
+    k = hauteur / lh
+    x0, y0 = cx - lw * k / 2, bas - hauteur
+    pas = max(6.0, hauteur / 40)
+    for fam, tons in zones.items():
+        traits = [l for tr in tons.values() for l in tr if _aire(l) * k * k > 900]
+        if not traits:
+            continue
+        pl = _place(traits, x0, y0, k)
+        if fam == "ambre":
+            hachures(c, _chemin_plein(pl), AMBRE, pas, -35, 1.6, 0.8 * a, u)
+            dessiner(c, pl, AMBRE, 2.2, a, u)
+        else:
+            dessiner(c, pl, COULEURS[fam], 1.3, 0.4 * a, u)
+    contour = _place(sil, x0, y0, k)
+    dessiner(c, contour, VERT_PALE, 2.8, a, u)
+    return contour
+
+
+def _aire(l):
+    return abs(sum(x0 * y1 - x1 * y0 for (x0, y0), (x1, y1) in zip(l, l[1:]))) / 2
+
+
+def dessiner_icone(c, nom, cx, bas, hauteur, a=1.0, u=1.0, miroir=False):
+    """Une icône en vecteurs : zones hachurées par couleur et par ton, silhouette au faisceau. Renvoie la silhouette."""
+    zones, sil, (lw, lh) = icone_vecteur(nom)
+    k = hauteur / lh
+    x0, y0 = cx - lw * k / 2, bas - hauteur
+    pas_base = max(5.0, hauteur / 46)
+    for fam, tons in zones.items():
+        col = COULEURS[fam]
+        for ton, traits in tons.items():
+            p = _chemin_plein(_place(traits, x0, y0, k))
+            pas = pas_base * (1.7 if ton == 0 else 1.0)
+            O_a = (0.55 if ton == 0 else 0.75) * a
+            hachures(c, p, col, pas, ANGLES[fam], 1.5, O_a, u)
+            if ton >= 2:                                   # l'ombre : hachures croisées
+                hachures(c, p, col, pas * 1.3, ANGLES[fam] + 90, 1.3, 0.55 * a, u)
+            dessiner(c, _place(traits, x0, y0, k), col, 1.4, 0.45 * a, u)
+    contour = _place(sil, x0, y0, k)
+    dessiner(c, contour, VERT_PALE, 2.6, a, u)
+    return contour
