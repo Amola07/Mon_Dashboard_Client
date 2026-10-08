@@ -281,6 +281,11 @@ def preparer_calage(debuts):
         prevu.append(p)
     REEL[:], PREVU[:] = np.array(reel), np.array(prevu)
     ACC[:] = accents()
+    alignes = iter(MV.MOTS)                                               # les sous-titres suivent les mêmes instants
+    for i, (w, a, b, deb, rang) in enumerate(M.MOTS):
+        if any(ch.isalnum() for ch in w):
+            a2, b2, _ = next(alignes)
+            M.MOTS[i] = (w, a2, b2, deb, rang)
 
 
 def prevu(t):
@@ -365,7 +370,7 @@ def tableaux():
 def chocs():
     flashs, _ = E.chocs()
     flashs = [reel(x) for x in flashs + [I.T_CHOC(), s(32) + 3.5 + 0.95]]
-    flashs += [tw for tw, genre in ACC if genre != "pop"]
+    flashs += [tw for tw, genre in ACC if genre == "choc"]
     return flashs, []                                                    # les secousses passent par les caméras
 
 
