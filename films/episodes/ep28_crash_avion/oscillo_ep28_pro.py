@@ -1,0 +1,293 @@
+"""Épisode 28 en version « animée pro » : mêmes dessins, même voix, même minutage que oscillo_ep28.py, avec les outils
+de films/styles/anim_pro.py (testés sur l'écran de l'inertie, voir inertie_pro.py).
+
+Ce qui change, sans réécrire les écrans :
+  - chaque écran a sa caméra (avancée lente, zooms vers ce que dit la voix, secousses aux chocs, turbulences) ;
+    le titre et le tableau des lois restent fixes au-dessus ;
+  - les dessins arrivent avec un rebond, repartent en se réduisant, ne sont jamais figés (traits vivants, légers
+    mouvements propres à chaque objet : flammes, fumée qui monte, avion qui tangue sur l'eau, poids qui tombe…) ;
+  - les changements de pose des personnages sont continus (flux d'un dessin à l'autre) et ils respirent ;
+  - les textes arrivent avec un rebond ; les chiffres en grand défilent comme un compteur ;
+  - écrans réécrits : l'inertie (corps qui se penche, inertie_pro.py) et le sac qui part (trajectoire, rotation, choc).
+
+    python -m films.episodes.ep28_crash_avion.oscillo_ep28_pro output/ep28_pro.mp4
+    python -m films.episodes.ep28_crash_avion.oscillo_ep28_pro output/ep28_pro_extrait.mp4 53 61   (un extrait)
+"""
+import math
+import re
+import sys
+
+import skia
+
+from films.episodes.ep28_crash_avion import inertie_pro as I
+from films.episodes.ep28_crash_avion import oscillo_ep28 as E
+from films.episodes.ep28_crash_avion.oscillo_ep28 import AMBRE, VERT, VERT_PALE, W, Z, faisceau, info, objet, trace
+from films.outils.extrait import rendre_extrait
+from films.styles import anim_pro as A
+
+M = E.M
+s, e = M.s, M.e
+H = M.H
+
+# les fonctions d'origine, avant remplacement
+_ecrit, _titre = E.ecrit, E.titre
+
+
+# ------------------------------------------------------------------------------------------------ textes
+COMPTEURS = {"95 %": 2.4}                 # durée du défilement (s) quand elle doit suivre l'image ; sinon 0,6 s
+
+
+def ecrit(c, t, t0, txt, x, y, taille, col=VERT_PALE, centre=True, halo=1.0, vitesse=0.035):
+    """Comme ecrit, avec un rebond d'arrivée ; un chiffre écrit en grand défile comme un compteur."""
+    if t < t0:
+        return
+    m = re.fullmatch(r"(\D{0,4})(\d{1,3})(\D{0,10})", txt)
+    if m and taille >= 56:
+        n = int(m.group(2))
+        k = A.sortie((t - t0) / COMPTEURS.get(txt, 0.6), 2.5)
+        txt = f"{m.group(1)}{round(n * k)}{m.group(3)}"
+        vitesse = 0.0
+    k = A.pop(t, t0, 0.3)
+    f = skia.Font(M.MONO, taille)
+    px = x if centre else x + f.measureText(txt) / 2
+    py = y - taille * 0.35
+    c.save()
+    c.translate(px, py)
+    c.scale(k, k)
+    c.translate(-px, -py)
+    _ecrit(c, t, t0, txt, x, y, taille, col, centre, halo, vitesse)
+    c.restore()
+
+
+TITRES = []
+
+
+def titre(c, t, t0, txt, col=VERT_PALE, y=300, taille=58):
+    """Le titre est dessiné après la caméra, fixe au-dessus de l'image."""
+    TITRES.append((t0, txt, col, y, taille))
+
+
+# ------------------------------------------------------------------------------------------------ dessins
+def _bas(tr):
+    return max(p[1] for l in tr for p in l)
+
+
+def _vers_haut(tr, k, cx, cy):
+    return [[(cx + (x - cx), cy + (y - cy) * k) for x, y in l] for l in tr]
+
+
+def _sur_bas(tr, k):
+    b = _bas(tr)
+    return [[(x, b + (y - b) * k) for x, y in l] for l in tr]
+
+
+def mouvement(nom, tr, t, t0, cx, cy, larg):
+    """Le petit mouvement propre à chaque objet, pour qu'aucun dessin ne soit figé."""
+    dt = t - t0
+    if nom == "av_descente":                                             # l'avion pique, secoué
+        tr = A.tourne(tr, 1.6 * A.doux(3 * t, 2) + 2.0 * dt, cx, cy)
+        return A.deplace(tr, 14 * dt + 3 * A.doux(9 * t), 22 * dt + 3 * A.doux(11 * t, 4))
+    if nom in ("cab_clignote", "cab_masques"):                           # turbulences
+        return A.deplace(A.tourne(tr, 0.7 * A.doux(6 * t, 1), cx, cy), 4 * A.doux(9 * t, 3), 3 * A.doux(13 * t, 5))
+    if nom == "fe_flammes":                                              # flammes qui dansent
+        return A.vivant(_sur_bas(tr, 1 + 0.07 * A.doux(7 * t, 2)), t, 2.2, 14, 3)
+    if nom == "fe_fumee":                                                # la fumée monte et gonfle
+        return A.vivant(A.deplace(A.echelle(tr, 1 + 0.025 * dt, cx, cy), 0, -14 * dt), t, 1.4, 10, 5)
+    if nom == "fe_plafond":
+        return A.deplace(tr, 10 * A.doux(0.8 * t, 1), 0)
+    if nom == "av_eau":                                                  # l'avion tangue sur l'eau
+        return A.deplace(A.tourne(tr, 1.3 * math.sin(1.7 * t), cx, cy), 0, 6 * math.sin(1.7 * t + 1))
+    if nom in ("eau_gilet_gonfle", "eau_gilet_vide"):
+        return A.echelle(tr, 1 + 0.025 * math.sin(4 * t), cx, cy)
+    if nom in ("ph_kettlebell", "ph_poids16"):                           # le poids tombe et rebondit
+        u = dt / 0.55
+        h = 0 if u >= 1 else abs(math.cos(1.5 * math.pi * u)) * (1 - u) ** 2
+        return A.deplace(tr, 0, -320 * h)
+    if nom == "ph_ressort":                                              # le ressort s'écrase et revient
+        return _sur_bas(tr, 1 - 0.18 * abs(math.sin(2.2 * dt)) * math.exp(-0.3 * dt))
+    if nom == "ph_accordeon":                                            # la structure se plie
+        k = 1 - 0.12 * abs(math.sin(2.0 * dt))
+        return [[(cx + (x - cx) * k, y) for x, y in l] for l in tr]
+    if nom == "ph_mannequin":                                            # le choc du test
+        return A.deplace(tr, 14 * A.secousse(dt - 0.1, 5.0, 5.0), 0)
+    if nom == "gr_file":                                                 # la file avance
+        return A.deplace(tr, 9 * dt, 0)
+    if nom == "fe_main":                                                 # la main suit les rangées
+        return A.deplace(tr, 10 * math.sin(5 * t), 0)
+    return A.deplace(tr, 0, 3 * A.doux(1.2 * t, len(nom)))               # flottement par défaut
+
+
+def apres(c, t, t0, nom, cx, cy, larg, col=VERT_PALE, d=0.5, bip=1500, miroir=False, intense=1.0, t1=None):
+    """Comme apres : tracé au faisceau, plus un rebond d'arrivée, un mouvement propre, une sortie en se réduisant."""
+    if t < t0 or (t1 is not None and t >= t1):
+        return
+    tr = objet(nom, cx, cy, larg, miroir)
+    k = 0.86 + 0.14 * A.rebond((t - t0) / 0.45, 2.2)
+    if t1 is not None and t > t1 - 0.15:
+        k *= 1 - 0.5 * A.lisse((t - t1 + 0.15) / 0.15)
+    tr = mouvement(nom, A.echelle(tr, k, cx, cy), t, t0, cx, cy, larg)
+    trace(c, t, t0, d, A.vivant(tr, t, 0.6, 12, len(nom)), col, 1.2, intense, bip=bip)
+
+
+def suite(c, t, tab, cx, bas, k, col=VERT_PALE, bip=1100, miroir=False):
+    """Un personnage qui change de pose : la première se trace, les suivantes en découlent (flux) ; il respire."""
+    cour = [(tt, n) for tt, n in tab if t >= tt]
+    if not cour or cour[-1][1] is None:
+        return
+    t0, nom = cour[-1]
+    resp = 1 + 0.008 * math.sin(2.3 * t)
+    if len(cour) > 1 and cour[-2][1] and t - t0 < 0.3:
+        av = cour[-2][1]
+        cle = (av, nom, cx, bas, k, miroir)
+        for tr, i in A.flux(cle, E.pose(av, cx, bas, k, miroir), E.pose(nom, cx, bas, k, miroir), (t - t0) / 0.3):
+            faisceau(c, A.vivant(_sur_bas(tr, resp), t, 0.5), 1.0, col, 1.2, i)
+        return
+    debut = cour[0][0] if len(cour) == 1 else t0 - 1.0                    # seule la première pose se trace
+    tr = A.vivant(_sur_bas(E.pose(nom, cx, bas, k, miroir), resp), t, 0.5)
+    trace(c, t, debut, 0.35, tr, col, 1.2, 1.0, bip=bip if len(cour) == 1 else 0)
+
+
+# ------------------------------------------------------------------------------------------------ l'écran du sac
+def e7b(c, t):
+    """Le sac part : il décrit une courbe en tournant, accélère et percute le passager."""
+    titre(c, t, s(31), "4 · F = m × a")
+    t0, d = s(32) + 3.5, 0.95
+    ti = t0 + d
+    recul = -10 * A.secousse(t - ti, 1.4, 3.0)                           # le passager encaisse
+    tr = E.pose("as_regarde_haut", 270, 1500, 1.15)
+    tr = A.tourne(tr, recul, 270, 1500)
+    trace(c, t, s(32) + 3.2, 0.35, A.vivant(tr, t, 0.5), VERT_PALE, 1.2, 1.0, bip=1100)
+    u = A.borne((t - t0) / d) ** 1.6
+    x = 960 - 560 * u
+    y = 760 + 300 * u - 220 * math.sin(math.pi * u)
+    if t < ti + 0.05:
+        sac = A.tourne(objet("sac_vol", x, y, 360 - 60 * u), -260 * u, x, y)
+        faisceau(c, A.vivant(sac, t, 0.6), 1.0, AMBRE, 2.2, 1.0)
+        for k in range(4):                                               # traînée
+            v = max(0.0, u - 0.07 * (k + 1))
+            px, py = 960 - 560 * v, 760 + 300 * v - 220 * math.sin(math.pi * v)
+            faisceau(c, [[(px, py), (px + 30, py - 8)]], 1.0, AMBRE, 1.6, 0.6 - 0.12 * k)
+    else:
+        b = 1.0 - A.lisse((t - ti) / 0.6)                                # le sac retombe
+        sac = A.tourne(objet("sac_vol", 470, 1060 + 280 * (1 - b), 300), -260 + 40 * (1 - b), 470, 1060)
+        faisceau(c, sac, 1.0, AMBRE, 2.2, 0.4 + 0.6 * b)
+    if ti <= t < ti + 0.35:                                              # étincelles du choc
+        f = (t - ti) / 0.35
+        for i in range(12):
+            a = 2 * math.pi * i / 12
+            r0, r1 = 40 + 120 * f, 80 + 180 * f
+            faisceau(c, [[(400 + r0 * math.cos(a), 1050 + r0 * math.sin(a)),
+                          (400 + r1 * math.cos(a), 1050 + r1 * math.sin(a))]], 1.0, AMBRE, 2.4, 1 - f)
+    ecrit(c, t, s(32) + 3.6, "112 KG", 640, 700, 96, AMBRE, True, 2.4)
+
+
+# ------------------------------------------------------------------------------------------------ caméras
+def _tete_brace():
+    w = 322 * 1.9
+    h = w * info("as_brace")["ratio"]
+    return 540 - w / 2 + 0.78 * w, 1480 - h + 0.12 * h
+
+
+def cameras():
+    """Pour chaque écran (par son début) : la caméra. Les écrans absents ont une avancée lente automatique."""
+    tx, ty = _tete_brace()
+    turbulences = [(0.3 * i, 0.3, 7) for i in range(int(s(3) / 0.3))]
+    tb = s(32) + 3.5 + 0.95
+    return {
+        0.0: A.Camera([(0.0, 1.08, 540, 980), (s(2), 1.0, 540, 940), (s(3), 1.04, 540, 900)],
+                      turbulences + [(s(2), 0.4, 16)]),
+        s(3) - 0.1: A.Camera([(s(3), 1.0, 540, 960), (s(5), 1.02, 540, 940), (s(5) + 2.4, 1.06, 540, 1000),
+                              (s(6), 1.07, 540, 1010), (s(7), 1.03, 540, 990)], [(s(5) + 2.4, 0.35, 12)]),
+        s(14): A.Camera([(s(14), 1.0, 540, 960), (s(15), 1.03, 540, 980),
+                         (s(16), 1.12, tx - 130, ty + 120, 0.4), (s(17), 1.12, tx - 110, ty + 160),
+                         (s(18), 1.14, 470, ty + 300, 0.4), (s(19), 1.0, 540, 960, 0.4), (s(21), 1.05, 540, 1060)]),
+        s(21): A.Camera([(s(21), 1.0, 540, 940), (s(24), 1.04, 540, 900), (s(24) + 0.3, 1.04, 520, 880, 0.5),
+                         (s(26), 1.05, 530, 880)]),
+        s(26) - 0.05: A.Camera([(s(26), 1.0, 540, 960), (s(28), 1.03, 540, 900), (s(28) + 1.6, 1.08, 540, 1000)]),
+        s(29) - 0.05: A.Camera([(s(29), 1.12, 560, 860), (s(29) + 0.3, 1.0, 540, 940, 0.3), (s(31), 1.05, 560, 1000)],
+                               [(s(29), 0.4, 18)]),
+        s(31): A.Camera([(s(31), 1.0, 540, 900), (s(32), 1.03, 540, 1000), (s(32) + 2.0, 1.08, 640, 1150, 0.4),
+                         (s(32) + 3.0, 1.1, 640, 1150)], [(s(32) + 2.0, 0.3, 10)]),
+        s(32) + 3.0: A.Camera([(s(32) + 3.0, 1.0, 600, 960), (s(32) + 3.5, 1.04, 640, 900),
+                               (tb, 1.14, 450, 1020), (tb + 0.12, 1.26, 420, 1040, 0.12), (s(33), 1.2, 430, 1030)],
+                              [(tb, 0.5, 26)]),
+        s(33): A.Camera([(s(33), 1.0, 540, 900), (s(34), 1.02, 540, 960), (s(35), 1.12, 300, 1100, 0.4),
+                         (s(36), 1.1, 500, 1080, 0.5), (s(37), 1.14, 700, 1100)]),
+        s(37): A.Camera([(s(37), 1.0, 540, 1000), (s(38), 1.04, 540, 1000), (s(38) + 0.3, 1.0, 540, 900, 0.3),
+                         (s(39), 1.02, 540, 1000), (s(41), 1.08, 540, 1260)]),
+        s(41): A.Camera([(s(41), 1.06, 540, 900), (s(43), 1.0, 540, 940), (s(44), 1.05, 540, 960),
+                         (s(45), 1.1, 540, 1280, 0.4), (s(46), 1.12, 540, 1300)]),
+        s(46): A.Camera([(s(46), 1.0, 540, 900), (s(46) + 0.4, 1.12, 420, 700, 0.3), (s(46) + 1.4, 1.12, 420, 1000),
+                         (s(47), 1.06, 540, 1100, 0.4), (s(49), 1.04, 540, 1150, 0.4), (s(50), 1.06, 540, 1180)],
+                        [(s(49), 0.3, 10)]),
+        s(50): A.Camera([(s(50), 1.0, 540, 900), (s(51), 1.02, 540, 980), (s(51) + 0.4, 1.08, 380, 1060, 0.5),
+                         (s(52) + 0.4, 1.08, 440, 1080), (s(53), 1.0, 540, 1000, 0.5), (s(55), 1.03, 560, 1020)]),
+    }
+
+
+# ------------------------------------------------------------------------------------------------ montage
+HAUT = 330                                # sous le titre : l'image filmée commence ici, avec un fondu
+
+
+def avec_camera(fn, cam, lois=True, haut=HAUT):
+    def g(c, t):
+        TITRES.clear()
+        c.save()
+        if cam is not None:
+            c.clipRect(skia.Rect(0, haut, W, H))
+            cam.appliquer(c, t)
+        fn(c, t)
+        c.restore()
+        if cam is not None and haut == HAUT:
+            fondu = skia.GradientShader.MakeLinear([skia.Point(0, HAUT), skia.Point(0, HAUT + 90)],
+                                                  [skia.Color(2, 8, 4, 255), skia.Color(2, 8, 4, 0)])
+            c.drawRect(skia.Rect(0, HAUT, W, HAUT + 90), skia.Paint(Shader=fondu))
+        if TITRES:
+            t0, txt, col, y, taille = TITRES[-1]
+            ecrit(c, t, t0, txt, W / 2, y, taille, col, True, 1.6)
+        if lois:
+            E.tableau_lois(c, t)
+    return g
+
+
+def tableaux():
+    cams = cameras()
+    out = []
+    origine = E.tableaux()
+    ecrans = [E.e1, E.e2, I.e4_pro, E.e5, E.e6a, E.e6b, E.e6c, E.e7, e7b, E.e8a, E.e8b, E.e9, E.e10, E.e11, E.e12]
+    for (t0, _, tr), fn in zip(origine, ecrans):
+        fin = ([x[0] for x in origine if x[0] > t0] + [t0 + 5])[0]
+        cam = cams.get(t0) or A.Camera([(t0, 1.0, 540, 960), (fin, 1.05, 540, 940)])
+        if fn in (I.e4_pro, E.e12):
+            cam = None                                                   # l'inertie a sa propre caméra ; carton de fin
+        haut = 215 if fn in (E.e1, E.e2) else HAUT                       # e2 écrit dans le haut, e1 n'a pas de titre
+        out.append((t0, avec_camera(fn, cam, lois=fn not in (E.e1, E.e12), haut=haut), tr))
+    return out
+
+
+def chocs():
+    flashs, _ = E.chocs()
+    return flashs + [I.T_CHOC(), s(32) + 3.5 + 0.95], []                # les secousses passent par les caméras
+
+
+def effets(tabs):
+    ev = I.effets_pro(tabs)
+    tb = s(32) + 3.5 + 0.95
+    ev = [x for x in ev if not (s(32) + 4.5 <= x[0] < s(32) + 4.7)]       # l'ancien choc du sac
+    ev += [(tb, Z.boom(0.6, 55)), (tb, Z.thump(0.45)), (tb, Z.craquement(0.3)), (s(32) + 3.5, Z.whoosh(0.9, 0.1)),
+           (s(30) + 0.1, Z.thump(0.3)), (s(32) + 2.0, Z.thump(0.35))]
+    return ev
+
+
+def installer():
+    E.ecrit, E.titre, E.apres, E.suite = ecrit, titre, apres, suite
+    M.tableaux, M.chocs, M.effets = tableaux, chocs, effets
+
+
+if __name__ == "__main__":
+    installer()
+    sortie = sys.argv[1] if len(sys.argv) > 1 else "output/ep28_pro.mp4"
+    if len(sys.argv) > 3:
+        rendre_extrait(M, float(sys.argv[2]), float(sys.argv[3]), sortie)
+    else:
+        M.render(sortie)
