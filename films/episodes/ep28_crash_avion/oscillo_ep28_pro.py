@@ -323,6 +323,7 @@ def coup(c, t):
 
 
 # ------------------------------------------------------------------------------------------------ montage
+FIXES = [E.e12]                           # écrans sans accents de caméra (cartons de fin)
 HAUT = 330                                # sous le titre : l'image filmée commence ici, avec un fondu
 
 
@@ -333,7 +334,7 @@ def avec_camera(fn, cam, lois=True, haut=HAUT):
         c.save()
         if cam is not None:
             c.clipRect(skia.Rect(0, haut, W, H))
-        if fn is not E.e12:
+        if fn not in FIXES:
             coup(c, tr)
         if cam is not None:
             cam.appliquer(c, t)
@@ -354,7 +355,7 @@ def avec_camera(fn, cam, lois=True, haut=HAUT):
             t0, txt, col, y, taille = g.titres[-1]
             ecrit(c, t, t0, txt, W / 2, y, taille, col, True, 1.6)
         if lois:
-            E.tableau_lois(c, t)
+            (lois if callable(lois) else E.tableau_lois)(c, t)              # un autre épisode passe son tableau
     g.hud, g.titres, g.haut = dessus, [], haut
     return g
 
