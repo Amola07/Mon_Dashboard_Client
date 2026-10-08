@@ -327,7 +327,7 @@ HAUT = 330                                # sous le titre : l'image filmée comm
 
 
 def avec_camera(fn, cam, lois=True, haut=HAUT):
-    def g(c, tr):
+    def g(c, tr, hud=True):
         t = prevu(tr)                                                     # le temps des écrans
         TITRES.clear()
         c.save()
@@ -343,17 +343,26 @@ def avec_camera(fn, cam, lois=True, haut=HAUT):
             fondu = skia.GradientShader.MakeLinear([skia.Point(0, HAUT), skia.Point(0, HAUT + 90)],
                                                   [skia.Color(2, 8, 4, 255), skia.Color(2, 8, 4, 0)])
             c.drawRect(skia.Rect(0, HAUT, W, HAUT + 90), skia.Paint(Shader=fondu))
-        if TITRES:
-            t0, txt, col, y, taille = TITRES[-1]
+        g.titres = list(TITRES)
+        if hud:
+            g.hud(c, tr)
+
+    def dessus(c, tr):
+        """Le titre et le tableau des lois : fixes, hors caméra."""
+        t = prevu(tr)
+        if g.titres:
+            t0, txt, col, y, taille = g.titres[-1]
             ecrit(c, t, t0, txt, W / 2, y, taille, col, True, 1.6)
         if lois:
             E.tableau_lois(c, t)
+    g.hud, g.titres, g.haut = dessus, [], haut
     return g
 
 
 def tableaux():
     cams = cameras()
     out = []
+    CAMS.clear()
     origine = E.tableaux()
     preparer_calage([x[0] for x in origine])
     ecrans = [E.e1, E.e2, I.e4_pro, E.e5, E.e6a, E.e6b, E.e6c, E.e7, e7b, E.e8a, E.e8b, E.e9, E.e10, E.e11, E.e12]
@@ -364,6 +373,140 @@ def tableaux():
             cam = None                                                   # l'inertie a sa propre caméra ; carton de fin
         haut = 215 if fn in (E.e1, E.e2) else HAUT                       # e2 écrit dans le haut, e1 n'a pas de titre
         out.append((t0, avec_camera(fn, cam, lois=fn not in (E.e1, E.e12), haut=haut), tr))
+        CAMS.append(I.camera() if fn is I.e4_pro else cam)
+    return enchainements(out)
+
+
+# ------------------------------------------------------------------------------------------------ enchaînements
+CAMS = []
+TRANSFOS = []                             # [(début, fin)] des enchaînements, pour les sons
+_COUCHES = []
+
+
+def mini_perso(x, y, r=10):
+    return E.mini_perso(x, y, r)
+
+
+def vers_ecran(i, t, traits):
+    """Les traits d'un dessin de l'écran i tels qu'on les voit à l'instant réel t (caméra de l'écran)."""
+    cam = CAMS[i]
+    if cam is None:
+        return traits
+    z, cx, cy = cam.etat(prevu(t))
+    return [[((x - cx) * z + W / 2, (y - cy) * z + H / 2) for x, y in l] for l in traits]
+
+
+def centre(traits):
+    xs = [p[0] for l in traits for p in l]
+    ys = [p[1] for l in traits for p in l]
+    return (min(xs) + max(xs)) / 2, (min(ys) + max(ys)) / 2
+
+
+def heros():
+    """Pour chaque début d'écran : (le dessin qui part, le dessin qui arrive, début, fin) ; ou ("plongee", P, Q) ;
+    les dessins sont des fonctions du temps (coordonnées du monde de leur écran)."""
+    cel = (207 + 66 * 5, 360 + 40 + 66 * 4 * 1.12)                       # un passager au milieu de la grille
+    ob = objet
+    return {
+        s(3) - 0.1: (lambda t: E.pose("as_regarde_haut", W / 2, 1500, 1.45), lambda t: mini_perso(*cel),
+                     s(3) - 0.4, s(3) + 0.012 * 45 + 0.35),
+        s(7): (lambda t: mini_perso(*cel), lambda t: I.passager(t)[0][0], s(7) - 0.3, s(7) + 0.3),
+        s(14): (lambda t: I.passager(t)[0][0], lambda t: E.pose("as_brace", 540, 1480, 1.9), s(14) - 0.3, s(15) + 0.4),
+        s(21): ("plongee", (270, 1468), (540, 760)),
+        s(26) - 0.05: ("plongee", (520, 1090), (290, 620)),
+        s(29) - 0.05: (lambda t: ob("si_siege_coupe", 540, 1180, 330), lambda t: ob("ph_mannequin", 340, 880, 560),
+                       s(29) - 0.35, s(29) + 0.75),
+        s(31): ("plongee", (820, 1230), (540, 590)),
+        s(32) + 3.0: (lambda t: ob("ph_kettlebell", 800, 1150, 290), lambda t: ob("sac_vol", 960, 760, 360),
+                      s(32) + 2.7, s(32) + 3.3),
+        s(37): (lambda t: ob("fe_flammes", 790, 1090, 440), lambda t: ob("sac_tas", 790, 1110, 400),
+                s(37) - 0.3, s(37) + 0.95),
+        s(41): (lambda t: A.deplace(ob("gr_file", W / 2, 700, 900), 9 * (t - s(38)), 0),
+                lambda t: ob("fe_fumee", W / 2, 900, 520), s(41) - 0.3, s(41) + 0.85),
+        s(46): (lambda t: ob("fe_plafond", W / 2, 740, 960), lambda t: ob("cab_dessus", W / 2, 840, 440),
+                s(46) - 0.3, s(46) + 0.75),
+        s(50): (lambda t: ob("cab_dessus", W / 2, 840, 440), lambda t: ob("av_eau", W / 2, 580, 940),
+                s(50) - 0.3, s(50) + 0.75),
+    }
+
+
+def _couche(i):
+    while len(_COUCHES) <= i:
+        _COUCHES.append(skia.Surface(W, H))
+    sf = _COUCHES[i]
+    sf.getCanvas().clear(skia.Color(0, 0, 0, 0))
+    return sf
+
+
+def _poser(c, sf, alpha, k=1.0, pivot=(W / 2, H / 2)):
+    if alpha <= 0.01:
+        return
+    c.save()
+    c.translate(*pivot)
+    c.scale(k, k)
+    c.translate(-pivot[0], -pivot[1])
+    c.drawImage(sf.makeImageSnapshot(), 0, 0, skia.SamplingOptions(skia.FilterMode.kLinear),
+                skia.Paint(Alphaf=min(1.0, alpha)))
+    c.restore()
+
+
+def transformation(i, g_av, g_ap, ha, hb, debut):
+    """L'objet qui part (écran i - 1) se change en l'objet qui arrive (écran i) ; les deux écrans se fondent autour."""
+    def m(c, t):
+        k = A.borne((t - debut) / 0.6)
+        A_ = vers_ecran(i - 1, debut, ha(debut))
+        B_ = vers_ecran(i, debut + 0.6, hb(debut + 0.6))
+        pa, pb = centre(A_), centre(B_)
+        s1, s2 = _couche(0), _couche(1)
+        g_av(s1.getCanvas(), t, hud=False)
+        g_ap(s2.getCanvas(), t, hud=False)
+        c.save()
+        c.clipRect(skia.Rect(0, min(g_av.haut, g_ap.haut), W, H))
+        _poser(c, s1, 1 - A.lisse(k / 0.6), 1 + 0.12 * A.lisse(k), pa)            # l'ancien écran s'efface en avançant
+        _poser(c, s2, A.lisse((k - 0.35) / 0.65), 0.93 + 0.07 * A.lisse(k), pb)   # le nouveau arrive en reculant
+        for tr, it in A.flux(("transfo", i), A_, B_, k):
+            faisceau(c, A.vivant(tr, t, 0.6), 1.0, VERT_PALE, 1.4, it)
+        c.restore()
+        (g_av if k < 0.5 else g_ap).hud(c, t)
+    return m
+
+
+def plongee(g_av, g_ap, P, Q, debut):
+    """La caméra plonge dans un point de l'écran qui part et ressort d'un point de l'écran qui arrive."""
+    def m(c, t):
+        k = A.borne((t - debut) / 0.6)
+        s1, s2 = _couche(0), _couche(1)
+        g_av(s1.getCanvas(), t, hud=False)
+        g_ap(s2.getCanvas(), t, hud=False)
+        c.save()
+        c.clipRect(skia.Rect(0, min(g_av.haut, g_ap.haut), W, H))
+        _poser(c, s1, 1 - A.lisse((k - 0.2) / 0.4), 1 + 5 * A.lisse(k / 0.7) ** 2, P)
+        _poser(c, s2, A.lisse((k - 0.35) / 0.4), 0.35 + 0.65 * A.sortie((k - 0.3) / 0.7), Q)
+        c.restore()
+        (g_av if k < 0.5 else g_ap).hud(c, t)
+    return m
+
+
+def enchainements(tabs):
+    """Remplace les coupes et les effets (glitch, balayage…) par des transformations entre écrans."""
+    TRANSFOS.clear()
+    H_ = heros()
+    out = []
+    for i, (t0, g, tr) in enumerate(tabs):
+        h = H_.get(t0)
+        if not h or i == 0:
+            out.append((t0, g, tr))
+            continue
+        g_av = tabs[i - 1][1]
+        if h[0] == "plongee":
+            debut, fin = t0 - 0.3, t0 + 0.3
+            m = plongee(g_av, g, h[1], h[2], debut)
+        else:
+            debut, fin = h[2], h[3]
+            m = transformation(i, g_av, g, h[0], h[1], debut)
+        TRANSFOS.append((debut, fin))
+        out.append((debut, m, None))
+        out.append((fin, g, None))
     return out
 
 
@@ -381,6 +524,7 @@ def effets(tabs):
     ev += [(tb, Z.boom(0.6, 55)), (tb, Z.thump(0.45)), (tb, Z.craquement(0.3)), (s(32) + 3.5, Z.whoosh(0.9, 0.1)),
            (s(30) + 0.1, Z.thump(0.3)), (s(32) + 2.0, Z.thump(0.35))]
     ev = [(reel(t0), snd) for t0, snd in ev]                              # sons des écrans : suivent le recalage
+    ev += [(d, Z.whoosh(0.6, 0.08)) for d, f in TRANSFOS]                  # les enchaînements
     ev += [(tw, Z.thump(0.3)) for tw, genre in ACC if genre == "choc"]
     ev += [(tw, Z.boom(0.45, 70)) for tw, genre in ACC if genre == "arret"]
     return ev
