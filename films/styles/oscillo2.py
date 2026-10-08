@@ -333,8 +333,21 @@ def _chemin_plein(traits):
 ANGLES = {"vert": 0, "ambre": -35, "pale": 35}
 
 
-def dessiner_icone_sobre(c, nom, cx, bas, hauteur, a=1.0, u=1.0):
-    """Version sobre : silhouette au faisceau, contours des grandes zones en trait fin, hachures sur l'ambre seulement."""
+def silhouette(nom, cx, bas, hauteur):
+    """Le contour extérieur de l'icône, placé (pour les transformations d'un dessin en un autre)."""
+    zones, sil, (lw, lh) = icone_vecteur(nom)
+    k = hauteur / lh
+    return _place(sil, cx - lw * k / 2, bas - hauteur, k)
+
+
+def hauteur_pour(nom, largeur):
+    _, _, (lw, lh) = icone_vecteur(nom)
+    return largeur * lh / lw
+
+
+def dessiner_icone_sobre(c, nom, cx, bas, hauteur, a=1.0, u=1.0, hach=("ambre",)):
+    """Version sobre : silhouette au faisceau, contours des grandes zones en trait fin, hachures sur les familles
+    de couleur de `hach` (l'ambre seulement par défaut)."""
     zones, sil, (lw, lh) = icone_vecteur(nom)
     k = hauteur / lh
     x0, y0 = cx - lw * k / 2, bas - hauteur
@@ -344,9 +357,10 @@ def dessiner_icone_sobre(c, nom, cx, bas, hauteur, a=1.0, u=1.0):
         if not traits:
             continue
         pl = _place(traits, x0, y0, k)
-        if fam == "ambre":
-            hachures(c, _chemin_plein(pl), AMBRE, pas, -35, 1.6, 0.8 * a, u)
-            dessiner(c, pl, AMBRE, 2.2, a, u)
+        if fam in hach:
+            hachures(c, _chemin_plein(pl), COULEURS[fam], pas, ANGLES[fam] or -35, 1.6,
+                     (0.8 if fam == "ambre" else 0.45) * a, u)
+            dessiner(c, pl, COULEURS[fam], 2.2 if fam == "ambre" else 1.6, a, u)
         else:
             dessiner(c, pl, COULEURS[fam], 1.3, 0.4 * a, u)
     contour = _place(sil, x0, y0, k)

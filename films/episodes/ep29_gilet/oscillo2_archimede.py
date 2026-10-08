@@ -165,7 +165,10 @@ def lissajous(t, cx=540, cy=1300, r=200):
 
 def ecran_a(c, t, a=1.0):
     phrase(c, t, s(5), ["La raison ?"])
-    O.dessiner(c, lissajous(t), VERT, 1.8, 0.35 * a)
+    O.dessiner(c, lissajous(t), VERT, 1.8, 0.2 * a)
+    ta0 = w("archimède", 6)
+    if t >= ta0 and os.path.exists(os.path.join(O._DOSSIER_PX, "vx_archimede.png")):
+        O.dessiner_icone_sobre(c, "vx_archimede", W / 2, 1480, 420, a, (t - ta0 - 0.2) / 0.6, hach=("ambre", "vert"))
     ta = w("archimède", 6)
     if t >= ta:
         O.dessiner(c, O.texte("ARCHIMÈDE", W / 2, 880, 112, gras=True), AMBRE, 3.4, a, (t - ta) / 0.5)
