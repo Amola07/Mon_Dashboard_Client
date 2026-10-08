@@ -304,8 +304,17 @@ def _contours_masque(m, ech, lisse_n=2):
     return out
 
 
+_DOSSIER_VX = _os.path.join(_ICI, "..", "illustrations_vecteur")
+
+
 def icone_vecteur(nom):
-    """{famille: {ton: [contours]}}, contour de la silhouette, (largeur, hauteur) en pixels de l'icône."""
+    """{famille: {ton: [contours]}}, contour de la silhouette, (largeur, hauteur) en pixels de l'icône.
+    Prend la version précise (films/illustrations_vecteur, tirée de la planche en pleine définition) si elle existe."""
+    if nom not in _VECT and _os.path.exists(_os.path.join(_DOSSIER_VX, nom + ".json")):
+        import json as _json
+        d = _json.load(open(_os.path.join(_DOSSIER_VX, nom + ".json")))
+        zones = {f: {int(t): [[tuple(p) for p in l] for l in ls] for t, ls in z.items()} for f, z in d["zones"].items()}
+        _VECT[nom] = (zones, [[tuple(p) for p in l] for l in d["silhouette"]], tuple(d["taille"]))
     if nom not in _VECT:
         from PIL import Image
         a = np.asarray(Image.open(_os.path.join(_DOSSIER_PX, nom + ".png")).convert("RGBA"))
