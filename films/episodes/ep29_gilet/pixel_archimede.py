@@ -99,6 +99,9 @@ def scene(t):
             dc = ImageDraw.Draw(cal)
             X.texte(dc, (X.LW / 2, 150), "ARCHIMÈDE", F32, ORANGE)
             X.texte(dc, (X.LW / 2, 196), "IIIE SIÈCLE AV. J.-C.", F8, BV)
+            if os.path.exists(os.path.join(X.DOSSIER_ICONES, "px_archimede.png")):
+                buste = X.icone("px_archimede", 2)
+                cal.paste(buste, (round(X.LW / 2 - buste.width / 2), 220), buste)
             X.poser(toile, cal, X.apparition(t, ta, 0.3))
         return toile, phrases, neige
 

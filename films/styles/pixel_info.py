@@ -30,6 +30,12 @@ ORANGE_CLAIR = (255, 196, 140)
 ORANGE_SOMBRE = (168, 72, 26)
 BLANC = (236, 242, 240)
 GRIS = (120, 130, 132)
+GRIS_CLAIR = (188, 198, 198)
+GRIS_FONCE = (66, 76, 80)
+BV_CLAIR = (128, 214, 214)
+# couleurs auxquelles on ramène les icônes générées par IA (films/outils/planche_pixel.py)
+PALETTE_ICONES = [BV, BV_MOYEN, BV_SOMBRE, BV_CLAIR, ORANGE, ORANGE_CLAIR, ORANGE_SOMBRE, BLANC, GRIS, GRIS_CLAIR,
+                  GRIS_FONCE]
 
 
 def pixel(taille, gras=True):
@@ -59,12 +65,16 @@ def calque():
     return Image.new("RGBA", (LW, LH), (0, 0, 0, 0))
 
 
-def poser(toile, cal, u):
-    """Pose le calque sur la toile ; u de 0 à 1 : il apparaît pixel par pixel (trame de Bayer)."""
-    if u <= 0:
+def poser(toile, cal, u, disparait=False):
+    """Pose le calque sur la toile ; u de 0 à 1 : il apparaît pixel par pixel (trame de Bayer).
+    disparait=True : le calque s'efface pixel par pixel quand u va de 0 à 1 (pour un fondu entre deux poses)."""
+    if (u <= 0 and not disparait) or (disparait and u >= 1):
         return
     a = np.asarray(cal)
-    vis = (a[..., 3] > 0) & (SEUIL < min(1.0, u) - 1e-6)
+    if disparait:
+        vis = (a[..., 3] > 0) & (SEUIL >= max(0.0, u))
+    else:
+        vis = (a[..., 3] > 0) & (SEUIL < min(1.0, u) - 1e-6)
     t = np.asarray(toile).copy()
     t[vis] = a[vis][:, :3]
     toile.paste(Image.fromarray(t))
@@ -165,19 +175,22 @@ def phrase(img, lignes, y, t, t0, taille=84, t1=None):
     if t < t0 or (t1 is not None and t >= t1):
         return
     u = sortie((t - t0) / 0.18)
-    f = GROTESQUE if taille == 84 else ImageFont.truetype(os.path.join(POLICES, "Montserrat-ExtraBold.ttf"), taille)
     d = ImageDraw.Draw(img)
+    plus_longue = max(d.textlength(l.replace("*", ""), font=GROTESQUE) for l in lignes)
+    if plus_longue > W - 90:                              # une ligne trop longue : la police rétrécit
+        taille = int(84 * (W - 90) / plus_longue)
+    f = GROTESQUE if taille == 84 else ImageFont.truetype(os.path.join(POLICES, "Montserrat-ExtraBold.ttf"), taille)
     dy = round(18 * (1 - u))
     alpha = u
     for i, ligne in enumerate(lignes):
-        mots = ligne.split(" ")
-        largeurs = [d.textlength(m.strip("*") + " ", font=f) for m in mots]
-        x = (W - sum(largeurs) + d.textlength(" ", font=f)) / 2
-        for m, lw in zip(mots, largeurs):
-            col = ORANGE if m.startswith("*") else BLANC
+        morceaux = ligne.split("*")                       # *…* = en orange, sur un ou plusieurs mots
+        largeur = d.textlength(ligne.replace("*", ""), font=f)
+        x = (W - largeur) / 2
+        for j, m in enumerate(morceaux):
+            col = ORANGE if j % 2 == 1 else BLANC
             col = tuple(int(c * alpha + NOIR[k] * (1 - alpha)) for k, c in enumerate(col))
-            d.text((x, y + i * taille * 1.18 + dy), m.strip("*"), font=f, fill=col)
-            x += lw
+            d.text((x, y + i * taille * 1.18 + dy), m, font=f, fill=col)
+            x += d.textlength(m, font=f)
 
 
 # ------------------------------------------------------------------------------------------------ sons 8 bits
@@ -193,3 +206,63 @@ def bip(f=1320, d=0.06, amp=0.12):
 
 def rafale(f0, n, pas=0.05, amp=0.1):
     return [(i * pas, bip(f0 + 60 * i, 0.05, amp)) for i in range(n)]
+
+
+# ------------------------------------------------------------------------------------------------ icônes générées
+DOSSIER_ICONES = os.path.join(ICI, "..", "illustrations_pixel")
+_ICONES = {}
+
+
+def icone(nom, k=1):
+    """Une icône de films/illustrations_pixel (vrais pixels, fond transparent), agrandie k fois sans lissage."""
+    if (nom, k) not in _ICONES:
+        im = Image.open(os.path.join(DOSSIER_ICONES, nom + ".png")).convert("RGBA")
+        _ICONES[(nom, k)] = im.resize((im.width * k, im.height * k), Image.NEAREST) if k != 1 else im
+    return _ICONES[(nom, k)]
+
+
+def coller(toile, img, cx, bas, u=1.0, disparait=False):
+    """Pose une icône centrée en cx, posée sur la ligne `bas`, avec l'apparition en trame."""
+    cal = calque()
+    cal.paste(img, (round(cx - img.width / 2), round(bas - img.height)), img)
+    poser(toile, cal, u, disparait)
+
+
+def tampon(toile, t, t0, txt, cx, cy, ang=-8, f=None, col=ORANGE):
+    """Un tampon : texte pixel dans un cadre, penché, qui s'écrase (gros, puis à sa taille)."""
+    if t < t0:
+        return
+    f = f or F16
+    d0 = ImageDraw.Draw(Image.new("RGB", (1, 1)))
+    lw = int(d0.textlength(txt, font=f))
+    im = Image.new("RGBA", (lw + 16, f.size + 14), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    d.rectangle([0, 0, im.width - 1, im.height - 1], outline=col, width=2)
+    d.text((8, 5), txt, font=f, fill=col)
+    im = im.rotate(ang, expand=True, resample=Image.NEAREST)
+    k = 2 if t < t0 + 0.08 else 1
+    if k > 1:
+        im = im.resize((im.width * 2, im.height * 2), Image.NEAREST)
+    toile.paste(im, (round(cx - im.width / 2), round(cy - im.height / 2)), im)
+
+
+def chaleur(d, t, cx, cy, n, r0, r1, col=ORANGE):
+    """Des petites ondulations qui quittent le corps : la chaleur perdue (n traits)."""
+    for i in range(n):
+        a = -math.pi / 2 + 2 * math.pi * (i + 0.5) / n
+        ph = (t * 0.8 + i * 0.37) % 1.0
+        if ph > 0.85:
+            continue
+        r = r0 + (r1 - r0) * ph
+        for j in range(5):
+            rr = r + j * 2
+            o = round(1.5 * math.sin(j * 1.7 + 8 * t))
+            x = cx + rr * math.cos(a) - o * math.sin(a)
+            y = cy + rr * math.sin(a) + o * math.cos(a)
+            d.point((round(x), round(y)), fill=col if ph < 0.6 else ORANGE_SOMBRE)
+
+
+def grille_cases(d, x0, y0, n_total, n_allumes, cols, c=4, pas=5, col=BV, eteint=BV_SOMBRE):
+    for i in range(n_total):
+        x, y = x0 + (i % cols) * pas, y0 + (i // cols) * pas
+        d.rectangle([x, y, x + c - 1, y + c - 1], fill=col if i < n_allumes else eteint)
