@@ -1,57 +1,59 @@
 # Épisode 30 — La forêt française a doublé
 
 Hashtags : #science #vulgarisation #psychologie #biaiscognitif #biaisdenégativité #cerveau #écologie #climat #forêt
-Durée visée : ≈ 95 s (≈ 280 mots, débit rapide, silences ≤ 0,4 s). Plan : accroche (0-8 s) → la révélation tout de
+Durée visée : ≈ 115 s (≈ 330 mots, débit rapide, silences ≤ 0,4 s). Plan : accroche (0-8 s) → la révélation tout de
 suite (8-25 s) → pourquoi on croyait l'inverse (25-38 s) → le retournement (38-70 s) → la deuxième surprise (70-82 s)
 → objection + fin coupée (82-95 s).
 
-## Texte à lire
+## Texte à lire (ton des vidéos de référence : « je » qui réagit, « vous », questions-réponses)
 
 > **[0 s — accroche]**
-> Depuis 1830, la France a gagné une forêt grande comme l'Autriche.
-> Pas perdu. Gagné.
+> La France a gagné une forêt grande comme l'Autriche. Et presque personne n'est au courant.
 >
-> **[≈ 5 s — la révélation, chiffrée]**
-> En 1830, la forêt couvrait 9 millions d'hectares.
-> Aujourd'hui : 17 millions et demi. Un tiers du pays.
-> Elle a presque doublé.
+> **[≈ 5 s — le cliché, puis « sauf que »]**
+> Quand je dis « forêt française », vous pensez sûrement à ça : des coupes rases, des incendies, des arbres qui
+> disparaissent. Normal, moi aussi.
+> Sauf qu'en 1830, la forêt couvrait 9 millions d'hectares. Aujourd'hui ? 17 millions et demi. Un tiers du pays.
+> Elle a presque doublé. Et l'histoire des Landes m'a complètement scotché.
 >
-> **[≈ 15 s — comment]**
-> Les paysans sont partis en ville. Les champs abandonnés sont redevenus des bois.
-> Et dans les Landes, une loi de 1857 a fait planter un million d'hectares de pins,
-> là où des bergers marchaient sur des échasses.
+> **[≈ 25 s — comment]**
+> Comment c'est possible ? Les paysans sont partis en ville. Les champs abandonnés sont redevenus des bois. Tout seuls.
+> Et les Landes ? Il y a 170 ans, c'était une immense lande, souvent marécageuse, où les bergers se déplaçaient sur
+> des échasses. En 1857, une loi oblige les communes à planter. Résultat : près d'un million d'hectares de pins.
+> Cette forêt que vous traversez sur la route des vacances ? Elle a été plantée par l'homme.
 >
-> **[≈ 28 s — le biais]**
-> Si tu croyais l'inverse, c'est normal.
-> Ton cerveau retient mieux ce qui se dégrade que ce qui s'améliore.
-> Ça s'appelle le biais de négativité.
+> **[≈ 48 s — le biais]**
+> Alors pourquoi on est tous persuadés que la forêt recule ?
+> Le truc, c'est que notre cerveau retient ce qui se dégrade, pas ce qui s'améliore.
+> Un incendie passe au journal de 20 heures. Un arbre qui pousse, jamais.
 >
-> **[≈ 38 s — relance]**
-> Mais attends. Parce que cette bonne nouvelle cache un problème.
+> **[≈ 58 s — relance]**
+> Mais attendez, parce que c'est là que ça devient inquiétant.
 >
-> **[≈ 42 s — le retournement]**
-> Une forêt, c'est une éponge à CO2.
-> Entre 2005 et 2013, la nôtre en avalait 63 millions de tonnes par an.
-> Entre 2014 et 2022 : 39 millions.
-> Presque 40 % de moins, en dix ans.
+> **[≈ 62 s — le retournement]**
+> Une forêt, c'est une éponge à CO2. Entre 2005 et 2013, la nôtre en absorbait 63 millions de tonnes par an.
+> Et aujourd'hui, à votre avis ? 39. Presque 40 % de moins, en dix ans.
 >
-> **[≈ 56 s — pourquoi]**
-> Les arbres meurent.
-> Il meurt aujourd'hui plus de deux fois plus de bois qu'il y a quinze ans.
-> Les sécheresses affaiblissent les arbres, et les insectes finissent le travail.
-> Un scolyte de quelques millimètres tue un épicéa de trente mètres.
+> **[≈ 74 s — pourquoi]**
+> Pourquoi ? Parce que les arbres meurent. Il meurt deux fois plus de bois qu'il y a quinze ans.
+> La sécheresse les affaiblit. Et un insecte finit le travail : le scolyte. Cinq millimètres.
+> Il tue des épicéas de trente mètres.
 >
-> **[≈ 70 s — la deuxième surprise]**
-> Et pourtant, la quantité de carbone stockée dans la forêt continue d'augmenter : plus 17 % depuis 2009.
-> La forêt grossit… mais respire de plus en plus mal.
+> **[≈ 86 s — la deuxième surprise]**
+> Et pourtant, le carbone stocké dans la forêt continue d'augmenter : plus 17 % depuis 2009.
+> Elle grossit. Mais elle respire de plus en plus mal.
+> Alors, est-ce qu'on a peur de la bonne chose ? Le problème, ce n'est pas une forêt qui disparaît.
+> C'est une forêt qui s'épuise.
 >
-> **[≈ 82 s — objection + fin coupée]**
-> Je sais ce que tu vas me dire : il suffit de replanter.
-> Justement. Les arbres qu'on plante aujourd'hui auront cent ans en 2125.
-> Il faut donc choisir des arbres pour un climat qui n'existe pas encore. Et les forestiers ont trouvé une idée
-> complètement…
+> **[≈ 100 s — objection + fin coupée]**
+> Et je sais ce que vous allez me dire : il suffit de planter des arbres.
+> Justement. Un arbre planté aujourd'hui aura cent ans en 2125. Il faut donc planter pour un climat qui n'existe pas
+> encore. Et les forestiers ont trouvé une idée… mais je n'ai plus le temps ici, donc je vous la montre demain, et
+> vous allez voir que…
 >
 > **[carton] LA SUITE DEMAIN ▶**
+
+Durée : ≈ 115 s (≈ 330 mots à ≈ 175 mots/min). Les temps du découpage ci-dessous sont à recaler sur la voix.
 
 ## Découpage visuel (oscilloscope 2.0, une idée = un tableau qui évolue)
 

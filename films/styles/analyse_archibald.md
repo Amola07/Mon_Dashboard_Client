@@ -67,3 +67,26 @@ transitoires, débit de parole), plus examen image par image des transitions.
 **Le genre** : une peur ou une idée reçue que tout le monde a, démontée chiffres à l'appui. Le sujet est un débat de
 société (on a tous un avis) → commentaires. Il y a un « méchant » de comparaison (le charbon), un retournement
 historique ou naturel étonnant (Oklo), et les vidéos se répondent (énergie → déchets → suite).
+
+## Le ton (transcription Whisper du 9 octobre, `films/outils/transcrire_whisper.py`)
+
+Texte complet ≈ 300 mots pour 2 min. Les transcriptions restent hors du dépôt ; seules les mécaniques sont notées.
+
+- **Un narrateur « je » qui réagit** : il vit la découverte avec le spectateur (« Normal, moi aussi. », « … m'a
+  carrément retourné le cerveau », « Rendez-vous compte »). On parle à « vous ».
+- **Accroche = comparaison paradoxale + « et personne ne le sait / n'en a peur »**, puis promesse d'un moment fort
+  plus tard (« et celle de Fukushima… »).
+- **Le cliché, puis « sauf que »** : « Vous pensez sûrement à ça. », « Vous imaginez plutôt ça ? » → l'image fausse
+  (référence pop : les Simpson, les séries) → « Sauf qu'en vrai… ».
+- **Expérience de pensée concrète** : « Imaginons une ville de 150 000 habitants… ».
+- **Questions au spectateur, réponse immédiate** : « À votre avis ? Je brise le suspense. », « Et dangereux pour
+  l'éternité ? Oh, … », « Et la solution existe ? ».
+- **Phrases coupées, très courtes** : « Solide. Rien qui coule. », « Oui, ils sont dangereux. Très dangereux. »
+- **Une image qui fait voir l'échelle** : « Elle était déjà là quand les dinosaures marchaient au-dessus. »
+- **Relance avant le 2e temps fort** : « Mais attendez, parce que c'est là que ça devient vraiment troublant. »
+- **Psychologie à la fin** : « notre cerveau retient les catastrophes, pas les statistiques », puis une question
+  ouverte (« a-t-on peur de ce qui est dangereux, ou de ce qui est spectaculaire ? »).
+- **Fin** : objection du spectateur (« Et je sais ce que vous allez me dire… Justement… ») ou « je n'ai plus le temps
+  ici, donc je vous poste la suite demain, et vous allez voir à quel point… » (coupé).
+- Ne pas reprendre ses formules signatures mot pour mot (« retourner le cerveau », « je brise le suspense ») : garder
+  les mécaniques, avec nos propres mots.
