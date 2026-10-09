@@ -1,7 +1,7 @@
 # Épisode 30 — La forêt française a doublé
 
 Hashtags : #science #vulgarisation #psychologie #biaiscognitif #biaisdenégativité #cerveau #écologie #climat #forêt
-Durée visée : ≈ 115 s (≈ 330 mots, débit rapide, silences ≤ 0,4 s). Plan : accroche (0-8 s) → la révélation tout de
+Durée visée : ≈ 2 min (≈ 370 mots, débit rapide, silences ≤ 0,4 s). Plan : accroche (0-8 s) → la révélation tout de
 suite (8-25 s) → pourquoi on croyait l'inverse (25-38 s) → le retournement (38-70 s) → la deuxième surprise (70-82 s)
 → objection + fin coupée (82-95 s).
 
@@ -53,7 +53,7 @@ suite (8-25 s) → pourquoi on croyait l'inverse (25-38 s) → le retournement (
 >
 > **[carton] LA SUITE DEMAIN ▶**
 
-Durée : ≈ 115 s (≈ 330 mots à ≈ 175 mots/min). Les temps du découpage ci-dessous sont à recaler sur la voix.
+Durée : ≈ 2 min (≈ 370 mots à ≈ 185 mots/min, comme la référence). Les temps du découpage ci-dessous sont à recaler sur la voix.
 
 ## Découpage visuel (oscilloscope 2.0, une idée = un tableau qui évolue)
 
