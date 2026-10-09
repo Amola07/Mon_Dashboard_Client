@@ -541,27 +541,33 @@ def sons_fixes():
             (T["calme"], lambda: J.fichier("selection", 0.25)), (T["fin"] + 0.3, J.niveau)]
 
 
+def famille(snd):
+    """Range un bruitage dans une famille de mixage d'après sa forme : bip court, accent grave, ambiance longue…"""
+    from scipy.signal import butter, sosfiltfilt
+    d = len(snd) / MI.SR
+    e = np.sqrt(np.mean(snd ** 2)) + 1e-12
+    grave = np.sqrt(np.mean(sosfiltfilt(butter(2, 200, fs=MI.SR, output="sos"), snd) ** 2)) / e
+    crete = 20 * np.log10(np.abs(snd).max() / e + 1e-12)
+    if grave > 0.55 and crete > 10:
+        return "accent"
+    if d < 0.12:
+        return "interface"
+    if d > 1.5:
+        return "ambiance"
+    return "effet"
+
+
 def mixage(chemin, voix, dur):
-    import wave
-    n = int(dur * MI.SR)
-    v = np.zeros(n)
-    v[:min(n, len(voix))] = voix[:n]
-    v *= 10 ** (-16 / 20) / (np.sqrt((v[np.abs(v) > 0.01] ** 2).mean()) + 1e-9)
-    fx = np.zeros(n)
-    for t0, fab in list(SONS.values()) + sons_fixes():
-        snd = fab()
-        i = int(t0 * MI.SR)
-        k = min(n - i, len(snd))
-        if k > 0 and i >= 0:
-            fx[i:i + k] += snd[:k]
-    a = v + 0.8 * fx
-    a *= np.minimum(1, (n - np.arange(n)) / (0.6 * MI.SR))
-    a = a / max(1.0, np.abs(a).max() / 0.95)
-    with wave.open(chemin, "wb") as f:
-        f.setnchannels(1)
-        f.setsampwidth(2)
-        f.setframerate(MI.SR)
-        f.writeframes((np.clip(a, -1, 1) * 32767).astype(np.int16).tobytes())
+    from films.styles import mixage_pro as MP
+    ev = []
+    for cle, (t0, fab) in list(SONS.items()) + [((("fixe", i),), x) for i, x in enumerate(sons_fixes())]:
+        snd = np.asarray(fab(), float)
+        if snd.ndim > 1:
+            snd = snd.mean(1)
+        fam = famille(snd)
+        pan = ((hash(str(cle)) % 100) / 100 - 0.5) * 0.5 if fam == "interface" else 0.0
+        ev.append((t0, snd, fam, pan))
+    MP.mixer(chemin, voix, dur, ev)
 
 
 REPERES = [("porte", "porte", None), ("aspire", "aspire", None), ("non", "non", None), ("ouvrir", "louvrir", None),
