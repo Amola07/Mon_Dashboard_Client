@@ -66,12 +66,46 @@ def sprite(c, t, t0, nom, cx, bas, h, a=1.0, trace=0.45, hach=("ambre", "vert"))
     O.dessiner_icone_sobre(c, nom, cx, bas, h, a, u, hach)
 
 
-def anime(c, t, t0, base, cx, bas, h, fps=8, images=(1, 2, 3, 4), a=1.0, trace=0.0, hach=("ambre", "vert")):
-    """Un sprite animé (cycle d'images)."""
+def anime(c, t, t0, base, cx, bas, h, fps=8, images=(1, 2, 3, 4), a=1.0, trace=0.0, hach=("ambre", "vert"),
+          fondu=0.45, balance=0.0, souffle=0.0):
+    """Un sprite animé, fluide : entre deux images on fond l'une dans l'autre (sur la fin de l'intervalle), le
+    corps se balance autour des pieds (balance, en degrés) et respire (souffle : écrasement-étirement)."""
     if t < t0:
         return
-    k = images[int((t - t0) * fps) % len(images)]
-    sprite(c, t, t0, f"{base}_{k}", cx, bas, h, a, trace if (t - t0) < trace else 0.0, hach)
+    f = (t - t0) * fps
+    i = int(f)
+    fr = f - i
+    k0, k1 = images[i % len(images)], images[(i + 1) % len(images)]
+    ang = balance * math.sin(2 * math.pi * f / len(images))
+    sy = 1 + souffle * math.sin(2 * math.pi * f / len(images) * 2)
+    c.save()
+    c.translate(cx, bas)
+    c.rotate(ang)
+    c.scale(1 / math.sqrt(sy), sy)
+    c.translate(-cx, -bas)
+    u = A.lisse((fr - (1 - fondu)) / fondu) if fondu > 0 else 0.0
+    if u <= 0:
+        sprite(c, t, t0, f"{base}_{k0}", cx, bas, h, a, trace if (t - t0) < trace else 0.0, hach)
+    else:
+        c.saveLayerAlpha(None, int(255 * (1 - u) * a))
+        sprite(c, t, t0, f"{base}_{k0}", cx, bas, h, 1.0, 0.0, hach)
+        c.restore()
+        c.saveLayerAlpha(None, int(255 * u * a))
+        sprite(c, t, t0, f"{base}_{k1}", cx, bas, h, 1.0, 0.0, hach)
+        c.restore()
+    c.restore()
+
+
+def lampe(c, t, x, y, a=1.0):
+    """Un voyant d'alarme qui clignote, avec ses rayons."""
+    if int(t * 4) % 2:
+        return
+    p = skia.Path()
+    p.addCircle(x, y, 22)
+    O.hachures(c, p, AMBRE, 5, -35, 1.6, a)
+    O.dessiner(c, O.contours(p, 4), AMBRE, 3, a)
+    O.dessiner(c, [[(x + 34 * math.cos(k), y + 34 * math.sin(k)), (x + 56 * math.cos(k), y + 56 * math.sin(k))]
+                   for k in [i * math.pi / 4 for i in range(8)]], AMBRE, 3, a)
 
 
 def suite_images(c, t, etapes, base, cx, bas, h, a=1.0, hach=("ambre", "vert")):
@@ -124,20 +158,19 @@ PORTE_X = 840
 
 
 def s1(c, t, a=1.0):
+    """L'accroche : dès l'image 0, le passager arrache la poignée, l'alarme hurle, la porte tremble."""
     phrase(c, t, -1.0, ["Ouvrir la porte", "*en plein vol* ?"])
     nuages(c, t)
     x = 100 + (t * 160) % 1100                                    # l'avion qui traverse, en haut
-    sprite(c, t, -1.0, "sp_avion_1", x, 760, 90, a, 0)
+    sprite(c, t, -1.0, "sp_avion_1", x, 760 + 6 * math.sin(2.5 * t), 90, a, 0)
     O.dessiner(c, [[(80, 1560), (1000, 1560)]], VERT_PALE, 2.4, a)    # le plancher de la cabine
-    sprite(c, t, -1.0, "sp_porte_1", PORTE_X, 1560, 520, a, 0)
-    ta = T["aspire"] - 0.2
-    if t < T["porte"]:
-        px = 220 + 330 * A.lisse((t + 0.5) / max(0.6, T["porte"] + 0.5))
-        anime(c, t, -1.0, "sp_marche", px, 1560, 420, 7, a=a)
-    elif t < ta:
-        sprite(c, t, T["porte"], "sp_tire_1", 590, 1560, 420, a, 0)
-    else:
-        anime(c, t, ta, "sp_tire", 590, 1560, 420, 5, (2, 3, 4, 3), a=a)
+    tremble = 7 * math.sin(55 * t) * (0.4 + 0.6 * abs(math.sin(3 * t)))
+    sprite(c, t, -1.0, "sp_porte_1", PORTE_X + tremble, 1560, 520, a, 0)
+    lampe(c, t, PORTE_X, 960, a)
+    fort = 1.0 if t < T["aspire"] else 1.6                        # il tire de plus en plus fort
+    anime(c, t, -1.0, "sp_tire", 610, 1560, 420, 4.5, (3, 4), a=a, fondu=0.6, balance=-3 * fort, souffle=0.015)
+    if t >= T["aspire"] - 0.2:                                    # l'air aspiré vers la porte
+        vent(c, -t, PORTE_X - 260, PORTE_X - 40, 1080, 1500, a * A.lisse((t - T["aspire"] + 0.2) / 0.3), 10)
     if t >= T["aspire"]:
         O.dessiner(c, O.texte("?", 470, 1010, 120, gras=True), AMBRE, 4, a)
 
@@ -400,7 +433,7 @@ def hud(c, t, k):
         O.dessiner(c, O.texte(txt, 990 - O.largeur_texte(txt, 30), 190, 30, centre=False, gras=True), VERT, 1.8, 0.9)
 
 
-BANDEAUX = [("aspire", 0.0, 1.2, "! PORTE EN DANGER"), ("elephants", 0.2, 1.4, "x2 ÉLÉPHANTS"),
+BANDEAUX = [("debut", 0.0, 2.6, "! ALERTE : PORTE"), ("aspire", 0.0, 1.2, "! PORTE EN DANGER"), ("elephants", 0.2, 1.4, "x2 ÉLÉPHANTS"),
             ("zero", 0.0, 1.2, "PRESSION : 0"), ("secours", 0.0, 1.4, "! PORTE OUVERTE"),
             ("panneau", 0.0, 1.6, "! PANNEAU ARRACHÉ"), ("cooper", 0.0, 1.4, "AFFAIRE NON RÉSOLUE")]
 
@@ -463,12 +496,14 @@ def image(c, t):
             ajoute(("whoosh", i), b - 0.2, lambda: J.fichier("swoosh_court", 0.18))
             break
     else:
-        z = 1.0
-        for tw in (T["non"], T["toute"], T["contre"], T["panneau"], T["vides"]):
+        z, dx, dy = 1.0, 0.0, 0.0
+        for tw in (0.0, T["non"], T["toute"], T["contre"], T["panneau"], T["vides"]):
             if t >= tw:
                 z += 0.05 * math.exp(-6 * (t - tw))
+                dx += 26 * A.secousse(t - tw, 7, 7)                # la caméra encaisse le choc
+                dy += 14 * A.secousse(t - tw, 9, 7)
         c.save()
-        c.translate(W / 2, H / 2)
+        c.translate(W / 2 + dx, H / 2 + dy)
         c.scale(z, z)
         c.translate(-W / 2, -H / 2)
         ec[k][1](c, t)
@@ -479,6 +514,8 @@ def image(c, t):
         if t < T["non"] + 0.12:
             rng = np.random.default_rng(int(t * 1000))
             O.dessiner(c, [[(x, y), (x + 3, y)] for x, y in rng.uniform(0, 1, (900, 2)) * (W, H)], VERT_PALE, 2, 0.8)
+    if t < 0.15:                                                  # flash blanc de l'image 0
+        c.drawRect(skia.Rect(0, 0, W, H), skia.Paint(Color=skia.Color(255, 255, 255, int(200 * (1 - t / 0.15)))))
     if ec[k][1] is not fin:
         hud(c, t, k + 1)
         bandeaux(c, t)
@@ -488,7 +525,10 @@ def image(c, t):
 
 
 def sons_fixes():
-    return [(0.0, lambda: J.fichier("selection", 0.25)), (T["non"], lambda: J.fichier("arret", 0.3)),
+    return [(0.0, lambda: J.fichier("boum_cine", 0.55, 2.5)), (0.0, lambda: J.fichier("glitch", 0.35)),
+            (0.02, lambda: J.fichier("impact", 0.3))] + [(0.15 + 0.5 * i, lambda: J.alerte(1, 0.05))
+                                                           for i in range(int(T["non"] / 0.5))] + [
+            (T["non"], lambda: J.fichier("arret", 0.3)),
             (T["non"] + 0.05, lambda: J.fichier("erreur", 0.35)), (T["non"], lambda: J.fichier("boum_cine", 0.35, 2.0)),
             (T["non"], lambda: Z.neige(0.22, 0.2)), (T["surprendre"], lambda: J.fichier("question", 0.28)),
             (T["cabine"], lambda: J.fichier("souffle_sombre", 0.18)), (T["toute"] + 0.8, lambda: J.fichier("impact", 0.25)),
@@ -547,6 +587,7 @@ def preparer():
     MV.charger(types.SimpleNamespace(SEGS=os.path.join(ICI, "audio", "voix.json"), VOIX=chemin))
     B.VOIX, N, _ = MI.tighten(MI.load_voice(chemin), max_gap=0.40, thr_db=-38.0)
     T.clear()
+    T["debut"] = 0.0
     for nom, cle, apres in REPERES:
         T[nom] = MV.mot(cle, T[apres] + 0.01 if apres else 0.0)
     T["fin"] = MV.MOTS[-1][1] + 0.6
@@ -557,6 +598,7 @@ def preparer():
 
 # le moteur de rendu de l'ép. 30, branché sur cet épisode
 B.preparer, B.image, B.mixage = preparer, image, mixage
+B.FPS = 60                                                         # 60 images/s : mouvement plus fluide
 
 if __name__ == "__main__":
     out = sys.argv[1] if len(sys.argv) > 1 else "output/ep31.mp4"

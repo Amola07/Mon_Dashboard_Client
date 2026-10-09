@@ -20,3 +20,10 @@ Fin de prompt type :
 ```
 Flat vector style, simple bold shapes, large flat color areas, no outlines, no gradients, no texture, no small details, each color used in at most two tones (base and one darker tone for shadows), strictly limited palette: teal #28AFAF, dark teal #1A6E70, orange #FF8A3D, dark orange #A8481A, off-white #ECF2F0, grey #788284, on a pure solid black background #000000, no text, no numbers, no frame borders, generous empty black space between cells.
 ```
+
+## Fluidité (9 octobre, demande : « fluide comme un dessin animé »)
+- Côté code (fait dans jeu_ep31.py) : rendu à 60 i/s, fondu entre deux images d'un cycle, balancement et
+  écrasement-étirement continus, secousse de caméra et flash sur les chocs, déplacements avec accélération.
+- Côté planches : pour une action importante, demander **8 images** au lieu de 4 (grille 4 × 4 : deux lignes de 4
+  pour une même action, « frames 1 to 8 of the same animation, read row by row »). Plus d'images = mouvement plus
+  fluide ; c'est la seule vraie façon d'avoir un dessin animé image par image.
