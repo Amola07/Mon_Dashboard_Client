@@ -220,3 +220,16 @@ Ce qui la distingue :
 
 Ce qui ne la distingue PAS : la finesse du dessin (bonhommes bâtons, pas de hachures), le nombre d'effets.
 Prudence : une seule vidéo ; les vues dépendent aussi du jour, de l'heure et de la poussée de l'algorithme.
+
+### Le côté « jeu vidéo » (constat de l'utilisateur, vérifié dans le code et le son)
+
+Ép. 21 (`films/episodes/ep21_ascenseur/oscillo_ep21.py`, `mixage` + `effets`) : **pas de nappe de fond**, mais
+- un **bip à chaque trait tracé** par le faisceau (toutes les 0,13 s, hauteur qui varie) et un **clic par lettre** qui
+  s'écrit (comme les dialogues de jeux rétro) → le son suit tout ce qui bouge ;
+- des **bruitages qui racontent** : alarme, vent de chute, cliquet à chaque étage qui défile, sirène descendante,
+  « arrêt de bande », clang, cœur qui bat, ding d'ascenseur, porte, foule, applaudissements, arpège qui monte ;
+- un **écran de jeu** : compteurs « ÉTAGE 09.9 / 85 km/h » en direct, bandeaux « ! CÂBLE ROMPU », « IMPACT », « SAUT »,
+  « ⏸ ARRÊT SUR IMAGE », bonhomme-sprite, « NON » géant qui clignote.
+Spectrogramme des 12 premières secondes : l'ép. 21 est plein de traits tonals (bips tenus, glissandos montants et
+descendants) ; l'ép. 30 n'a presque que la voix et la nappe. Depuis l'ép. 28, on a remplacé ces sons par une nappe
+continue + quelques whoosh/pings génériques : c'est sans doute une perte importante.
