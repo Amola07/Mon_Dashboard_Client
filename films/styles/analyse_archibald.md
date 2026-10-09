@@ -47,3 +47,23 @@ transitoires, débit de parole), plus examen image par image des transitions.
 4. Accroche : vraie image + objet-choc incrusté + phrase courte dès l'image 0.
 5. Re-accroches écrites à l'écran, et fin en feuilleton qui renvoie à la vidéo suivante.
 6. Une identité stricte : une couleur d'accent, une police pixel, les mêmes icônes (chez nous : bleu-vert + orange).
+
+## De quoi parlent les vidéos (9 octobre)
+
+- **B, « Il existe une énergie ×800 »** : le charbon tue ~800 fois plus par TWh que le nucléaire, mais c'est le
+  nucléaire qui fait peur. Tchernobyl / Fukushima → 150 000 évacués → le charbon : 25 morts par TWh, pétrole 18, gaz 3
+  → nucléaire « 1 mort tous les 33 ans » (à production égale) → « MAIS ATTENDEZ » : Fukushima, morts dues aux
+  radiations : 1 ; à l'évacuation : 2 313 (personnes âgées déplacées) → « ce n'est pas l'atome » : le Japon arrête ses
+  réacteurs, remplace par du charbon → France 61 % → « juste un air un peu plus sale », on a peur de ce qui est
+  spectaculaire (« d'un coup ») et pas de ce qui tue lentement (balance) → « Et les déchets, alors ? » PROCHAINE VIDÉO.
+- **A, « Ce cube »** : tous les déchets nucléaires les plus dangereux de France tiennent dans un cube de 16 m
+  (< 2 piscines olympiques) → coulés dans du verre → on recycle presque tout (95 % uranium, le vrai déchet 4 %) → très
+  dangereux, quelques instants à 1 m → « le charbon ? vous êtes en train de les respirer » → 0,2 % des déchets = 95 % de
+  la radioactivité, ÷1000 en quelques siècles → Cigéo à Bure, 500 m sous terre dans une argile de 160 millions d'années
+  → « je vais vous retourner le cerveau » : des réacteurs nucléaires naturels (Oklo, Gabon, découverts en 1972, il y a
+  2 milliards d'années), leurs déchets n'ont presque pas bougé → « Encore un truc que presque personne ne sait… »
+  LA SUITE DEMAIN.
+
+**Le genre** : une peur ou une idée reçue que tout le monde a, démontée chiffres à l'appui. Le sujet est un débat de
+société (on a tous un avis) → commentaires. Il y a un « méchant » de comparaison (le charbon), un retournement
+historique ou naturel étonnant (Oklo), et les vidéos se répondent (énergie → déchets → suite).
