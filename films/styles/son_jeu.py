@@ -155,3 +155,26 @@ def suite_demain(amp=0.1):
     """Jingle de fin, en suspens (« à suivre »)."""
     return suite([(note(72), 0.12), (note(74), 0.12), (note(76), 0.12), (note(79), 0.12), (note(83), 0.5)],
                  amp, 0.5, decl=0.4)
+
+
+# ------------------------------------------------------------------------------------------------ vrais bruitages
+# Banque CC0 (films/sons, voir LICENCE.md) : interface de jeu Kenney, échantillons Sonic Pi / Adafruit.
+import os as _os
+import wave as _wave
+
+_SONS = _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "..", "sons")
+_CACHE = {}
+
+
+def fichier(nom, amp=0.3, d=None):
+    """Un bruitage de la banque, crête ramenée à amp ; d coupe la fin (avec un fondu de 50 ms)."""
+    if nom not in _CACHE:
+        with _wave.open(_os.path.join(_SONS, nom + ".wav")) as f:
+            y = np.frombuffer(f.readframes(f.getnframes()), np.int16).astype(np.float64) / 32768
+        _CACHE[nom] = y / (np.abs(y).max() + 1e-9)
+    y = _CACHE[nom] * amp
+    if d is not None and len(y) > int(d * SR):
+        y = y[:int(d * SR)].copy()
+        k = int(0.05 * SR)
+        y[-k:] *= np.linspace(1, 0, k)
+    return y
