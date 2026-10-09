@@ -181,7 +181,8 @@ def s3(c, t, a=1.0):
         ti = te + 0.25 * i
         if t >= ti:
             y = 620 + 230 * min(1.0, ((t - ti) / 0.35) ** 2)
-            ajoute(("boum_el", i), ti + 0.35, lambda: J.fichier("boum_grave", 0.45) + np.r_[J.fichier("impact", 0.2), np.zeros(int(0.6 * MI.SR))][:int(1.714 * MI.SR)])
+            ajoute(("boum_el", i), ti + 0.35, lambda: J.fichier("boum_grave", 0.45))
+            ajoute(("impact_el", i), ti + 0.35, lambda: J.fichier("impact", 0.2))
             sprite(c, t, ti, f"sp_elephant_{1 + (int(t * 4) % 2 if t > ti + 0.5 else 0)}", x, y, 210, a, 0.2)
 
 
