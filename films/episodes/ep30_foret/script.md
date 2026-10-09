@@ -90,7 +90,9 @@ la fin du siècle) — à vérifier avant écriture.
 Phrase de prudence : le biais de négativité est bien établi (Baumeister et al., 2001, « Bad is stronger than good ») ;
 on dit « ton cerveau retient mieux », pas « tous les Français pensent que la forêt recule » (pas de sondage trouvé).
 
-## Dessins à générer (planche 21, aplats, même style que la planche 18)
+## Dessins à générer
+
+Voir `planches.md` (planches 21, 22, 23). Ancienne proposition ci-dessous, remplacée :
 
 ```
 Flat vector icon sheet, 9 separate objects in a 3 columns × 3 rows grid, each object isolated and centered in its cell, drawn at a similar size, with NOTHING around it: no ground, no sky, no background scenery. 1. a single deciduous tree, full green crown. 2. the same tree dead and dry, bare twisted branches, no leaves. 3. a tall spruce tree. 4. a maritime pine tree with a tall bare trunk and a flat umbrella crown. 5. a 19th-century shepherd from the Landes of Gascony standing on tall wooden stilts, holding a long staff, wearing a wool cape and a beret, side view, blank face. 6. a bark beetle seen from above, magnified, six legs. 7. a farmer with a bundle on his shoulder walking away to the right, side view, blank face. 8. a small sapling with three leaves in a mound of soil. 9. a natural sea sponge. Flat vector style, simple bold shapes, large flat color areas, no outlines, no gradients, no texture, no small details, each color used in at most two tones, strictly limited palette: teal #28AFAF, dark teal #1A6E70, orange #FF8A3D, dark orange #A8481A, off-white #ECF2F0, grey #788284, on a pure solid black background #000000, no text, no numbers, no frame borders, generous empty black space between cells.
