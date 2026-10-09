@@ -192,8 +192,11 @@ def ecran_b(c, t, a=1.0):
     if imm > 0:
         cx = (x0 + x1) / 2
         O.dessiner(c, fleche_haut(cx, yc + C / 2 + 120, 280 * imm, 30), VERT_PALE, 5, a)
-        O.dessiner(c, O.texte("POUSSÉE", 930, yc + 10, 30), AMBRE, 1.8, a)
-        O.dessiner(c, O.segments(f"{round(100 * imm):3d}", 930, yc + 110, 80), AMBRE, 4, a)
+        O.dessiner(c, O.texte("POUSSÉE", 160, 1300, 30), AMBRE, 1.8, a)
+        O.dessiner(c, O.segments(f"{round(100 * imm):3d}", 160, 1400, 80), AMBRE, 4, a)
+        O.curseur(c, NIV0, x0 + 10, x1 + 40, "", VERT, a)          # les curseurs : le niveau avant, après
+        O.curseur(c, niv, x0 + 10, x1 + 40, "", VERT_PALE, a)
+        O.ecart(c, x1 + 60, NIV0, niv, "MONTÉE" if imm > 0.3 else "", AMBRE, a)
     if t >= tp:
         O.dessiner(c, O.texte("= LE POIDS DE L'EAU DÉPLACÉE", W / 2, 1490, 34), AMBRE, 2, a, (t - tp) / 0.6)
 

@@ -31,7 +31,14 @@ s, e, w = M.s, M.e, Q.w
 phrase, eau, fleche_haut, rect = Q.phrase, Q.eau, Q.fleche_haut, Q.rect
 
 
-def icone(c, nom, cx, bas, h, a=1.0, u=1.0, hach=("ambre",)):
+VOIX = None                               # la voix (resserrée), pour l'oscillogramme
+_T, _T0 = 0.0, 0.0                        # l'instant courant et le début de l'écran en cours de dessin
+
+
+def icone(c, nom, cx, bas, h, a=1.0, u=None, hach=("ambre",)):
+    """Un dessin ; sans u, il se trace au faisceau à l'ouverture de son écran (sauf l'image 0, déjà pleine)."""
+    if u is None:
+        u = 1.0 if _T0 <= 0 else (_T - _T0 + 0.25) / 0.9
     return O.dessiner_icone_sobre(c, nom, cx, bas, h, a, u, hach)
 
 
@@ -149,6 +156,13 @@ def e3(c, t, a=1.0):
     c.clipRect(skia.Rect(INT[0], CAB_Y0, INT[1], 1180))
     eau(c, INT[0], INT[1], niv, cab_y(0.95), t, a)
     c.restore()
+    tm = w("monte", 14) + 0.5
+    if tm <= t < w("seize", 19):                           # les curseurs : le plafond, l'eau, l'air qui reste
+        u = A.lisse((t - tm) / 0.4)
+        O.curseur(c, cab_y(0.17), INT[0] + 20, INT[1] - 20, "", VERT_PALE, a, u)
+        O.curseur(c, niv, INT[0] + 20, INT[1] - 20, "", VERT, a, u)
+        if u >= 1:
+            O.ecart(c, INT[0] + 70, cab_y(0.17), niv, "AIR", AMBRE, a)
     ts = w("sorties", 15)
     if t >= ts and (int((t - ts) * 4) % 2 == 0 or t >= ts + 1.5):
         O.dessiner(c, [rect(PORTE[0] - 8, cab_y(0.42), PORTE[1] + 8, cab_y(0.92))], AMBRE, 3.4, a)
@@ -279,6 +293,7 @@ def e6b(c, t, a=1.0):
     icone(c, "vx_ferry", fx, 760, 130, a, hach=("ambre", "vert"))
     if s(37) <= t < s(39) and t >= td:
         icone(c, "px_thermometre", 230, 1560, 320, a, (t - td) / 0.3)
+        O.curseur(c, 1470, 285, 440, "", AMBRE, a, (t - td - 0.2) / 0.4)
         deg = round(15 - 13 * A.sortie((t - td) / 0.8, 2.5))
         O.dessiner(c, O.segments(f"{deg:2d}", 520, 1520, 130), AMBRE, 6, a)
         rond = skia.Path()
@@ -364,6 +379,12 @@ def heros(i):
 _HEROS = {}
 
 
+def appeler(fn, c, t, t0):
+    global _T, _T0
+    _T, _T0 = t, t0
+    fn(c, t)
+
+
 def image(c, t):
     O.ecran(c, t)
     ec = ecrans()
@@ -373,10 +394,10 @@ def image(c, t):
         if b - 0.25 <= t < b + 0.25:
             u = (t - b + 0.25) / 0.5
             c.saveLayerAlpha(None, int(255 * (1 - A.lisse(u / 0.6))))
-            ec[i - 1][1](c, t)
+            appeler(ec[i - 1][1], c, t, ec[i - 1][0])
             c.restore()
             c.saveLayerAlpha(None, int(255 * A.lisse((u - 0.4) / 0.6)))
-            ec[i][1](c, t)
+            appeler(ec[i][1], c, t, ec[i][0])
             c.restore()
             h = heros(i)
             if h:
@@ -395,10 +416,12 @@ def image(c, t):
         c.translate(W / 2, H / 2)
         c.scale(z, z)
         c.translate(-W / 2, -H / 2)
-        ec[k][1](c, t)
+        appeler(ec[k][1], c, t, ec[k][0])
         c.restore()
     if ec[k][1] is not fin:
         Q.sous_titre(c, t)
+        if VOIX is not None:                               # la voix du narrateur, en direct, sous la phrase
+            O.oscillogramme(c, VOIX, MI.SR, t, y=470, x0=220, x1=860, ampli=30)
 
 
 def sons():
@@ -447,8 +470,14 @@ def mixage(chemin, voix, dur):
         f.writeframes((np.clip(a, -1, 1) * 32767).astype(np.int16).tobytes())
 
 
+def preparer():
+    global VOIX
+    VOIX = Q.preparer()
+    return VOIX
+
+
 def rendre(sortie, t0=0.0, t1=None):
-    voix = Q.preparer()
+    voix = preparer()
     dur = M.SEG[-1][1] + 1.8
     t1 = dur if t1 is None else t1
     tmp = tempfile.mkdtemp()

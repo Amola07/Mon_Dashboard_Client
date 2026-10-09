@@ -361,19 +361,25 @@ def dessiner_icone_sobre(c, nom, cx, bas, hauteur, a=1.0, u=1.0, hach=("ambre",)
     k = hauteur / lh
     x0, y0 = cx - lw * k / 2, bas - hauteur
     pas = max(6.0, hauteur / 40)
-    for fam, tons in zones.items():
-        traits = [l for tr in tons.values() for l in tr if _aire(l) * k * k > 900]
-        if not traits:
-            continue
-        pl = _place(traits, x0, y0, k)
-        if fam in hach:
-            hachures(c, _chemin_plein(pl), COULEURS[fam], pas, ANGLES[fam] or -35, 1.6,
-                     (0.8 if fam == "ambre" else 0.45) * a, u)
-            dessiner(c, pl, COULEURS[fam], 2.2 if fam == "ambre" else 1.6, a, u)
-        else:
-            dessiner(c, pl, COULEURS[fam], 1.3, 0.4 * a, u)
+    u_sil = u / 0.6                                        # apparition : d'abord la silhouette au faisceau,
+    u_z = (u - 0.35) / 0.65                                # puis les zones et le balayage des hachures
     contour = _place(sil, x0, y0, k)
-    dessiner(c, contour, VERT_PALE, 2.8, a, u)
+    if u_z > 0:
+        for fam, tons in zones.items():
+            traits = [l for tr in tons.values() for l in tr if _aire(l) * k * k > 900]
+            if not traits:
+                continue
+            pl = _place(traits, x0, y0, k)
+            if fam in hach:
+                hachures(c, _chemin_plein(pl), COULEURS[fam], pas, ANGLES[fam] or -35, 1.6,
+                         (0.8 if fam == "ambre" else 0.45) * a, u_z)
+                dessiner(c, pl, COULEURS[fam], 2.2 if fam == "ambre" else 1.6, a, u_z)
+            else:
+                dessiner(c, pl, COULEURS[fam], 1.3, 0.4 * a, u_z)
+    if u < 1:                                              # pendant le tracé, la silhouette brille un peu plus
+        dessiner(c, contour, VERT_PALE, 3.4, a, u_sil)
+    else:
+        dessiner(c, contour, VERT_PALE, 2.8, a)
     return contour
 
 
@@ -400,3 +406,58 @@ def dessiner_icone(c, nom, cx, bas, hauteur, a=1.0, u=1.0, miroir=False):
     contour = _place(sil, x0, y0, k)
     dessiner(c, contour, VERT_PALE, 2.6, a, u)
     return contour
+
+
+# ------------------------------------------------------------------------------------------------ mesures et signal
+def pointilles(p0, p1, pas=16, plein=9):
+    L = math.dist(p0, p1)
+    n = max(1, int(L / pas))
+    out = []
+    for i in range(n):
+        a, b = i * pas / L, min(1.0, (i * pas + plein) / L)
+        out.append([(p0[0] + (p1[0] - p0[0]) * a, p0[1] + (p1[1] - p0[1]) * a),
+                    (p0[0] + (p1[0] - p0[0]) * b, p0[1] + (p1[1] - p0[1]) * b)])
+    return out
+
+
+def curseur(c, y, x0, x1, etiquette="", col=VERT_PALE, a=1.0, u=1.0, droite=True):
+    """Un curseur de mesure horizontal, comme sur un oscilloscope : ligne pointillée, repères aux bouts, étiquette."""
+    xs = x0 + (x1 - x0) * min(1.0, max(0.0, u))
+    dessiner(c, pointilles((x0, y), (xs, y)), col, 1.8, 0.85 * a)
+    dessiner(c, [[(x0, y - 12), (x0, y + 12)], [(x0 - 10, y), (x0, y)]], col, 2.2, a)
+    if etiquette and u >= 1:
+        tx = x1 + 14 if droite else x0 - 14 - largeur_texte(etiquette, 28)
+        dessiner(c, texte(etiquette, tx, y + 10, 28, centre=False), col, 1.6, a)
+
+
+def ecart(c, x, y_a, y_b, etiquette="", col=AMBRE, a=1.0):
+    """L'écart mesuré entre deux curseurs : une cote verticale avec ses flèches et son étiquette."""
+    if abs(y_b - y_a) < 4:
+        return
+    s_ = 1 if y_b > y_a else -1
+    f = min(14, abs(y_b - y_a) / 3)
+    dessiner(c, [[(x, y_a), (x, y_b)], [(x - f, y_a + s_ * f), (x, y_a), (x + f, y_a + s_ * f)],
+                 [(x - f, y_b - s_ * f), (x, y_b), (x + f, y_b - s_ * f)]], col, 2.4, a)
+    if etiquette:
+        dessiner(c, texte(etiquette, x + 22, (y_a + y_b) / 2 + 12, 34, centre=False, gras=True), col, 1.8, a)
+
+
+def oscillogramme(c, voix, sr, t, y=1625, x0=150, x1=930, ampli=70, fenetre=0.035, a=1.0):
+    """La voix du narrateur tracée en direct par le faisceau, comme un oscilloscope branché sur le micro.
+    Déclenchement sur un passage par zéro montant : l'onde reste stable à l'écran au lieu de défiler."""
+    n = int(fenetre * sr)
+    i = int(t * sr)
+    if i <= 0 or i + 2 * n >= len(voix):
+        return
+    morceau = voix[i:i + 2 * n]
+    z = np.flatnonzero((morceau[:-1] < 0) & (morceau[1:] >= 0))       # le déclenchement
+    d = int(z[0]) if len(z) and z[0] < n else 0
+    seg = morceau[d:d + n]
+    niveau = float(np.sqrt((voix[max(0, i - n):i + n] ** 2).mean()) + 1e-9)
+    gain = ampli / max(0.08, niveau * 6)
+    pts = 260
+    ech = seg[np.linspace(0, len(seg) - 1, pts).astype(int)]
+    ech = np.convolve(ech, np.ones(3) / 3, mode="same")
+    trace = [(x0 + (x1 - x0) * k / (pts - 1), y - float(np.clip(v * gain, -ampli, ampli))) for k, v in enumerate(ech)]
+    dessiner(c, [[(x0 - 30, y), (x0 - 8, y)], [(x1 + 8, y), (x1 + 30, y)]], VERT_SOMBRE, 1.4, 0.8 * a)   # repères
+    dessiner(c, [trace], VERT, 2.0, (0.45 + 0.5 * min(1.0, niveau * 12)) * a)
