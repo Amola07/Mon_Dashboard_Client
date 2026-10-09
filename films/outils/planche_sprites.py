@@ -64,6 +64,43 @@ def convertir(chemin, cols, lignes, noms):
     return out
 
 
+def ancre(q, b):
+    """Le repère fixe d'une case : la boîte du plus grand morceau blanc cassé (la porte, dans la planche 27)."""
+    from scipy import ndimage
+    x0, y0, x1, y1 = b
+    blanc = PALETTE_ICONES.index(next(c for c in PALETTE_ICONES if FAMILLES[tuple(c)] == ("pale", 0))) + 1
+    m = q[y0:y1, x0:x1] == blanc
+    lab, n = ndimage.label(m)
+    if n == 0:
+        return None
+    k = np.bincount(lab.ravel())[1:].argmax() + 1
+    ys, xs = np.nonzero(lab == k)
+    if len(xs) < 2000:
+        return None
+    return x0 + xs.min(), y0 + ys.min()
+
+
+def convertir_ancre(chemin, cols, lignes, groupes):
+    """Comme convertir, mais chaque groupe de cases (une animation sur plusieurs lignes) est recalé sur un repère
+    fixe dessiné dans chaque case (la porte) : groupes = [(nom, [indices des cases])]."""
+    a = np.asarray(Image.open(chemin).convert("RGB"))
+    q = quantifier(a)
+    boites = cases(q, cols, lignes)
+    out = {}
+    for nom, idx in groupes:
+        bs = [boites[i] for i in idx]
+        an = [ancre(q, b) if b is not None else None for b in bs]
+        ok = [x for x in an if x is not None]
+        moy = (np.mean([x[0] - b[0] for x, b in zip(an, bs) if x]), np.mean([x[1] - b[1] for x, b in zip(an, bs) if x]))
+        an = [x if x is not None else (b[0] + moy[0], b[1] + moy[1]) for x, b in zip(an, bs)]
+        rel = [(b[0] - x[0], b[1] - x[1], b[2] - x[0], b[3] - x[1]) for b, x in zip(bs, an)]
+        fx0, fy0 = min(r[0] for r in rel) - 4, min(r[1] for r in rel) - 4
+        fx1, fy1 = max(r[2] for r in rel) + 4, max(r[3] for r in rel) + 4
+        for k, x in enumerate(an):
+            out[f"{nom}_{k + 1}"] = dessin(q, int(x[0] + fx0), int(x[1] + fy0), int(x[0] + fx1), int(x[1] + fy1))
+    return out
+
+
 def main():
     src, grille = sys.argv[1], sys.argv[2]
     cols, lignes = map(int, grille.split("x"))

@@ -163,12 +163,11 @@ def s1(c, t, a=1.0):
     nuages(c, t)
     x = 100 + (t * 160) % 1100                                    # l'avion qui traverse, en haut
     sprite(c, t, -1.0, "sp_avion_1", x, 760 + 6 * math.sin(2.5 * t), 90, a, 0)
-    O.dessiner(c, [[(80, 1560), (1000, 1560)]], VERT_PALE, 2.4, a)    # le plancher de la cabine
-    tremble = 7 * math.sin(55 * t) * (0.4 + 0.6 * abs(math.sin(3 * t)))
-    sprite(c, t, -1.0, "sp_porte_1", PORTE_X + tremble, 1560, 520, a, 0)
-    lampe(c, t, PORTE_X, 960, a)
-    fort = 1.0 if t < T["aspire"] else 1.6                        # il tire de plus en plus fort
-    anime(c, t, -1.0, "sp_tire", 610, 1560, 420, 4.5, (3, 4), a=a, fondu=0.6, balance=-3 * fort, souffle=0.015)
+    O.dessiner(c, [[(80, 1580), (1000, 1580)]], VERT_PALE, 2.4, a)    # le plancher de la cabine
+    tremble = 5 * math.sin(55 * t) * (0.4 + 0.6 * abs(math.sin(3 * t)))
+    lampe(c, t, 718, 850, a)
+    fps = 9 if t < T["aspire"] else 12                           # il tire de plus en plus vite
+    anime(c, t, -1.0, "sp_effort", 540 + tremble, 1580, 700, fps, tuple(range(2, 13)), a=a, fondu=0.5)
     if t >= T["aspire"] - 0.2:                                    # l'air aspiré vers la porte
         vent(c, -t, PORTE_X - 260, PORTE_X - 40, 1080, 1500, a * A.lisse((t - T["aspire"] + 0.2) / 0.3), 10)
     if t >= T["aspire"]:
