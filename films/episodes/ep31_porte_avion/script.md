@@ -23,7 +23,7 @@ C'est arrivé. Janvier 2024, à 5 000 mètres. Un panneau de porte s'arrache d'u
 Le souffle arrache le t-shirt d'un adolescent. Des téléphones s'envolent. L'un d'eux est retrouvé par terre… intact.
 Et les deux sièges juste à côté du trou ? Vides. Ce jour-là, personne n'y était assis.
 
-Et le seul homme qui ait sauté d'un avion de ligne en vol ? D. B. Cooper, 1971, par l'escalier arrière.
+Et l'homme le plus célèbre à avoir sauté d'un avion de ligne en vol ? D. B. Cooper, 1971, par l'escalier arrière.
 On ne l'a jamais retrouvé. Depuis, une petite palette bloque cet escalier en vol.
 
 Alors la prochaine fois qu'un passager regarde la porte d'un peu trop près, restez calme.
