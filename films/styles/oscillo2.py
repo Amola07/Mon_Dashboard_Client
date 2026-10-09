@@ -411,6 +411,8 @@ def dessiner_icone(c, nom, cx, bas, hauteur, a=1.0, u=1.0, miroir=False):
 # ------------------------------------------------------------------------------------------------ mesures et signal
 def pointilles(p0, p1, pas=16, plein=9):
     L = math.dist(p0, p1)
+    if L < 1:                                              # curseur pas encore tracé
+        return []
     n = max(1, int(L / pas))
     out = []
     for i in range(n):
