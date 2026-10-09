@@ -547,13 +547,12 @@ def e12(c, t, a=1.0):
         if t >= T["cent"]:
             O.dessiner(c, [[(190, 1600), (x, 1600)]], AMBRE, 5, a)
         nom = "vx_pousse" if u < 0.35 else ("vx_chene" if u < 0.75 else "vx_chene_centenaire")
-        icone(c, nom, x, 1590, 130 + 560 * u, a, 1.0)
+        icone(c, nom, x, 1590, 130 + 400 * u, a, 1.0)
         tc = T["climat"]
         if t >= tc:                                            # le thermomètre qui monte en même temps
-            icone(c, "px_thermometre", 940, 1450, 420, a, (t - tc) / 0.4)
-            y = 1350 - 260 * A.lisse((t - tc - 0.4) / 2.0)          # le climat qui monte : un curseur
-            O.curseur(c, y, 990, 1030, "", AMBRE, a, (t - tc - 0.3) / 0.3, False)
-            O.dessiner(c, [[(870, y + 40), (870, y - 40)], [(850, y - 20), (870, y - 40), (890, y - 20)]], AMBRE, 4, a)
+            icone(c, "px_thermometre", 170, 1450, 420, a, (t - tc) / 0.4)
+            y = 1350 - 260 * A.lisse((t - tc - 0.4) / 2.0)          # le climat qui monte : une flèche
+            O.dessiner(c, [[(290, y + 40), (290, y - 40)], [(270, y - 20), (290, y - 40), (310, y - 20)]], AMBRE, 4, a)
         return
     apparait(c, t, T["forestiers"] - 0.1, "vx_forestier", 540, 1500, 560, a)
     if t >= T["idee"]:
