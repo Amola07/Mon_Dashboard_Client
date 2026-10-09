@@ -20,6 +20,7 @@ from films.episodes.ep29_gilet import pixel_archimede as PA
 from films.styles import anim_pro as A
 from films.styles import oscillo2 as O
 from films.styles import oscillo_son as Z
+from films.outils.image_en_traits import dessin
 from films.styles.oscillo2 import AMBRE, VERT, VERT_PALE, VERT_SOMBRE, W, H
 
 M, MV = PA.M, PA.MV
@@ -40,7 +41,7 @@ def phrase(c, t, t0, lignes, y=300, h=64, t1=None):
         for j, m in enumerate(morceaux):
             if m:
                 O.dessiner(c, O.texte(m, x, y + i * h * 1.45, h, centre=False, gras=True), AMBRE if j % 2 else VERT_PALE,
-                           3.2, 1.0, u)
+                           (5.0 if O.PAPIER and j % 2 else 3.2), 1.0, u)                  # sur papier : le mot-clé en gras
             x += O.largeur_texte(m, h)
 
 
@@ -53,7 +54,7 @@ def sous_titre(c, t):
     g0 = deb + (rang // 3) * 3
     grp = [m for m in M.MOTS[g0:g0 + 3] if m[3] == deb]
     txt = " ".join(m[0] for m in grp)
-    O.dessiner(c, O.texte(txt, W / 2, 1720, 34), VERT, 1.6, 0.75)
+    O.dessiner(c, O.texte(txt, W / 2, 1720, 34), VERT_PALE if O.PAPIER else VERT, 1.6, 0.75)
 
 
 def fleche_haut(cx, y_bas, long, larg=26):
@@ -206,7 +207,11 @@ def ecran_c(c, t, a=1.0):
     phrase(c, t, s(9), ["Un gilet gonflé :", "*16 litres* d'air"], t1=tk)
     phrase(c, t, tk, ["Donc *16 kilos*", "vers le haut"])
     monte = 60 * A.sortie((t - tk) / 0.6) if t >= tk else 0
-    dessiner_gilet(c, 330, 1060 - monte, 3.4, a, (t - s(9) + 0.25) / 0.5)
+    if O.PAPIER:                                           # sur papier : le gilet de la planche, au trait
+        O.dessiner(c, dessin("eau_gilet_gonfle", 330 - 170, 1060 - monte - 200, 340), VERT_PALE, 3.0, a,
+                   (t - s(9) + 0.25) / 0.6)
+    else:
+        dessiner_gilet(c, 330, 1060 - monte, 3.4, a, (t - s(9) + 0.25) / 0.5)
     n = 0 if t < tl else min(16, int((t - tl) / 0.06) + 1)
     for i in range(16):                                    # 1 case = 1 litre
         gx, gy = 640 + (i % 4) * 78, 820 + (i // 4) * 78
@@ -232,6 +237,15 @@ def ecran_c(c, t, a=1.0):
 def ecran_d(c, t, a=1.0):
     phrase(c, t, s(11), ["Dehors : *parfait*"])
     surf = 1040 + 10 * math.sin(1.7 * t)
+    if O.PAPIER:                                           # sur papier : le nageur de la planche, au trait
+        O.dessiner(c, dessin("fr_flotte", 540 - 330, surf - 300 + 10 * math.sin(1.7 * t), 660), VERT_PALE, 3.0, a,
+                   (t - s(11) + 0.25) / 0.7)
+        O.dessiner(c, fleche_haut(540, surf + 380, 110 + 12 * math.sin(3 * t), 26), AMBRE, 6, a)
+        te = w("effort", 12)
+        if t >= te:
+            O.dessiner(c, [[(150, 600), (180, 630), (230, 560)]], VERT_PALE, 6, a, (t - te) / 0.25)
+            O.dessiner(c, O.texte("SANS EFFORT", 590, 630, 64, gras=True), VERT_PALE, 3, a, (t - te - 0.1) / 0.4)
+        return
     cx = 540
     for sgn in (-1, 1):
         O.dessiner(c, [O.lisser([(cx + sgn * 120, surf + 30), (cx + sgn * 200, surf + 20), (cx + sgn * 270, surf + 8)])],

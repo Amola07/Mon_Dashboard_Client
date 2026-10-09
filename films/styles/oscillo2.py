@@ -16,11 +16,24 @@ import skia
 from HersheyFonts import HersheyFonts
 
 W, H = 1080, 1920
-VERT = (90, 255, 140)
-VERT_SOMBRE = (30, 110, 64)
-VERT_PALE = (200, 255, 215)
-AMBRE = (255, 196, 90)
-FOND_CENTRE, FOND_BORD = (8, 26, 16), (1, 6, 3)
+import os
+
+# Thème : "phosphore" (vert et ambre sur fond sombre, le faisceau brille) ou "papier" (noir sur blanc, comme les
+# planches de dessins au trait : l'oscilloscope devient une table traçante, la plume encre le papier quadrillé).
+# Choisi au lancement : OSC_THEME=papier python -m …
+PAPIER = os.environ.get("OSC_THEME", "phosphore") == "papier"
+if PAPIER:
+    VERT = (95, 95, 95)                                   # le secondaire : gris
+    VERT_SOMBRE = (214, 214, 210)                         # le quadrillage : gris très clair
+    VERT_PALE = (22, 22, 22)                              # le sujet : noir
+    AMBRE = (0, 0, 0)                                     # l'important : noir, en trait plus épais
+    FOND_CENTRE, FOND_BORD = (252, 251, 247), (236, 234, 228)
+else:
+    VERT = (90, 255, 140)
+    VERT_SOMBRE = (30, 110, 64)
+    VERT_PALE = (200, 255, 215)
+    AMBRE = (255, 196, 90)
+    FOND_CENTRE, FOND_BORD = (8, 26, 16), (1, 6, 3)
 
 
 def peinture(col, w, a=1.0, flou=0.0, plein=False):
@@ -94,6 +107,11 @@ def dessiner(c, traits, col=VERT, w=3.0, a=1.0, u=1.0):
     """Un trait de faisceau net : halo court, trait, cœur presque blanc ; point brillant en tête si u < 1."""
     traits, tete = partiel(traits, u)
     p = chemin(traits)
+    if PAPIER:                                             # de l'encre : pas de halo, un trait net, la plume en tête
+        c.drawPath(p, peinture(col, w * (1.25 if col == AMBRE else 0.95), a))
+        if tete:
+            c.drawCircle(*tete, w * 1.3, peinture(col, 0, a, plein=True))
+        return
     c.drawPath(p, peinture(col, w * 3.2, 0.28 * a, flou=w * 1.6))
     c.drawPath(p, peinture(col, w, a))
     blanc = tuple(int(v + (255 - v) * 0.65) for v in col)
@@ -138,8 +156,9 @@ def hachures(c, path, col=AMBRE, pas=7.0, angle=-35, w=1.6, a=0.8, u=1.0):
         lignes.lineTo(cx + nx * o + dx * R, cy + ny * o + dy * R)
     c.save()
     c.clipPath(path, skia.ClipOp.kIntersect, True)
-    c.drawPath(lignes, peinture(col, w * 2.6, 0.18 * a, flou=w * 1.4))
-    c.drawPath(lignes, peinture(col, w, a))
+    if not PAPIER:
+        c.drawPath(lignes, peinture(col, w * 2.6, 0.18 * a, flou=w * 1.4))
+    c.drawPath(lignes, peinture(col, w * (0.8 if PAPIER else 1.0), a))
     c.restore()
 
 
@@ -241,12 +260,12 @@ def ecran(c, t):
     c.drawRect(skia.Rect(0, 0, W, H), skia.Paint(Shader=g))
     x0, y0, x1, y1 = MARGE, MARGE * 2, W - MARGE, H - MARGE * 2
     dx, dy = (x1 - x0) / COLS, (y1 - y0) / LIGNES
-    fin = peinture(VERT_SOMBRE, 1.2, 0.22)
+    fin = peinture(VERT_SOMBRE, 1.2, 1.0 if PAPIER else 0.22)
     for i in range(COLS + 1):
         c.drawLine(x0 + i * dx, y0, x0 + i * dx, y1, fin)
     for j in range(LIGNES + 1):
         c.drawLine(x0, y0 + j * dy, x1, y0 + j * dy, fin)
-    gr = peinture(VERT_SOMBRE, 1.4, 0.4)
+    gr = peinture((170, 170, 166) if PAPIER else VERT_SOMBRE, 1.4, 1.0 if PAPIER else 0.4)
     cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
     for i in range(COLS * 5 + 1):
         x = x0 + i * dx / 5
@@ -264,8 +283,11 @@ _VIGN = (1 - 0.38 * (((_XX - W / 2) / (W / 2)) ** 2 + ((_YY - H / 2) / (H / 2)) 
 def finition(img, t, fps=30):
     """Vignette, lignes de balayage presque invisibles, grain fin (sur un tableau numpy RGBA ou BGRA)."""
     a = img.astype(np.float32)
-    a[..., :3] *= _VIGN[..., None]
-    a[::3, :, :3] *= 0.94
+    if PAPIER:                                             # le papier : vignette légère, pas de lignes de balayage
+        a[..., :3] *= (0.86 + 0.14 * _VIGN)[..., None]
+    else:
+        a[..., :3] *= _VIGN[..., None]
+        a[::3, :, :3] *= 0.94
     g = np.random.default_rng(int(t * fps)).normal(0, 2.5, (H // 2, W // 2, 1)).repeat(2, 0).repeat(2, 1)
     a[..., :3] += g
     return np.clip(a, 0, 255).astype(np.uint8)
