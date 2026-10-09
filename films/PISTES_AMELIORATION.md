@@ -189,3 +189,34 @@ Lecture :
 - Hypothèses à tester : l'heure de publication (le groupe de test vient des gens actifs à ce moment-là) et le sujet (droit routier) montré à un autre public.
 
 À demander pour confirmer : l'heure de publication de chaque vidéo, les sources de trafic, la même capture « Emplacements » pour les vidéos 2 et 3 (où commence le décalage ?), la courbe de rétention des vidéos 1 et 4.
+
+## La vidéo qui marche le plus : ép. 21 ascenseur (> 5 000 vues), comparée à tout ce qui a suivi (9 octobre)
+
+Mesures (même méthode pour toutes : différences d'images à 10 i/s ; voix transcrite par Whisper) :
+
+| | Ép. 21 ascenseur (la meilleure) | Ép. 29 oscillo 2.0 | Ép. 30 forêt | Référence archibald (énergie) |
+|---|---|---|---|---|
+| Durée | **81 s** | 85 s | 115 s | 122 s |
+| Mots / débit | 240 mots, 178 mots/min | — | ≈ 370 mots, ≈ 193 mots/min | ≈ 300 mots, 157 mots/min |
+| Changements forts / min | **10** | 18 | 22 | 22 |
+| Luminosité moyenne | 7,5 (très sombre) | 14,5 | 14,3 | 10,9 |
+| Sous-titres en bas, mot à mot | **oui** (mot-clé en ambre) | oui | **non** | non |
+| Première image | la cabine **déjà en train de tomber**, compteur km/h qui monte | avion sur l'eau | carte qui se trace | phrase-choc + chiffre |
+| Réponse à la question | « Non. » à **4 s** | — | révélation à 15 s | à 38 s |
+| Fin | rassurante + geste concret (« respirez ») | « la suite demain » | fin coupée | fin coupée |
+
+Ce qui la distingue :
+1. **Le sujet est une question que tout le monde s'est déjà posée** (le cliché des films : sauter au dernier moment),
+   à la 2e personne, avec une réponse binaire immédiate (« NON » en gros à 4 s), puis « et la raison va vous
+   surprendre ». La forêt part d'un chiffre, pas d'une question que le spectateur se pose.
+2. **L'action est déjà là à l'image 0** : la cabine chute, les étages défilent, la vitesse monte en direct.
+3. **Un seul schéma qui dure** : le même immeuble pendant 20 s, le même graphique en barres, la même cabine avec un
+   bonhomme bâton. Peu de dessins, peu de détails, des chiffres qui bougent. Moitié moins de changements que nos
+   versions récentes : on a le temps de lire.
+4. **Sous-titres mot à mot** en bas, en permanence (on suit même sans le son). L'ép. 30 les a retirés.
+5. **Plus courte** : 81 s.
+6. Chaîne de révélations claire : non → pourquoi (90 km/h vs 10) → « le vrai problème » (on flotte) → que faire
+   (s'allonger) → « rassurez-vous » (Otis 1854) → record (Betty Lou Oliver, 75 étages) → conclusion rassurante.
+
+Ce qui ne la distingue PAS : la finesse du dessin (bonhommes bâtons, pas de hachures), le nombre d'effets.
+Prudence : une seule vidéo ; les vues dépendent aussi du jour, de l'heure et de la poussée de l'algorithme.
