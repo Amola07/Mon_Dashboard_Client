@@ -418,8 +418,19 @@ AFFICHE = """Si un passager ouvre la porte|de l'avion en plein vol,|est-ce que|t
 MORCEAUX = []
 
 
+def lignes_st(txt, larg=880, h=36):
+    out, cour = [], ""
+    for m in txt.split():
+        essai = (cour + " " + m).strip()
+        if O.largeur_texte(essai, h) > larg and cour:
+            out.append(cour)
+            cour = m
+        else:
+            cour = essai
+    return out + [cour] if cour else out
+
+
 def sous_titres(c, t):
-    from films.episodes.ep30_foret.jeu_ep30 import lignes_st
     for a, b, txt in MORCEAUX:
         if a - 0.05 <= t < b + 0.35 and txt:
             u = min(1.0, (t - a + 0.05) / max(0.3, b - a))
