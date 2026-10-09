@@ -65,3 +65,12 @@ Flat vector icon sheet, 9 separate drawings in a 3 columns × 3 rows grid, each 
 Noms : `vx_passager_porte`, `vx_porte_avion`, `vx_porte_volante`, `vx_ado_tshirt`, `vx_telephone`, `vx_sieges_vides`,
 `vx_727_escalier`, `vx_cooper`, `vx_elephant`. Réutilisés : `vx_avion`, `vx_cabine`, `vx_porte`, `vx_avion_pique`.
 Code : altimètre, jauge de pression, balance, flèches de pression, coupe de la porte et du cadre, lignes de vent.
+
+## Dessins à générer — planche 25 (aplats, 3 × 3)
+
+```
+Flat vector icon sheet, 9 separate drawings in a 3 columns × 3 rows grid, each isolated and centered in its cell, drawn at a similar size, with NOTHING around it: no ground, no sky, no clouds, no background scenery. All people have a blank face (a plain oval, no eyes, no nose, no mouth). 1. a modern twin-engine passenger jet seen from the side facing right, with a rectangular hole torn in the fuselage behind the wing. 2. a passenger jet seen from the side facing right, nose slightly up, landing gear down, about to land. 3. a row of three airplane passengers seated side by side, seen from the front, holding their armrests. 4. a seated passenger seen from the side, seatbelt fastened, calmly looking sideways. 5. a close-up of a fastened airplane seatbelt buckle. 6. a close-up of an open airplane seatbelt with the two straps apart. 7. a flight attendant standing, side view, raising one hand in a stop gesture. 8. a yellow-style oxygen mask hanging from its tube. 9. a small cut-away of an airplane door: the thick door and its frame seen from above, the door wider than the opening. Flat vector style, simple bold shapes, large flat color areas, no outlines, no gradients, no texture, no small details, each color used in at most two tones (base and one darker tone for shadows), strictly limited palette: teal #28AFAF, dark teal #1A6E70, orange #FF8A3D, dark orange #A8481A, off-white #ECF2F0, grey #788284, on a pure solid black background #000000, no text, no numbers, no frame borders, generous empty black space between cells.
+```
+
+Noms : `vx_avion_trou`, `vx_avion_atterrit`, `vx_rangee_passagers`, `vx_passager_ceinture`, `vx_ceinture_fermee`,
+`vx_ceinture_ouverte`, `vx_hotesse_stop`, `vx_masque_o2`, `vx_porte_coupe`.
