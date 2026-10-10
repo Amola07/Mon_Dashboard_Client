@@ -23,6 +23,7 @@ Et le plus fou ? L'entrée des catacombes est aujourd'hui place Denfert-Rocherea
 Le danger a-t-il disparu ? Non. En 1961, à Clamart, juste à côté de Paris, un quartier entier s'effondre dans une ancienne carrière. Vingt et un morts.
 
 Aujourd'hui encore, l'Inspection des carrières descend surveiller ces 280 kilomètres de galeries. Parce qu'au-dessus, il y a un immeuble sur cinq.
+Abonnez-vous : demain, je vous raconte ce que la police a trouvé en 2004, à vingt mètres sous le Trocadéro. Un vrai cinéma… clandestin.
 Alors la prochaine fois que vous marchez dans Paris, dites-vous que…
 
 ## Découpage (pixel bleu, 100 % code)
@@ -54,3 +55,5 @@ Alors la prochaine fois que vous marchez dans Paris, dites-vous que…
 | charrettes de nuit | transferts nocturnes en charrettes (récit courant) | à confirmer |
 | Denfert-Rochereau / rue d'Enfer | la rue d'Enfer est devenue l'avenue Denfert-Rochereau ; entrée des catacombes place Denfert-Rochereau | Sortir à Paris ; catacombes.paris.fr |
 | Clamart 1961 | 1er juin 1961, effondrement d'une ancienne carrière de craie, 21 morts, 45 blessés | Paris ZigZag ; INERIS |
+
+| Abonnement (ép. suivant) | août-septembre 2004 : la police découvre un cinéma clandestin équipé (écran, projecteur, bar, électricité) dans les carrières sous le Trocadéro ; mot laissé : « Ne cherchez pas » | Gizmodo ; Boing Boing (2004) ; Futility Closet |

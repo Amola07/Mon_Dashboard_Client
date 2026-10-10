@@ -245,9 +245,10 @@ def personnage(img, pieds, taille=92, tronc=0.0, mains=None, flexion=0.0, tete=N
         pied_av, pied_ar = (px + 12 * s, py), (px + 7 * s, py)
     elif marche is not None:                                     # la marche : les pieds alternent, le corps rebondit
         ph = marche
-        hanche = (px, py - (cuisse + tibia) * (0.95 - 0.03 * abs(math.cos(ph))))
-        pied_av = (px + 10 * s * math.sin(ph), py - 4 * s * max(0.0, math.cos(ph)))
-        pied_ar = (px - 10 * s * math.sin(ph), py - 4 * s * max(0.0, -math.cos(ph)))
+        hanche = (px, py - (cuisse + tibia) * (0.9 + 0.04 * abs(math.cos(ph))))      # le corps monte et descend
+        pied_av = (px + 15 * s * math.sin(ph), py - 8 * s * max(0.0, math.cos(ph)))  # le pied qui passe se lève
+        pied_ar = (px - 15 * s * math.sin(ph), py - 8 * s * max(0.0, -math.cos(ph)))
+        tronc = tronc + 4                                                             # léger penché vers l'avant
     else:
         hanche = (px - 9 * s * flexion - 1, py - (cuisse + tibia) * (0.97 - 0.2 * flexion))
         pied_av, pied_ar = (px + 7 * s, py), (px - 9 * s, py)
@@ -265,7 +266,7 @@ def personnage(img, pieds, taille=92, tronc=0.0, mains=None, flexion=0.0, tete=N
     h, b = T_["haut"], T_["bas"]
     sombre = lambda c: tuple(int(v * 0.72) for v in c)
     # le côté éloigné (plus sombre) : jambe arrière, bras arrière
-    g = _ik(hanche, pied_ar, cuisse, tibia, sens=-1 if not assis else 1)
+    g = _ik(hanche, pied_ar, cuisse, tibia, sens=1)
     _membre(d, P_(*hanche), P_(*g), 9 * s, 7.5 * s, tuple(sombre(c) for c in b))
     _membre(d, P_(*g), P_(*pied_ar), 7.5 * s, 6 * s, tuple(sombre(c) for c in b))
     _chaussure(d, P_(*pied_ar), s, sombre((30, 36, 56)))
@@ -278,7 +279,7 @@ def personnage(img, pieds, taille=92, tronc=0.0, mains=None, flexion=0.0, tete=N
     d.line([P_(hanche[0] - 6 * s * math.cos(a), hanche[1] - 6 * s * math.sin(a) - 1),
             P_(hanche[0] + 7 * s * math.cos(a), hanche[1] + 7 * s * math.sin(a) - 1)], fill=CONTOUR, width=max(1, int(2 * s)))
     # la jambe avant
-    g = _ik(hanche, pied_av, cuisse, tibia, sens=-1 if not assis else 1)
+    g = _ik(hanche, pied_av, cuisse, tibia, sens=1)
     _membre(d, P_(*hanche), P_(*g), 10 * s, 8 * s, b)
     _membre(d, P_(*g), P_(*pied_av), 8 * s, 6.5 * s, b)
     _chaussure(d, P_(*pied_av), s, (30, 36, 56))
