@@ -14,6 +14,7 @@ Résultat : la ville repose sur des carrières oubliées. Sans plan. Sans vrais 
 Mais attendez. La rue d'Enfer n'est que le début. D'autres rues craquent. Paris est un gruyère, et personne ne sait où sont les trous.
 
 1777. Louis XVI nomme un homme : Charles-Axel Guillaumot. Sa mission : cartographier tout le vide sous Paris, et le consolider. Piliers, murs, galeries remblayées. Il fait graver des noms de rues sur les parois, pour savoir ce qu'il y a au-dessus.
+Cette carte, on la met encore à jour aujourd'hui. Et elle peut vous dire si votre immeuble est construit au-dessus du vide. Comment la consulter ? Je vous le montre dans le prochain épisode.
 
 Et puis il y a un autre problème. Les cimetières de Paris débordent. Le plus grand, celui des Innocents, est devenu insalubre.
 En 1786, on commence à transférer les ossements… dans les carrières. Au total, environ six millions de Parisiens. Les catacombes sont nées.
@@ -23,7 +24,6 @@ Et le plus fou ? L'entrée des catacombes est aujourd'hui place Denfert-Rocherea
 Le danger a-t-il disparu ? Non. En 1961, à Clamart, juste à côté de Paris, un quartier entier s'effondre dans une ancienne carrière. Vingt et un morts.
 
 Aujourd'hui encore, l'Inspection des carrières descend surveiller ces 280 kilomètres de galeries. Parce qu'au-dessus, il y a un immeuble sur cinq.
-Abonnez-vous : demain, je vous raconte ce que la police a trouvé en 2004, à vingt mètres sous le Trocadéro. Un vrai cinéma… clandestin.
 Alors la prochaine fois que vous marchez dans Paris, dites-vous que…
 
 ## Découpage (pixel bleu, 100 % code)
@@ -57,3 +57,4 @@ Alors la prochaine fois que vous marchez dans Paris, dites-vous que…
 | Clamart 1961 | 1er juin 1961, effondrement d'une ancienne carrière de craie, 21 morts, 45 blessés | Paris ZigZag ; INERIS |
 
 | Abonnement (ép. suivant) | août-septembre 2004 : la police découvre un cinéma clandestin équipé (écran, projecteur, bar, électricité) dans les carrières sous le Trocadéro ; mot laissé : « Ne cherchez pas » | Gizmodo ; Boing Boing (2004) ; Futility Closet |
+| Raison de suivre (milieu du texte) | l'IGC tient un atlas des anciennes carrières mis à jour en continu ; sur igc.paris.fr, une demande en ligne donne un document certifiant la présence ou l'absence d'anciennes carrières sous une parcelle | Ville de Paris (rapports IGC) |
