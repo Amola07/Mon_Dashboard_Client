@@ -18,6 +18,7 @@ from films.styles import mixage_pro as MP
 from films.styles import oscillo_son as Z
 from films.styles import pixel_bleu as P
 from films.styles import son_jeu as J
+from films.episodes.ep34_moral_machine import decor34 as D
 from films.styles.pixel_bleu import B0, B1, B2, B3, B4, BLANC, GRIS, GRIS_F, NOIR, ROUGE, ROUGE_F
 
 ICI = os.path.dirname(os.path.abspath(__file__))
@@ -49,9 +50,10 @@ def apres(cle, dt=0.0):
 
 
 # ------------------------------------------------------------------------------------------------ les personnages
-def enceinte(img, x, y, taille=40, miroir=False, marche=None):
+def enceinte(img, x, y, taille=40, miroir=False, marche=None, panique=False):
     s = taille / 92
-    P.personnage(img, (x, y), taille, tenue="robe", miroir=miroir, marche=marche)
+    P.personnage(img, (x, y), taille, tenue="robe", miroir=miroir, marche=marche,
+                 mains=(x + 10 * s, y - 98 * s) if panique else (x + 8 * s, y - 52 * s))
     d = draw(img)
     sx = -1 if miroir else 1
     cx, cy, r = x + sx * 7 * s, y - 52 * s, 7 * s
@@ -59,11 +61,13 @@ def enceinte(img, x, y, taille=40, miroir=False, marche=None):
     d.point((cx + sx * 2, cy - 2), fill=B4)
 
 
-def vieux(img, x, y, taille=40, miroir=False):
+def vieux(img, x, y, taille=40, miroir=False, panique=False):
     s = taille / 92
     sx = -1 if miroir else 1
-    P.personnage(img, (x, y), taille, tronc=14, flexion=0.3, tenue="vieux", miroir=miroir,
-                 mains=(x + 24 * s, y - 40 * s) if not miroir else None)
+    P.personnage(img, (x, y), taille, tronc=14 if not panique else 2, flexion=0.3, tenue="vieux", miroir=miroir,
+                 mains=(x + 8 * s, y - 96 * s) if panique else (x + 24 * s, y - 40 * s))
+    if panique:
+        return
     d = draw(img)
     cx = x + sx * 26 * s
     d.line([(cx, y), (cx, y - 40 * s)], fill=GRIS, width=max(1, int(2 * s)))     # la canne
@@ -133,73 +137,6 @@ def chien(d, x, y, t=0.0, col=(176, 150, 120)):
         d.line([(x + k, y - 4), (x + k, y)], fill=col, width=2)
 
 
-# ------------------------------------------------------------------------------------------------ la route (dessus)
-def route(d, t, defile=0.0):
-    """La route vue de dessus : deux voies, trottoirs, passage piéton."""
-    d.rectangle((0, 0, 270, 480), fill=(8, 16, 36))
-    d.rectangle((0, 0, 36, 480), fill=B0)                                             # trottoirs
-    d.rectangle((234, 0, 270, 480), fill=B0)
-    for y in range(int(-defile) % 16 - 16, 480, 16):
-        d.line([(36, y), (36, y + 14)], fill=B1)
-        d.line([(234, y), (234, y + 14)], fill=B1)
-    for y in range(int(defile * 1.0) % 30 - 30, 480, 30):                              # la ligne médiane
-        if not (PASSAGE - 22 < y < PASSAGE + 22):
-            d.rectangle((134, y, 136, y + 14), fill=B3)
-    for x in range(42, 230, 12):                                                      # les bandes du passage
-        d.rectangle((x, PASSAGE - 18, x + 6, PASSAGE + 18), fill=(40, 60, 100))
-    for k in range(5):                                                                # des arbres sur le trottoir
-        yy = (k * 110 + defile) % 560 - 40
-        for xx in (16, 252):
-            d.ellipse((xx - 12, yy - 12, xx + 12, yy + 12), fill=B1, outline=B0)
-            d.ellipse((xx - 6, yy - 8, xx + 4, yy + 2), fill=B2)
-
-
-def voiture_dessus(img, cx, cy, ang=0.0, alerte=False, t=0.0, toit=True):
-    """La voiture autonome vue de dessus (avant vers le haut)."""
-    w, h = 40, 66
-    cal = Image.new("RGBA", (w + 24, h + 24), (0, 0, 0, 0))
-    d = draw(cal)
-    ox, oy = 12, 12
-    d.rounded_rectangle((ox, oy, ox + w, oy + h), 9, fill=B2, outline=P.CONTOUR)
-    d.rounded_rectangle((ox + 3, oy + 4, ox + w - 3, oy + h - 4), 7, fill=B3)
-    d.polygon([(ox + 6, oy + 18), (ox + w - 6, oy + 18), (ox + w - 9, oy + 26), (ox + 9, oy + 26)], fill=B0)   # pare-brise
-    if toit:
-        d.rectangle((ox + 8, oy + 26, ox + w - 8, oy + 48), fill=B2)
-    else:                                                                              # l'habitacle vide
-        d.rectangle((ox + 8, oy + 26, ox + w - 8, oy + 48), fill=B0)
-        for sx in (ox + 10, ox + w - 18):
-            d.rounded_rectangle((sx, oy + 30, sx + 8, oy + 40), 2, fill=GRIS_F)
-        cx_, cy_ = ox + 14, oy + 28                                                    # le volant qui tourne seul
-        d.ellipse((cx_ - 4, cy_ - 2, cx_ + 4, cy_ + 2), outline=GRIS)
-        a = t * 5
-        d.line([(cx_ - 4 * math.cos(a), cy_ - 2 * math.sin(a)), (cx_ + 4 * math.cos(a), cy_ + 2 * math.sin(a))], fill=GRIS)
-    d.polygon([(ox + 9, oy + 48), (ox + w - 9, oy + 48), (ox + w - 6, oy + 55), (ox + 6, oy + 55)], fill=B0)   # lunette
-    d.rectangle((ox + 16, oy + 6, ox + w - 16, oy + 12), fill=B1)                    # le capteur sur le capot
-    for x in (ox + 4, ox + w - 8):
-        d.rectangle((x, oy + 1, x + 4, oy + 3), fill=B4)                              # phares
-    feu = ROUGE if (alerte and int(t * 8) % 2) else ROUGE_F
-    for x in (ox + 4, ox + w - 8):
-        d.rectangle((x, oy + h - 3, x + 4, oy + h - 1), fill=feu)
-    for x, y in ((ox - 2, oy + 10), (ox + w - 1, oy + 10), (ox - 2, oy + h - 20), (ox + w - 1, oy + h - 20)):
-        d.rectangle((x, y, x + 3, y + 10), fill=NOIR)
-    cal = cal.rotate(-ang, resample=Image.NEAREST, expand=True)
-    img.paste(cal, (int(cx - cal.width / 2), int(cy - cal.height / 2)), cal)
-
-
-def voiture_profil(d, x, y, col=B2, t=0.0, roule=True):
-    """Une voiture de profil, sans marque (avant vers la droite)."""
-    d.rounded_rectangle((x, y - 22, x + 78, y - 6), 5, fill=col, outline=P.CONTOUR)
-    d.polygon([(x + 16, y - 22), (x + 26, y - 36), (x + 54, y - 36), (x + 66, y - 22)], fill=col, outline=P.CONTOUR)
-    d.polygon([(x + 20, y - 23), (x + 28, y - 33), (x + 39, y - 33), (x + 39, y - 23)], fill=B0)
-    d.polygon([(x + 42, y - 23), (x + 42, y - 33), (x + 53, y - 33), (x + 62, y - 23)], fill=B0)
-    d.rectangle((x + 72, y - 18, x + 77, y - 14), fill=B4)
-    d.rectangle((x + 1, y - 18, x + 4, y - 14), fill=ROUGE_F)
-    for cx in (x + 17, x + 61):
-        d.ellipse((cx - 8, y - 14, cx + 8, y + 2), fill=NOIR, outline=GRIS_F)
-        a = t * 12 if roule else 0
-        d.line([(cx - 5 * math.cos(a), y - 6 - 5 * math.sin(a)), (cx + 5 * math.cos(a), y - 6 + 5 * math.sin(a))], fill=GRIS)
-
-
 # ------------------------------------------------------------------------------------------------ interface
 def date(d, txt, t, t0, x=262):
     if t < t0:
@@ -254,122 +191,62 @@ def over(fn, *args):
     OVER.append((fn, args))
 
 
-# ------------------------------------------------------------------------------------------------ les scènes
-def s_route(img, d, t, s):
-    """L'accroche (s = temps de l'histoire) : la voiture sans freins fonce vers le passage ; qui choisir ?"""
-    route(d, t, defile=0.0)
-    gauche = s >= T["devant"] - 0.2
-    droite = s >= T["autre"] - 0.2
-    if gauche:                                                    # la femme enceinte, voie de gauche
-        enceinte(img, 80, PASSAGE + 6, 50)
-        if s >= T["enceinte"]:
-            over(bulle, *E(54, PASSAGE + 22), "ENCEINTE", BLANC, B2)
-    if droite:                                                    # trois personnes âgées, voie de droite
-        for k, x in enumerate((162, 184, 206)):
-            if s >= T["trois"] - 0.1 + 0.15 * k:
-                vieux(img, x, PASSAGE + 6, 46, miroir=True)
-        if s >= T["agees"]:
-            over(bulle, *E(164, PASSAGE + 22), "3 AGEES", BLANC, B2)
-    v = 0.0 if s < T["freins"] else min(1.0, (s - T["freins"]) / 2.0)
-    arrivee = T["rw0"]
-    u = lisse((s - (T["choisir"] - 0.2)) / (arrivee - T["choisir"] + 0.2))
-    cy = 400 - 20 * lisse(s / 1.2) - (380 - PASSAGE - 62) * u                      # la voiture avance (s'arrête juste avant le passage)
-    ang = 9 * math.sin(s * 3.1) * lisse((s - T["choisir"]) / 0.6) if s > T["choisir"] else 0.0   # elle hésite
-    cx = 135 + 30 * math.sin(s * 3.1) * lisse((s - T["choisir"]) / 0.6) if s > T["choisir"] else 135
-    voiture_dessus(img, cx, cy, ang, alerte=s >= T["freins"], t=s, toit=not (T["personne"] - 0.1 <= s < T["choisir"]))
-    if s >= T["freins"]:
-        clign = int(s * 6) % 2
-        over(P.cadre_texte, (98, 440), "FREINS : HS", 8, BLANC if clign else ROUGE, ROUGE, ROUGE_F if clign else NOIR)
-    if T["personne"] - 0.1 <= s < T["choisir"]:
-        over(P.cadre_texte, (70, 140), "CONDUCTEUR : AUCUN", 8, B4, B2)
-    if s >= T["alors"]:
-        f = P.police(36, pixel=False)
-        if int(s * 4) % 2 or s > T["alors"] + 0.6:
-            over(lambda dd: dd.text((122, 130), "?", font=f, fill=ROUGE))
+# ------------------------------------------------------------------------------------------------ véhicules, effets
+def voiture_profil(d, x, y, col=B2, t=0.0, roule=True, phare=True):
+    """Une voiture de profil, sans marque (avant vers la droite) : carrosserie ombrée, vitres, reflets, jantes."""
+    sombre = tuple(int(c * 0.65) for c in col)
+    clair = tuple(min(255, int(c * 1.3) + 20) for c in col)
+    d.ellipse((x + 2, y - 3, x + 78, y + 3), fill=(3, 6, 14))                                    # ombre
+    d.rounded_rectangle((x, y - 22, x + 78, y - 6), 5, fill=col, outline=P.CONTOUR)
+    d.polygon([(x + 16, y - 22), (x + 26, y - 36), (x + 54, y - 36), (x + 66, y - 22)], fill=col, outline=P.CONTOUR)
+    d.rectangle((x + 2, y - 11, x + 76, y - 7), fill=sombre)                                     # bas de caisse
+    d.line([(x + 4, y - 20), (x + 74, y - 20)], fill=clair)                                       # ligne de lumière
+    d.polygon([(x + 20, y - 23), (x + 28, y - 33), (x + 39, y - 33), (x + 39, y - 23)], fill=B0)
+    d.polygon([(x + 42, y - 23), (x + 42, y - 33), (x + 53, y - 33), (x + 62, y - 23)], fill=B0)
+    d.line([(x + 30, y - 31), (x + 26, y - 25)], fill=B2)                                         # reflets des vitres
+    d.line([(x + 46, y - 31), (x + 44, y - 26)], fill=B2)
+    d.line([(x + 40, y - 21), (x + 40, y - 9)], fill=sombre)                                      # la portière
+    d.rectangle((x + 44, y - 18, x + 48, y - 17), fill=clair)
+    d.polygon([(x + 62, y - 24), (x + 66, y - 26), (x + 66, y - 22)], fill=sombre)                # rétroviseur
+    d.rectangle((x + 72, y - 18, x + 77, y - 14), fill=BLANC)
+    d.rectangle((x + 1, y - 18, x + 4, y - 14), fill=ROUGE)
+    for cx in (x + 17, x + 61):
+        d.ellipse((cx - 9, y - 15, cx + 9, y + 3), fill=NOIR, outline=GRIS_F)
+        d.ellipse((cx - 4, y - 10, cx + 4, y - 2), fill=GRIS_F, outline=GRIS)
+        a = t * 12 if roule else 0
+        for k in range(3):
+            b = a + k * 2.1
+            d.line([(cx, y - 6), (cx + 4 * math.cos(b), y - 6 + 4 * math.sin(b))], fill=GRIS)
 
 
-def s_mit(img, d, t):
-    """« Cette question… » → « Résultat » : le jeu en ligne du MIT, 2016, Bonnefon à Toulouse."""
-    img.paste(Image.new("RGB", (1, 1)), (0, 0))
-    ex, ey, ew, eh = 20, 150, 230, 170                            # l'écran d'ordinateur
-    d.rectangle((ex - 6, ey - 6, ex + ew + 6, ey + eh + 6), fill=GRIS_F, outline=P.CONTOUR)
-    d.rectangle((ex, ey, ex + ew, ey + eh), fill=NOIR)
-    d.rectangle((ex + ew / 2 - 20, ey + eh + 6, ex + ew / 2 + 20, ey + eh + 18), fill=GRIS_F)
-    d.rectangle((ex + ew / 2 - 40, ey + eh + 18, ex + ew / 2 + 40, ey + eh + 22), fill=GRIS_F)
-    u = lisse((t - T["cette"]) / 0.6)
-    if u > 0:
-        titre(d, 135, ey + 8, "MORAL MACHINE", 12, B4)
-        for k, x in enumerate((ex + 8, ex + ew / 2 + 4)):        # deux scénarios côte à côte, l'un choisi
-            w = ew / 2 - 12
-            choisi = t >= T["lance"] and (int((t - T["lance"]) * 1.5) % 2 == k)
-            d.rectangle((x, ey + 30, x + w, ey + 150), fill=B0, outline=ROUGE if choisi else B1, width=2 if choisi else 1)
-            d.rectangle((x + w / 2 - 12, ey + 30, x + w / 2 + 12, ey + 150), fill=(8, 16, 36))
-            for y in range(int(ey + 40), int(ey + 150), 14):
-                d.line([(x + w / 2, y), (x + w / 2, y + 6)], fill=B3)
-            d.rectangle((x + w / 2 - 8 + (k * 2 - 1) * 4, ey + 110, x + w / 2 + 8 + (k * 2 - 1) * 4, ey + 135), fill=B2)
-            for j in range(3 if k else 1):
-                px = x + 10 + j * 9 if k == 0 else x + w - 12 - j * 9
-                d.ellipse((px - 3, ey + 62, px + 3, ey + 68), fill=P.PEAU)
-                d.rectangle((px - 3, ey + 68, px + 3, ey + 80), fill=B3 if k == 0 else GRIS)
-            d.text((x + w / 2 - 14, ey + 137), "CHOISIR", font=P.police(8), fill=B4)
-    if t >= T["parmi"]:                                           # le chercheur de Toulouse
-        x = 50 + 20 * lisse((t - T["parmi"]) / 0.5)
-        P.personnage(img, (x, 460), 110, tenue="costume", mains=None if t < T["bonnefon"] else (x + 30, 380))
-        if t >= T["toulouse"]:
-            over(P.cadre_texte, (130, 390), "TOULOUSE", 8, BLANC, ROUGE)
-        if t >= T["bonnefon"]:
-            over(P.cadre_texte, (130, 400), "J.-F. BONNEFON", 8, B4, B2)
-    if t >= T["mit"]:
-        over(lambda dd: (dd.rectangle((14, 112, 70, 140), fill=ROUGE_F, outline=ROUGE),
-                         dd.text((22, 114), "MIT", font=P.police(20, pixel=False), fill=BLANC)))
+def grand_profil(img, x, y, k=2, **kw):
+    tmp = Image.new("RGBA", (84, 44), (0, 0, 0, 0))
+    voiture_profil(draw(tmp), 2, 40, **kw)
+    tmp = tmp.resize((84 * k, 44 * k), Image.NEAREST)
+    img.paste(tmp, (int(x - 2 * k), int(y - 40 * k)), tmp)
 
 
-def _continents(d, cols, t=0.0, france=False):
-    """Une carte du monde très grossière (pixel) ; cols : couleur par groupe (ouest, est, sud)."""
-    o, e, s = cols
-    poly = {
-        "amn": ([(14, 40), (40, 28), (78, 30), (92, 46), (70, 70), (56, 92), (40, 80), (22, 62)], o),
-        "ams": ([(60, 96), (82, 102), (92, 124), (78, 160), (68, 176), (62, 150), (54, 118)], s),
-        "eur": ([(118, 36), (148, 30), (160, 42), (146, 58), (126, 62), (118, 54)], o),
-        "fr": ([(122, 54), (132, 52), (134, 62), (124, 64)], s),
-        "afr": ([(120, 70), (156, 68), (170, 92), (160, 130), (146, 150), (134, 122), (118, 92)], s),
-        "asi": ([(160, 30), (230, 26), (256, 48), (240, 74), (214, 92), (190, 84), (170, 70), (158, 50)], e),
-        "moy": ([(160, 70), (184, 72), (182, 92), (166, 88)], e),
-        "oce": ([(214, 130), (246, 126), (250, 148), (224, 152)], o),
-    }
-    for k, (pts, c) in poly.items():
-        if k == "fr" and france:
-            c = ROUGE if int(t * 5) % 2 else BLANC
-        d.polygon(pts, fill=c, outline=P.CONTOUR)
+def pluie(d, t, x0=0, x1=270, y0=0, y1=480, n=70):
+    rng = np.random.default_rng(12)
+    for _ in range(n):
+        x, y, v = rng.uniform(x0, x1), rng.uniform(y0, y1), rng.uniform(0.7, 1.3)
+        yy = y0 + (y - y0 + t * 420 * v) % (y1 - y0)
+        xx = x + (yy - y0) * 0.12
+        d.line([(xx, yy), (xx + 1, yy + 6)], fill=(60, 90, 150))
 
 
-def carte(img, d, t, x0, y0, cols, france=False, eclat=1.0):
-    tmp = Image.new("RGB", (270, 190), NOIR)
-    dd = draw(tmp)
-    for y in range(0, 190, 10):
-        dd.line([(0, y), (270, y)], fill=(10, 20, 44))
-    for x in range(0, 270, 10):
-        dd.line([(x, 0), (x, 190)], fill=(10, 20, 44))
-    _continents(dd, cols, t, france)
-    img.paste(tmp, (x0, y0))
+def gens(img, d, t, s, panique=False, taille=56):
+    """La femme enceinte (voie de gauche) et les trois personnes âgées (voie de droite), sur le passage."""
+    if s >= T["devant"] - 0.2:
+        D.ombre(d, 80, PASSAGE + 6, 10)
+        enceinte(img, 80, PASSAGE + 6, taille, panique=panique)
+    for k, x in enumerate((164, 188, 212)):
+        if s >= T["trois"] - 0.1 + 0.15 * k:
+            D.ombre(draw(img), x, PASSAGE + 6, 9)
+            vieux(img, x, PASSAGE + 6, taille - 4, miroir=True, panique=panique and k != 1)
 
 
-def s_planete(img, d, t):
-    """« Résultat : 40 millions de décisions, 233 pays » : la carte s'allume, le compteur monte."""
-    u = lisse((t - T["resultat"]) / 2.2)
-    carte(img, d, t, 0, 170, (B2, B2, B2))
-    rng = np.random.default_rng(5)
-    for k in range(int(260 * u)):                                 # les décisions qui tombent partout
-        x, y = rng.uniform(10, 260), rng.uniform(180, 350)
-        if np.asarray(img)[int(y), int(x)].sum() > 150:
-            d.point((x, y), fill=B4 if k % 3 else BLANC)
-    if t >= T["quarante"]:
-        v = 40_000_000 * lisse((t - T["quarante"]) / 1.4)
-        over(compteur, 135, 118, v, "", 20, BLANC)
-        over(P.cadre_texte, (88, 146), "DECISIONS", 8, B4, B2)
-    if t >= T["deux"]:
-        v = 233 * lisse((t - T["deux"]) / 1.0)
-        over(compteur, 135, 380, v, " PAYS", 16, B4)
+GRAND = {}
 
 
 def grand(img, fn, x, y, k=2, *args):
@@ -380,205 +257,416 @@ def grand(img, fn, x, y, k=2, *args):
     img.paste(tmp, (int(x - 30 * k), int(y - 36 * k)), tmp)
 
 
+def projecteurs(img, xs, y0, sol, col=(24, 46, 96), force=0.85, t=0.0):
+    for k, x in enumerate(xs):
+        bal = 10 * math.sin(t * 0.9 + k)
+        D.cone(img, (x, y0), (x + bal, sol), 3, 34, col, force)
+    return draw(img)
+
+
+# ------------------------------------------------------------------------------------------------ les scènes
+def s_route(img, d, t, s):
+    """L'accroche (s = temps de l'histoire) : la voiture sans freins fonce vers le passage ; qui choisir ?"""
+    d = D.route_nuit(img, s, PASSAGE)
+    arrivee = T["rw0"]
+    u = lisse((s - (T["choisir"] - 0.2)) / (arrivee - T["choisir"] + 0.2))
+    cy = 400 - 20 * lisse(s / 1.2) - (380 - PASSAGE - 62) * u
+    if s >= T["freins"]:                                          # les traces de freinage qui ne servent à rien
+        D.traces(d, 135, cy + 34, 480)
+    panique = s >= T["choisir"]
+    gens(img, d, t, s, panique)
+    d = draw(img)
+    hes = lisse((s - T["choisir"]) / 0.6) if s > T["choisir"] else 0.0
+    ang = 9 * math.sin(s * 3.1) * hes
+    cx = 135 + 30 * math.sin(s * 3.1) * hes
+    D.voiture_dessus(img, cx, cy, ang, alerte=s >= T["freins"], t=s,
+                     toit=not (T["personne"] - 0.1 <= s < T["choisir"]), freinage=1.0 if s >= T["freins"] else 0.0)
+    d = draw(img)
+    if s >= T["freins"]:
+        for k in range(6):                                        # étincelles sous la voiture
+            if (int(s * 20) + k) % 3 == 0:
+                d.point((cx - 18 + (k * 7) % 36, cy + 36 + (k * 5) % 6), fill=B4 if k % 2 else ROUGE)
+    pluie(d, s)
+    if s >= T["enceinte"]:
+        over(bulle, *E(52, PASSAGE + 22), "ENCEINTE", BLANC, B2)
+    if s >= T["agees"]:
+        over(bulle, *E(166, PASSAGE + 22), "3 AGEES", BLANC, B2)
+    if s >= T["freins"]:
+        clign = int(s * 6) % 2
+        over(P.cadre_texte, (92, 440), "FREINS : HS", 8, BLANC if clign else ROUGE, ROUGE, ROUGE_F if clign else NOIR)
+    if T["personne"] - 0.1 <= s < T["choisir"]:
+        over(P.cadre_texte, (70, 140), "CONDUCTEUR : AUCUN", 8, B4, B2)
+    if panique:
+        for x in (80, 164, 212):
+            if int(s * 6 + x) % 2:
+                over(lambda dd, p=E(x - 2, PASSAGE - 50): dd.text(p, "!", font=P.police(14, pixel=False), fill=ROUGE))
+    if s >= T["alors"]:
+        f = P.police(36, pixel=False)
+        if int(s * 4) % 2 or s > T["alors"] + 0.6:
+            over(lambda dd: dd.text((122, 300), "?", font=f, fill=ROUGE))
+
+
+def s_mit(img, d, t):
+    """« Cette question… » → « Résultat » : le bureau du chercheur, l'écran du jeu du MIT, 2016, Toulouse."""
+    d = D.labo(img, t)
+    ex, ey, ew, eh = 108, 222, 140, 96                            # le grand écran posé sur le bureau
+    d.rectangle((ex - 5, ey - 5, ex + ew + 5, ey + eh + 5), fill=(30, 36, 56), outline=P.CONTOUR)
+    d.rectangle((ex + ew / 2 - 6, ey + eh + 5, ex + ew / 2 + 6, 330), fill=(30, 36, 56))
+    choix = int((t - T["lance"]) * 1.5) % 2 if t >= T["lance"] else None
+    D.ecran_jeu(d, ex, ey, ew, eh, t, choix)
+    D.lumiere(img, ex + ew / 2, ey + eh / 2, 110, 90, (26, 48, 96), 0.5)
+    d = draw(img)
+    D.ecran_jeu(d, ex, ey, ew, eh, t, choix)
+    d.rectangle((150, 322, 200, 328), fill=GRIS_F, outline=P.CONTOUR)                           # le clavier
+    for k in range(8):
+        if int(t * 9 + k) % 3 == 0:
+            d.point((153 + k * 6, 324), fill=B4)
+    # le chercheur, assis, de profil, qui tape
+    P.siege(d, 94, 420, 1.7)
+    x = 76
+    tape = math.sin(t * 14) * 2
+    if t >= T["parmi"]:
+        P.personnage(img, (x + 34, 420), 104, assis=True, tenue="costume", mains=(150 + tape, 318))
+        D.lumiere(img, 120, 300, 30, 40, (40, 60, 110), 0.4)
+    if t >= T["moral"]:
+        over(P.cadre_texte, (120, 206), "MORAL MACHINE", 8, BLANC, ROUGE)
+    if t >= T["toulouse"]:
+        over(P.cadre_texte, (22, 444), "TOULOUSE", 8, BLANC, ROUGE)
+    if t >= T["bonnefon"]:
+        over(P.cadre_texte, (100, 444), "J.-F. BONNEFON", 8, B4, B2)
+    if t >= T["mit"]:
+        over(lambda dd: (dd.rectangle((14, 112, 70, 140), fill=ROUGE_F, outline=ROUGE),
+                         dd.text((22, 114), "MIT", font=P.police(20, pixel=False), fill=BLANC)))
+
+
+def s_planete(img, d, t):
+    """« Résultat : 40 millions de décisions, 233 pays » : le globe tourne et s'allume de points."""
+    d.rectangle((0, 0, 270, 480), fill=(4, 8, 20))
+    D.etoiles(d, t, 90)
+    D.lumiere(img, 135, 270, 140, 140, (12, 26, 60), 0.7)
+    u = lisse((t - T["resultat"]) / 2.5)
+    D.globe(img, 135, 270, 100, t * 0.35, (B2, B2, B2), points=200 * u, t=t)
+    d = draw(img)
+    for k in range(3):                                            # des satellites en orbite
+        a = t * (0.8 + 0.3 * k) + k * 2
+        x, y = 135 + 124 * math.cos(a), 270 + 40 * math.sin(a) - 20 * k
+        if math.sin(a) > -0.2 or True:
+            d.rectangle((x - 1, y - 1, x + 1, y + 1), fill=B4)
+            d.line([(x - 4, y), (x + 4, y)], fill=B2)
+    if t >= T["quarante"]:
+        v = 40_000_000 * lisse((t - T["quarante"]) / 1.4)
+        over(compteur, 135, 118, v, "", 20, BLANC)
+        over(P.cadre_texte, (98, 146), "DECISIONS", 8, B4, B2)
+    if t >= T["deux"]:
+        v = 233 * lisse((t - T["deux"]) / 1.0)
+        over(compteur, 135, 396, v, " PAYS", 16, B4)
+
+
+def _contenu(*items):
+    """Fabrique le contenu d'un plateau de balance : items = (fonction(img, x, y), décalage x)."""
+    def f(img, x, y):
+        for fn, dx in items:
+            fn(img, x + dx, y)
+    return f
+
+
+def _p(tenue, taille=40, miroir=False):
+    return lambda img, x, y: P.personnage(img, (x, y), taille, tenue=tenue, miroir=miroir)
+
+
+def _salle(img, d, t):
+    """Une salle sombre, un projecteur sur la balance."""
+    d.rectangle((0, 0, 270, 480), fill=(6, 12, 28))
+    for x in range(0, 270, 30):                                   # des colonnes dans l'ombre
+        d.rectangle((x + 6, 120, x + 16, 440), fill=(10, 20, 44))
+        d.rectangle((x + 4, 116, x + 18, 122), fill=(14, 26, 54))
+    d.rectangle((0, 440, 270, 480), fill=(12, 22, 46))
+    d = projecteurs(img, [135], 100, 440, (24, 44, 92), 0.9, t)
+    D.lumiere(img, 135, 444, 110, 14, (24, 44, 92), 0.9)
+    return draw(img)
+
+
 def s_regles(img, d, t):
-    """« Vous pensez… sauf que… trois règles » : une foule qui répond au hasard, puis trois tampons."""
+    """« Vous pensez… sauf que… trois règles » : une foule qui répond au hasard, puis trois balances."""
     if t < T["presque"]:
+        d = D.ville_fond(img, t, 380, 6, 200)
+        d.rectangle((0, 380, 270, 480), fill=(10, 20, 42))
+        for x in (40, 230):
+            D.lumiere(img, x, 380, 50, 20, (24, 44, 88), 0.8)
+        d = draw(img)
         for k in range(5):
             x = 35 + k * 50
-            P.personnage(img, (x, 360), 64, tenue=("pull", "gris", "clair", "costume", "sport")[k], miroir=k % 2)
+            D.ombre(d, x, 380, 10)
+            P.personnage(img, (x, 380), 70, tenue=("pull", "gris", "clair", "costume", "sport")[k], miroir=k % 2,
+                         tete=10 * math.sin(t * 3 + k))
             if int(t * 3 + k) % 2:
-                over(P.cadre_texte, (x - 6, 230 + 12 * (k % 2)), "?!"[(k + int(t * 2)) % 2], 14, BLANC, B2)
+                over(P.cadre_texte, (x - 6, 250 + 12 * (k % 2)), "?!"[(k + int(t * 2)) % 2], 14, BLANC, B2)
         return
+    d = _salle(img, d, t)
     if t < T["humains"] - 0.1:
         titre(d, 135, 200, "3 REGLES", 30, BLANC)
         titre(d, 135, 250, "PRESQUE PARTOUT", 12, B3)
         return
-    lignes = [("humains", "HUMAINS > ANIMAUX", 140), ("plus2", "LE + DE VIES", 250), ("jeunes", "LES + JEUNES", 360)]
-    for cle, txt, y in lignes:
-        if t >= T[cle]:
-            over(tampon, txt, t, T[cle], 135, y, -4, 14, B4)
-    P.personnage(img, (60, 220), 64, tenue="pull")
-    grand(img, chien, 210, 216, 2, t)
-    if t >= T["plus2"]:
-        for k in range(4):
-            P.personnage(img, (160 + 22 * k, 330), 50, tenue="clair")
-        P.personnage(img, (60, 330), 50, tenue="gris")
-    if t >= T["jeunes"]:
-        enfant(img, 210, 440, 46)
-        vieux(img, 60, 440, 56)
+    if t < T["plus2"] - 0.1:
+        cle, txt = "humains", "HUMAINS > ANIMAUX"
+        g, dr = _contenu((_p("pull", 44), 0)), _contenu((lambda im, x, y: grand(im, chien, x, y, 2, t), 0))
+    elif t < T["jeunes"] - 0.1:
+        cle, txt = "plus2", "LE + DE VIES"
+        g = _contenu(*[(_p(tn, 36), dx) for tn, dx in (("clair", -18), ("pull", -6), ("gris", 6), ("sport", 18))])
+        dr = _contenu((_p("costume", 36), 0))
+    else:
+        cle, txt = "jeunes", "LES + JEUNES"
+        g = _contenu((lambda im, x, y: enfant(im, x, y, 34, "robe"), 0))
+        dr = _contenu((lambda im, x, y: vieux(im, x, y, 42, miroir=True), 0))
+    u = lisse((t - T[cle]) / 0.5)
+    ang = -16 * u + 2 * math.sin(t * 6) * (1 - u)                 # le côté épargné l'emporte
+    D.balance(img, 135, 230, ang, t, g, dr)
+    over(tampon, txt, t, T[cle], 135, 140, -4, 16, B4)
+    over(P.cadre_texte, (40, 410), "EPARGNE", 8, B4, B2)
+    over(P.cadre_texte, (180, 410), "SACRIFIE", 8, ROUGE, ROUGE_F)
 
 
 PODIUM = [("bebe", "BEBE"), ("fille", "FILLETTE"), ("garcon", "GARCON"), ("enceinte2", "ENCEINTE")]
 
 
 def s_classement(img, d, t, interdit=False):
-    """« Les plus épargnés ? » : le classement, du bébé (en haut) au chat (en bas)."""
-    titre(d, 135, 116, "LES PLUS EPARGNES", 12, B4)
+    """« Les plus épargnés ? » : le podium sous les projecteurs ; en dessous, la cave : chien, criminel, chat."""
+    d.rectangle((0, 0, 270, 480), fill=(6, 12, 28))
+    d.rectangle((0, 120, 270, 290), fill=(10, 20, 44))
+    for x in range(0, 270, 18):                                   # le rideau de scène
+        d.line([(x, 120), (x + 4, 290)], fill=(16, 30, 62), width=3)
+    d = projecteurs(img, [55, 115, 165, 225], 120, 286, (28, 52, 108), 0.9, t)
+    sol = 290
+    tops = D.podium(d, 135, sol, t)
+    d.rectangle((0, sol, 270, 296), fill=GRIS_F)
+    titre(d, 135, 126, "LES PLUS EPARGNES", 12, B4)
     for k, (cle, nom) in enumerate(PODIUM):
         if t < T[cle] - 0.1 and not interdit:
             continue
-        y = 170 + k * 46
-        d.rectangle((20, y - 34, 250, y + 4), fill=B0, outline=B1)
-        d.text((28, y - 26), f"{k + 1}", font=P.police(14, pixel=False), fill=B3)
-        d.text((120, y - 20), nom, font=P.police(8), fill=BLANC)
+        x, y = tops[k]
         if k == 0:
-            grand(img, poussette, 70, y, 2, t) if False else poussette(d, 70, y, t)
+            grand(img, poussette, x, y, 2, t)
         elif k == 1:
-            enfant(img, 70, y, 30, "robe")
+            enfant(img, x, y, 46, "robe")
         elif k == 2:
-            enfant(img, 70, y, 32, "pull")
+            enfant(img, x, y, 48, "pull")
         else:
-            enceinte(img, 70, y, 36)
-    if t >= T["tout"] or interdit:                                # le bas du classement
-        d.line([(20, 360), (250, 360)], fill=GRIS_F)
-        d.text((108, 356), "...", font=P.police(8), fill=GRIS)
-        bas = [("chien", "CHIEN", 380), ("criminel", "CRIMINEL", 414), ("chat", "CHAT", 448)]
-        for cle, nom, y in bas:
+            enceinte(img, x, y, 52)
+        d = draw(img)
+        if t < T[cle] + 0.5 and not interdit:                     # l'étincelle d'arrivée
+            r = 18 * (t - T[cle] + 0.1) / 0.6
+            for j in range(8):
+                a = j * math.pi / 4
+                d.point((x + r * math.cos(a), y - 30 + r * math.sin(a)), fill=BLANC)
+    # la cave
+    d.rectangle((0, 296, 270, 480), fill=(4, 8, 18))
+    for y in range(300, 480, 10):
+        for x in range((y // 10) % 2 * 12, 270, 24):
+            d.rectangle((x, y, x + 22, y + 8), fill=(8, 14, 30))
+    if t >= T["tout"] or interdit:
+        titre(d, 135, 304, "TOUT EN BAS", 10, ROUGE)
+        bas = [("chien", "CHIEN", 46, 356), ("criminel", "CRIMINEL", 120, 404), ("chat", "CHAT", 194, 452)]
+        for cle, nom, x, y in bas:
+            d.rectangle((x - 40, y, x + 40, y + 6), fill=(30, 40, 66), outline=P.CONTOUR)   # les marches qui descendent
             if t < T[cle] - 0.1 and not interdit:
                 continue
-            d.rectangle((20, y - 26, 250, y + 4), fill=(10, 18, 40), outline=ROUGE_F)
-            d.text((120, y - 16), nom, font=P.police(8), fill=GRIS)
+            D.lumiere(img, x, y - 12, 34, 22, (20, 30, 56), 0.8)
+            d = draw(img)
             if cle == "chat":
-                chat(d, 70, y, t)
+                grand(img, chat, x, y, 2, t)
             elif cle == "chien":
-                chien(d, 70, y, t)
+                grand(img, chien, x, y, 2, t)
             else:
-                criminel(img, 70, y, 28)
+                criminel(img, x, y, 46)
+            d = draw(img)
+            texte_ = P.police(8)
+            d.text((x + 22, y - 14), nom, font=texte_, fill=GRIS)
         if t >= T["chien"] and not interdit:
-            d.text((200, 370), "^", font=P.police(14, pixel=False), fill=B3)
+            f = P.police(14, pixel=False)
+            if int(t * 4) % 2:
+                d.text((82, 384), "^", font=f, fill=B3)
+                d.text((150, 432), "^", font=f, fill=B3)
 
 
 def s_test(img, d, t):
-    """La raison de suivre : le test en 13 situations, comparé au reste du monde ; PROCHAIN ÉPISODE."""
-    ex, ey, ew, eh = 50, 120, 170, 290                            # un téléphone
-    d.rounded_rectangle((ex - 6, ey - 10, ex + ew + 6, ey + eh + 10), 12, fill=GRIS_F, outline=P.CONTOUR)
-    d.rectangle((ex, ey, ex + ew, ey + eh), fill=NOIR)
+    """La raison de suivre : le test en 13 situations dans un téléphone ; vous contre le monde ; PROCHAIN ÉPISODE."""
+    d = D.ville_fond(img, t, 480, 8, 300)
+    D.lumiere(img, 135, 280, 150, 200, (10, 20, 46), 0.8)
+    d = draw(img)
+    x0, y0, x1, y1 = D.telephone(img, d, 120, 270, 160, 290, t)
+    D.lumiere(img, 120, 270, 120, 170, (30, 56, 110), 0.5)
+    d = draw(img)
+    d.rectangle((x0, y0, x1, y1), fill=NOIR)
     n = 1 + int(12 * lisse((t - T["treize"]) / 2.0)) if t >= T["treize"] else 1
-    titre(d, 135, ey + 8, f"{n} / 13", 14, B4)
-    for k in range(2):                                            # deux petites scènes
-        x = ex + 8 + k * 80
-        d.rectangle((x, ey + 34, x + 74, ey + 120), fill=B0, outline=B1)
-        d.rectangle((x + 30, ey + 34, x + 44, ey + 120), fill=(8, 16, 36))
-        d.rectangle((x + 32, ey + 96, x + 42, ey + 114), fill=B2)
-        for j in range(1 + (n + k) % 3):
-            px = x + 8 + j * 7 if k == 0 else x + 66 - j * 7
-            d.ellipse((px - 2, ey + 50, px + 2, ey + 54), fill=P.PEAU)
-            d.rectangle((px - 2, ey + 54, px + 2, ey + 64), fill=B3 if (j + n) % 2 else GRIS)
-    if t >= T["compare"]:                                         # VOUS contre LE MONDE
+    titre(d, (x0 + x1) / 2, y0 + 6, f"{n} / 13", 14, B4)
+    for k in range(13):                                           # la barre de progression
+        d.rectangle((x0 + 6 + k * 11.5, y0 + 26, x0 + 15 + k * 11.5, y0 + 29), fill=ROUGE if k < n else B0)
+    D.ecran_jeu(d, x0 + 4, y0 + 34, x1 - x0 - 8, 110, t, (n + int(t * 1.5)) % 2)
+    if t >= T["compare"]:
         u = lisse((t - T["compare"]) / 1.0)
-        for k, (nom, v, c) in enumerate((("VOUS", 0.82, ROUGE), ("MONDE", 0.55, B3))):
-            y = ey + 140 + k * 40
-            d.text((ex + 8, y), nom, font=P.police(8), fill=BLANC)
-            d.rectangle((ex + 8, y + 12, ex + 8 + 150 * v * u, y + 22), fill=c)
-            d.rectangle((ex + 8, y + 12, ex + 158, y + 22), outline=B1)
+        for k, (nom, v, c) in enumerate((("VOUS", 0.82, ROUGE), ("LE MONDE", 0.55, B3))):
+            y = y0 + 160 + k * 38
+            d.text((x0 + 8, y), nom, font=P.police(8), fill=BLANC)
+            d.rectangle((x0 + 8, y + 12, x0 + 8 + 140 * v * u, y + 24), fill=c)
+            d.rectangle((x0 + 8, y + 12, x0 + 148, y + 24), outline=B1)
     if t >= T["prochain"]:
-        over(P.cadre_texte, (66, 430), "PROCHAIN EPISODE >", 8, BLANC, ROUGE)
+        over(P.cadre_texte, (66, 446), "PROCHAIN EPISODE >", 8, BLANC, ROUGE)
     if t >= T["decouvrir"]:
         f = P.police(30, pixel=False)
         if int(t * 4) % 2 or t > T["decouvrir"] + 0.8:
-            d.text((ex + ew / 2 - 8, ey + 236), "?", font=f, fill=ROUGE)
+            over(lambda dd: dd.text((212, 150), "?", font=f, fill=ROUGE))
 
 
 def s_groupes(img, d, t):
     """« Mais attendez… trois grands groupes… la France est dans celui du Sud. »"""
+    d.rectangle((0, 0, 270, 480), fill=(4, 8, 20))
+    D.etoiles(d, t, 90, 5)
     u = t >= T["trois2"]
-    cols = ((B2, B3, (90, 110, 150)) if u else (B1, B1, B1))
-    carte(img, d, t, 0, 160, cols, france=t >= T["france"])
+    cols = (B2, B4, (120, 140, 190)) if u else (B1, B1, B1)
+    rot = 2.97 - 0.6 * (1 - lisse((t - T["mais"]) / 2.5)) + 0.04 * math.sin(t)
+    D.lumiere(img, 135, 270, 140, 140, (12, 26, 60), 0.7)
+    D.globe(img, 135, 270, 104, rot, cols, france=t >= T["france"], t=t)
     if u:
-        for k, (nom, c, x) in enumerate((("OUEST", B2, 20), ("EST", B3, 110), ("SUD", (150, 170, 210), 190))):
+        for k, (nom, c, x) in enumerate((("OUEST", B2, 20), ("EST", B4, 115), ("SUD", (120, 140, 190), 196))):
             if t >= T["trois2"] + 0.25 * k:
-                over(P.cadre_texte, (x, 370), nom, 8, NOIR, c, c)
+                over(P.cadre_texte, (x, 400), nom, 8, NOIR, c, c)
     if t >= T["sud"]:
-        over(P.cadre_texte, (110, 120), "FRANCE = SUD", 8, BLANC, ROUGE)
+        over(P.cadre_texte, (98, 130), "FRANCE = SUD", 8, BLANC, ROUGE)
 
 
 def s_sud(img, d, t):
     """« Dans ce groupe, on épargne davantage les femmes, et les sportifs plutôt que les personnes en surpoids. »"""
-    titre(d, 70, 130, "EPARGNE", 10, B3)
-    titre(d, 200, 130, "SACRIFIE", 10, ROUGE)
-    d.line([(135, 150), (135, 430)], fill=B1)
-    if t >= T["femmes"]:
-        enceinte(img, 50, 260, 50) if False else P.personnage(img, (50, 260), 50, tenue="robe")
-        P.personnage(img, (210, 260), 50, tenue="pull", miroir=True)
-        over(P.cadre_texte, (30, 272), "FEMME", 8, B4, B2)
-        over(P.cadre_texte, (186, 272), "HOMME", 8, GRIS, B1)
-    if t >= T["sportifs"]:
-        sportif(img, 60, 400, 50, t=t)
-        over(P.cadre_texte, (30, 412), "SPORTIF", 8, B4, B2)
-    if t >= T["surpoids"]:
-        surpoids(img, 210, 400, 50, miroir=True)
-        over(P.cadre_texte, (176, 412), "SURPOIDS", 8, GRIS, B1)
+    d = _salle(img, d, t)
+    if t < T["sportifs"] - 0.1:
+        cle, txt = "femmes", "+ LES FEMMES"
+        g = _contenu((_p("robe", 46), 0))
+        dr = _contenu((_p("pull", 46, True), 0))
+    else:
+        cle, txt = "sportifs", "+ LES SPORTIFS"
+        g = _contenu((lambda im, x, y: sportif(im, x, y, 46, t=t), 0))
+        dr = _contenu((lambda im, x, y: surpoids(im, x, y, 46, miroir=True), 0))
+    if t < T.get(cle, 0):
+        ang = 2 * math.sin(t * 5)
+    else:
+        u = lisse((t - T[cle]) / 0.5)
+        ang = -14 * u
+    D.balance(img, 135, 230, ang, t, g, dr)
+    if t >= T[cle]:
+        over(tampon, txt, t, T[cle], 135, 140, -4, 16, B4)
+    over(P.cadre_texte, (40, 410), "EPARGNE", 8, B4, B2)
+    over(P.cadre_texte, (180, 410), "SACRIFIE", 8, ROUGE, ROUGE_F)
+    over(P.cadre_texte, (102, 444), "GROUPE SUD", 8, BLANC, ROUGE)
+
+
+def _rue_profil(img, t, sol=330):
+    d = D.ville_fond(img, t, sol, 11, 230)
+    d.rectangle((0, sol, 270, sol + 6), fill=GRIS_F)
+    d.rectangle((0, sol + 6, 270, 480), fill=(10, 18, 38))
+    for x in range(int(-t * 0) % 30, 270, 30):
+        d.rectangle((x, sol + 40, x + 14, sol + 42), fill=B3)
+    for x in (40, 200):                                           # réverbères
+        d.line([(x, sol), (x, sol - 70)], fill=GRIS_F, width=2)
+        d.line([(x, sol - 70), (x + 10, sol - 72)], fill=GRIS_F, width=2)
+        D.cone(img, (x + 10, sol - 70), (x + 10, sol), 3, 30, (26, 48, 96), 0.8)
+        d = draw(img)
+        d.rectangle((x + 7, sol - 72, x + 13, sol - 68), fill=B4)
+    return d
 
 
 def s_paradoxe(img, d, t):
     """« La majorité veut des voitures qui sacrifient leur passager… mais pour les autres. »"""
-    d.rectangle((0, 300, 270, 304), fill=B1)
+    sol = 330
+    d = _rue_profil(img, t, sol)
     if t < T["propre"] - 0.1:
         u = lisse((t - T["sacrifient"]) / 0.9)
-        x = 20 + 125 * u                                          # la voiture des autres va dans le mur, les piétons vivent
-        d.rectangle((222, 210, 236, 300), fill=GRIS_F, outline=P.CONTOUR)
-        for y in range(214, 300, 8):
-            d.line([(222, y), (236, y)], fill=P.CONTOUR)
-        voiture_profil(d, x, 300, B2, t)
-        for k in range(3):
-            P.personnage(img, (160 + 14 * k, 380), 34, tenue="clair")
-        d.rectangle((0, 380, 270, 383), fill=B1)
-        if t >= T["sacrifient"] + 0.9:                            # le choc contre le mur
+        x = 10 + 70 * u
+        for y in range(sol - 120, sol, 8):                        # le mur de briques
+            for xx in range(206 + (y // 8) % 2 * 6, 252, 12):
+                d.rectangle((xx, y, xx + 10, y + 6), fill=(70, 50, 60), outline=P.CONTOUR)
+        choc = t >= T["sacrifient"] + 0.9
+        grand_profil(img, x, sol, 2, col=B2, t=t, roule=not choc)
+        d = draw(img)
+        if choc:
             k = t - T["sacrifient"] - 0.9
-            for j in range(12):
-                a = j * 0.52
-                r = 30 * min(1.0, k * 3)
-                if k < 1.2:
-                    d.rectangle((222 + r * math.cos(a), 270 + r * math.sin(a) * 0.6,
-                                 224 + r * math.cos(a), 272 + r * math.sin(a) * 0.6), fill=B4 if j % 2 else ROUGE)
-            over(P.cadre_texte, (150, 400), "PIETONS SAUVES", 8, B4, B2)
+            for j in range(16):
+                a = -math.pi / 2 + (j - 8) * 0.2
+                r = 50 * min(1.0, k * 3)
+                if k < 1.4:
+                    d.rectangle((206 + r * math.cos(a + math.pi), sol - 40 + r * math.sin(a) * 0.7 + 30 * k * k,
+                                 209 + r * math.cos(a + math.pi), sol - 37 + r * math.sin(a) * 0.7 + 30 * k * k),
+                                fill=(70, 50, 60) if j % 3 else B4)
+        for k in range(3):                                        # les piétons sauvés, sur le trottoir d'en face
+            P.personnage(img, (40 + 22 * k, 420), 50, tenue=("clair", "gris", "robe")[k],
+                         mains=(40 + 22 * k + 6, 380) if choc else None)
+        if choc:
+            over(P.cadre_texte, (110, 410), "PIETONS SAUVES", 8, B4, B2)
         if t >= T["autres"]:
             over(P.cadre_texte, (20, 140), "LA VOITURE DES AUTRES :", 8, B4, B2)
             over(P.cadre_texte, (20, 160), "SACRIFIE LE PASSAGER", 8, BLANC, ROUGE)
     else:
-        voiture_profil(d, 120, 300, B3, t, roule=False)
-        P.personnage(img, (80, 302), 60, tenue="pull", mains=(116, 268))
+        grand_profil(img, 90, sol, 2, col=B3, t=t, roule=False)
+        d = draw(img)
+        if t >= T["protege"]:                                     # le bouclier
+            pul = 1 + 0.08 * math.sin(t * 8)
+            cx, cy = 172, sol - 110
+            pts = [(cx - 30 * pul, cy - 30 * pul), (cx + 30 * pul, cy - 30 * pul), (cx + 30 * pul, cy), (cx, cy + 36 * pul),
+                   (cx - 30 * pul, cy)]
+            d.polygon(pts, fill=B1, outline=B4)
+            d.line([(cx, cy - 26), (cx, cy + 28)], fill=B4)
+            d.line([(cx - 26, cy - 6), (cx + 26, cy - 6)], fill=B4)
+        P.personnage(img, (70, sol + 2), 80, tenue="pull", mains=(104, sol - 50), tronc=6)
         over(P.cadre_texte, (20, 140), "MA VOITURE :", 8, B4, B2)
         if t >= T["protege"]:
             over(P.cadre_texte, (20, 160), "PROTEGE-MOI !", 8, BLANC, ROUGE)
-            over(bulle, 30, 200, "MOI D'ABORD", BLANC, B2, (80, 230))
 
 
 def s_mercedes(img, d, t):
     """« La même année, un responsable de Mercedes le dit tout haut… »"""
-    d.rectangle((0, 330, 270, 334), fill=B1)
-    for k in range(6):                                            # un salon automobile : spots
-        x = 20 + k * 46
-        d.polygon([(x, 100), (x - 18, 330), (x + 18, 330)], fill=(10, 22, 50))
-    voiture_profil(d, 96, 330, GRIS, t, roule=False)
-    P.personnage(img, (60, 332), 66, tenue="costume", mains=(80, 280) if t >= T["sauvez"] else None)
-    if t >= T["sauvez"]:
-        over(P.cadre_texte, (40, 150), "\"SAUVEZ CELUI QUI", 8, BLANC, B2)
-        over(P.cadre_texte, (40, 168), "EST DANS LA VOITURE\"", 8, BLANC, B2)
-        over(P.cadre_texte, (40, 380), "MERCEDES, 2016", 8, B3, B1)
+    sol = 360
+    d = D.salon(img, t, sol)
+    grand_profil(img, 50, sol - 2, 2, col=GRIS, t=t, roule=False)
+    d = draw(img)
+    D.lumiere(img, 140, 300, 90, 30, (40, 60, 110), 0.4)
+    x = 232
+    P.personnage(img, (x, sol - 2), 104, tenue="costume", miroir=True,
+                 mains=(x + 14, sol - 92) if t >= T["sauvez"] else None)
+    d = draw(img)
+    if t >= T["sauvez"]:                                          # le micro
+        d.line([(x - 14, sol - 92), (x - 19, sol - 102)], fill=GRIS, width=2)
+        d.ellipse((x - 24, sol - 108, x - 16, sol - 100), fill=GRIS_F, outline=P.CONTOUR)
+        over(P.cadre_texte, (30, 150), "\"SAUVEZ CELUI QUI", 8, BLANC, B2)
+        over(P.cadre_texte, (30, 168), "EST DANS LA VOITURE\"", 8, BLANC, B2)
+    if t >= T["mercedes"]:
+        over(P.cadre_texte, (24, 452), "MERCEDES, MONDIAL DE PARIS 2016", 8, B3, B1)
 
 
 def s_allemagne(img, d, t):
     """« En 2017, l'Allemagne tranche : interdit de choisir selon l'âge ou le sexe. »"""
+    if t < T["age"] - 0.1:
+        d = D.bundestag(img, t)
+        if t >= T["allemagne"]:
+            over(P.cadre_texte, (92, 360), "ALLEMAGNE", 8, BLANC, ROUGE)
+            over(P.cadre_texte, (40, 380), "COMMISSION D'ETHIQUE", 8, B4, B2)
+        return
     s_classement(img, d, t, interdit=True)
-    if t >= T["age"]:
-        over(tampon, "INTERDIT : AGE / SEXE", t, T["age"], 135, 250, -10, 14)
-    if t >= T["allemagne"]:
-        over(P.cadre_texte, (24, 136), "ALLEMAGNE", 8, BLANC, ROUGE)
+    over(tampon, "INTERDIT : AGE / SEXE", t, T["age"], 135, 220, -10, 14)
+    if t >= T["exactement"]:
+        over(P.cadre_texte, (60, 300), "LE CHOIX DU MONDE ENTIER", 8, BLANC, ROUGE)
 
 
 def s_fin(img, d, t):
     """« Alors, votre voiture : elle sauve qui ? Vous… ou eux ? »"""
-    route(d, t)
-    enceinte(img, 80, PASSAGE + 6, 50)
-    for x in (162, 184, 206):
-        vieux(img, x, PASSAGE + 6, 46, miroir=True)
-    voiture_dessus(img, 135, PASSAGE + 62, 0, alerte=True, t=t)
+    d = D.route_nuit(img, t, PASSAGE)
+    D.traces(d, 135, PASSAGE + 96, 480)
+    gens(img, d, t, 99.0, False)
+    D.voiture_dessus(img, 135, PASSAGE + 62, 0, alerte=True, t=t, freinage=1.0)
+    d = draw(img)
+    pluie(d, t)
     if t >= T["vous3"]:
         sel = int(t * 2.5) % 2 if t < T["eux"] + 0.8 else 1
         for k, (nom, x) in enumerate((("VOUS", 50), ("EUX", 170))):
             c = ROUGE if sel == k else B1
-            over(P.cadre_texte, (x, 420), f" {nom} ", 8, BLANC, c, ROUGE_F if sel == k else NOIR)
+            over(P.cadre_texte, (x, 420), f"  {nom}  ", 14, BLANC, c, ROUGE_F if sel == k else NOIR)
 
 
 def ecrans():
@@ -614,15 +702,15 @@ def camera(t, scene):
     if scene == "route":
         s, rw = histoire(t)
         if rw:
-            return 1.6, 135, PASSAGE + 40
+            return 1.3, 135, PASSAGE + 50
         if T["personne"] - 0.1 <= s < T["choisir"]:                 # gros plan sur l'habitacle vide
             return 2.6, 135, 380
         if s >= T["choisir"]:
             u = lisse((s - T["choisir"]) / 1.5)
-            return 1.6 + 0.3 * u, 135, PASSAGE + 40 - 10 * u
-        return 1.6, 135, PASSAGE + 40
+            return 1.3 + 0.35 * u, 135, PASSAGE + 50 - 15 * u
+        return 1.3, 135, PASSAGE + 50
     if scene is s_fin:
-        return 1.6, 135, PASSAGE + 40
+        return 1.3, 135, PASSAGE + 50
     return 1.0, 135, 240
 
 
