@@ -304,7 +304,8 @@ def _notre_dame(d, x, sol, u):
     top = sol - h
     d.rectangle((x - 30, top, x - 8, sol), fill=B1)
     d.rectangle((x + 8, top, x + 30, sol), fill=B1)
-    d.rectangle((x - 8, top + 18, x + 8, sol), fill=B1)
+    if h > 20:
+        d.rectangle((x - 8, top + 18, x + 8, sol), fill=B1)
     d.line([(x - 30, top), (x - 30, sol)], fill=B2)
     if u > 0.8:
         d.ellipse((x - 7, top + 26, x + 7, top + 40), outline=B3)
