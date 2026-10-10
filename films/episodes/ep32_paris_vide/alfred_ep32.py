@@ -481,9 +481,44 @@ def s_fin(img, d, t):
     P.personnage(img, (60 + 20 * (t - T["alors"]), SOL + 1), 34, marche=t * 6, tenue="pull")
 
 
+def s_carte(img, d, t):
+    """« Cette carte… votre immeuble… prochain épisode » : la carte de Guillaumot devient une carte d'aujourd'hui."""
+    cx, cy = 135, 300
+    u = lisse((t - T["cette"]) / 1.2)
+    for k in range(-120, 130, 18):                                 # les rues (la carte moderne apparaît)
+        if u > 0.2:
+            d.line([(cx + k, cy - 110), (cx + k + 12, cy + 110)], fill=B1)
+            d.line([(cx - 125, cy + k * 0.85), (cx + 125, cy + k * 0.85 + 8)], fill=B1)
+    pts = [(cx - 130 + k * 13, cy + 20 + 16 * math.sin(k * 0.5)) for k in range(21)]
+    d.line(pts, fill=B3, width=5)                                  # la Seine
+    rng = np.random.default_rng(3)
+    for k in range(14):                                            # les galeries relevées (pointillés)
+        x, y = cx + rng.uniform(-110, 90), cy + rng.uniform(-100, 90)
+        lg = rng.uniform(20, 60)
+        for j in range(0, int(lg), 4):
+            d.point((x + j, y + j * 0.3), fill=B2 if u < 1 else B3)
+    for k in range(40):                                            # les immeubles (îlots)
+        x, y = cx - 115 + (k % 8) * 30, cy - 100 + (k // 8) * 42
+        d.rectangle((x, y, x + 14, y + 10), fill=B0, outline=B1)
+    if t >= T["immeuble2"]:                                        # « votre immeuble »
+        x, y = cx + 5, cy - 16
+        clign = int(t * 5) % 2
+        d.rectangle((x, y, x + 14, y + 10), fill=ROUGE if clign else ROUGE_F, outline=BLANC)
+        d.polygon([(x + 7, y - 4), (x + 1, y - 16), (x + 13, y - 16)], fill=ROUGE)
+        d.ellipse((x + 2, y - 26, x + 12, y - 14), fill=ROUGE, outline=BLANC)
+        over(P.cadre_texte, (80, 372), "VOTRE IMMEUBLE ?", 8, BLANC, ROUGE)
+    if t >= T["consulter"]:
+        f = P.police(30, pixel=False)
+        if int(t * 4) % 2 or t > T["consulter"] + 0.8:
+            d.text((cx + 70, cy + 40), "?", font=f, fill=ROUGE)
+    if t >= T["prochain"]:
+        over(P.cadre_texte, (76, 400), "PROCHAIN EPISODE >", 8, BLANC, ROUGE)
+    over(P.cadre_texte, (60, 150), "ATLAS DES CARRIERES", 8, B4, B2)
+
+
 def ecrans():
     return [(0.0, "rue"), (T["vous"] - 0.1, s_dessous), (T["pendant"] - 0.1, s_carriers), (T["mais"] - 0.1, s_gruyere),
-            (T["louis"] - 0.1, s_guillaumot), (T["et3"] - 0.1, s_ossuaire), (T["et4"] - 0.1, s_denfert),
+            (T["louis"] - 0.1, s_guillaumot), (T["cette"] - 0.1, s_carte), (T["et3"] - 0.1, s_ossuaire), (T["et4"] - 0.1, s_denfert),
             (T["le7"] - 0.1, s_clamart), (T["aujourdhui3"] - 0.1, s_aujourdhui), (T["alors"] - 0.1, s_fin)]
 
 
@@ -498,7 +533,7 @@ def histoire(t):
     return 0.0 + (t - tr1) * 0.6, False
 
 
-DATES = [("dixsept", "rue_fin", "1774"), ("louis", "et3", "1777"), ("dixsept2", "et4", "1786"), ("dixneuf", "aujourdhui3", "1961")]
+DATES = [("dixsept", "rue_fin", "1774"), ("louis", "cette", "1777"), ("cette", "et3", "2026"), ("dixsept2", "et4", "1786"), ("dixneuf", "aujourdhui3", "1961")]
 
 
 def image(t):
@@ -592,6 +627,8 @@ def sons():
     ev += [(T["piliers"] + 0.15 * i, f("impact", 0.2), "effet", -0.3 + 0.3 * i) for i in range(3)]
     ev += [(T["murs"], f("porte_ferme", 0.2, 0.6), "effet", 0.0)]
     ev += [(T["graver"] + i / 9, J.lettre(0.05), "interface", 0.3) for i in range(11)]
+    ev += [(T["cette"], f("ouverture", 0.3), "effet", 0.0), (T["immeuble2"], J.alerte(2, 0.05), "interface", 0.0),
+           (T["consulter"], f("question", 0.3), "effet", 0.0), (T["prochain"], f("reussite", 0.3), "effet", 0.0)]
     ev += [(T["debordent"], f("roulement", 0.12, 1.5), "ambiance", 0.0), (T["insalubre"], f("echec", 0.3), "effet", 0.0),
            (T["dixsept2"], f("boum_grave", 0.35), "accent", 0.0)]
     ev += [(T["six"] + 0.05 * i, J.tic_compteur(i), "interface", 0.0) for i in range(24)]
@@ -602,7 +639,7 @@ def sons():
            (T["immeuble3"], f("erreur", 0.25), "effet", 0.0), (T["que_fin"], f("arret", 0.35), "effet", 0.0)]
     dur = T["fin"] + 1
     mus = Z.musique(dur, [(0, "tension"), (to, "pulsation"), (T["trou"] + 0.55, "silence"), (T["vous"], "tension"),
-                          (T["mais"], "silence"), (T["mais"] + 0.8, "pulsation"), (T["louis"], "reflexion"),
+                          (T["mais"], "silence"), (T["mais"] + 0.8, "pulsation"), (T["louis"], "reflexion"), (T["cette"], "lumineux"), (T["et3"], "reflexion"),
                           (T["et3"], "tension"), (T["le7"], "silence"), (T["le7"] + 1.0, "tension"),
                           (T["que_fin"], "silence")])
     mus = mus.mean(1) if mus.ndim == 2 else mus
@@ -617,7 +654,8 @@ REPERES = [("dixsept", "dixsept", None), ("rue", "rue", None), ("souvre", "souvr
            ("piliers1", "piliers", "resultat"), ("mais", "mais", "piliers1"), ("dautres", "dautres", None),
            ("gruyere", "gruyere", None), ("trous", "trous", None), ("louis", "louis", None),
            ("guillaumot", "guillaumot", None), ("piliers", "piliers", "guillaumot"), ("murs", "murs", None),
-           ("graver", "graver", None), ("et3", "et", "audessus"), ("debordent", "debordent", None),
+           ("graver", "graver", None), ("cette", "cette", "graver"), ("immeuble2", "immeuble", "cette"),
+           ("consulter", "consulter", None), ("prochain", "prochain", "consulter"), ("et3", "et", "episode"), ("debordent", "debordent", None),
            ("insalubre", "insalubre", None), ("dixsept2", "dixsept", "insalubre"), ("carrieres3", "carrieres", "ossements"),
            ("six", "six", None), ("catacombes1", "catacombes", "six"), ("et4", "et", "catacombes1"),
            ("lancienne", "lancienne", None), ("rue3", "rue", "lancienne"), ("le7", "le", "rue3"), ("dixneuf", "dixneuf", None),
@@ -632,7 +670,7 @@ def preparer():
     MV.charger(types.SimpleNamespace(SEGS=os.path.join(ICI, "audio", "voix.json"), VOIX=chemin))
     VOIX, _, _ = MI.tighten(MI.load_voice(chemin), max_gap=0.40, thr_db=-38.0)
     T.clear()
-    aux = {"audessus": MV.mot("audessus", MV.mot("graver")), "ossements": MV.mot("ossements")}
+    aux = {"episode": MV.mot("episode", MV.mot("graver")), "ossements": MV.mot("ossements")}
     for nom, cle, apres in REPERES:
         base = T.get(apres, aux.get(apres, 0.0)) if apres else 0.0
         T[nom] = MV.mot(cle, base + 0.01 if apres else 0.0)
