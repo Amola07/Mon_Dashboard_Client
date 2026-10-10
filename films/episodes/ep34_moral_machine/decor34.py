@@ -30,8 +30,10 @@ def _appliquer(img, m, col):
 
 def lumiere(img, cx, cy, rx, ry, col=B1, force=0.8):
     """Une flaque de lumière elliptique tramée (Bayer)."""
-    dist = np.sqrt(((_XX - cx) / rx) ** 2 + ((_YY - cy) / ry) ** 2)
-    _appliquer(img, (np.clip(1 - dist, 0, 1) * force) > SEUIL, col)
+    w, h = img.size
+    yy, xx = _YY[:h, :w], _XX[:h, :w]
+    dist = np.sqrt(((xx - cx) / rx) ** 2 + ((yy - cy) / ry) ** 2)
+    _appliquer(img, (np.clip(1 - dist, 0, 1) * force) > SEUIL[:h, :w], col)
 
 
 def cone(img, p0, p1, w0, w1, col=B1, force=0.7):
@@ -132,45 +134,13 @@ def route_nuit(img, t, passage, defile=0.0, feu_rouge=True):
 
 
 def voiture_dessus(img, cx, cy, ang=0.0, alerte=False, t=0.0, toit=True, phares=True, freinage=0.0):
-    """La voiture autonome vue de dessus (avant vers le haut), avec capteur, phares et faisceaux."""
+    """La voiture autonome vue de dessus, avec le faisceau de ses phares."""
+    from films.episodes.ep34_moral_machine import figures34 as F
     if phares:
         a = math.radians(ang)
-        fx, fy = cx + 30 * math.sin(a), cy - 30 * math.cos(a)
-        cone(img, (fx, fy), (fx + 150 * math.sin(a), fy - 150 * math.cos(a)), 12, 46, (40, 70, 130), 0.75)
-    w, h = 42, 70
-    cal = Image.new("RGBA", (w + 24, h + 24), (0, 0, 0, 0))
-    d = draw(cal)
-    ox, oy = 12, 12
-    d.rounded_rectangle((ox + 2, oy + 3, ox + w + 2, oy + h + 3), 10, fill=(4, 8, 20, 200))                   # ombre
-    d.rounded_rectangle((ox, oy, ox + w, oy + h), 10, fill=B2, outline=CONTOUR)
-    d.rounded_rectangle((ox + 3, oy + 4, ox + w - 3, oy + h - 4), 8, fill=B3)
-    d.line([(ox + 5, oy + 6), (ox + 5, oy + h - 8)], fill=B4)                                                  # reflet
-    d.polygon([(ox + 6, oy + 19), (ox + w - 6, oy + 19), (ox + w - 9, oy + 28), (ox + 9, oy + 28)], fill=B0)  # pare-brise
-    d.line([(ox + 9, oy + 21), (ox + 15, oy + 21)], fill=B2)
-    if toit:
-        d.rounded_rectangle((ox + 8, oy + 28, ox + w - 8, oy + 51), 3, fill=B2)
-        d.rectangle((ox + 17, oy + 33, ox + w - 17, oy + 45), fill=(30, 60, 120))                              # le lidar
-        a2 = t * 8
-        d.line([(ox + 21, oy + 39), (ox + 21 + 5 * math.cos(a2), oy + 39 + 5 * math.sin(a2))], fill=B4)
-    else:
-        d.rectangle((ox + 8, oy + 28, ox + w - 8, oy + 51), fill=(6, 14, 34))
-        for sx in (ox + 10, ox + w - 19):
-            d.rounded_rectangle((sx, oy + 32, sx + 9, oy + 44), 2, fill=GRIS_F, outline=CONTOUR)
-            d.rectangle((sx + 1, oy + 32, sx + 8, oy + 34), fill=GRIS)
-        cx_, cy_ = ox + 15, oy + 30
-        d.ellipse((cx_ - 5, cy_ - 2, cx_ + 5, cy_ + 3), outline=GRIS, width=1)
-        a2 = t * 5
-        d.line([(cx_ - 4 * math.cos(a2), cy_ - 2 * math.sin(a2)), (cx_ + 4 * math.cos(a2), cy_ + 2 * math.sin(a2))], fill=B4)
-    d.polygon([(ox + 9, oy + 51), (ox + w - 9, oy + 51), (ox + w - 6, oy + 59), (ox + 6, oy + 59)], fill=B0)
-    for x in (ox + 3, ox + w - 9):
-        d.rectangle((x, oy + 1, x + 6, oy + 3), fill=BLANC)
-    feu = ROUGE if (alerte and int(t * 8) % 2) or freinage > 0 else ROUGE_F
-    for x in (ox + 3, ox + w - 9):
-        d.rectangle((x, oy + h - 3, x + 6, oy + h - 1), fill=feu)
-    for x, y in ((ox - 2, oy + 10), (ox + w - 1, oy + 10), (ox - 2, oy + h - 22), (ox + w - 1, oy + h - 22)):
-        d.rectangle((x, y, x + 3, y + 12), fill=NOIR)
-    cal = cal.rotate(-ang, resample=Image.NEAREST, expand=True)
-    img.paste(cal, (int(cx - cal.width / 2), int(cy - cal.height / 2)), cal)
+        fx, fy = cx + 36 * math.sin(a), cy - 36 * math.cos(a)
+        cone(img, (fx, fy), (fx + 150 * math.sin(a), fy - 150 * math.cos(a)), 14, 50, (40, 70, 130), 0.75)
+    F.voiture_dessus(img, cx, cy, ang, B2, t, toit, alerte, freinage)
 
 
 def traces(d, x, y0, y1, ecart=14):
@@ -183,25 +153,51 @@ def traces(d, x, y0, y1, ecart=14):
 
 # ------------------------------------------------------------------------------------------------ intérieurs et ville
 def ville_fond(img, t, sol, graine=4, haut=150):
-    """Silhouettes d'immeubles de nuit (deux plans), fenêtres allumées."""
+    """La ville de nuit en deux plans : immeubles aux façades détaillées (étages, encadrements, fenêtres allumées en
+    grappes, quelques rideaux), toits avec réservoirs et antennes à balise, brume au pied des immeubles."""
     d = draw(img)
     rng = np.random.default_rng(graine)
-    for plan, (col, hmin, hmax, fen) in enumerate(((B0, 60, haut, (20, 46, 96)), ((10, 24, 56), 40, haut - 40, B2))):
+    plans = (((12, 26, 58), 60, haut, (34, 66, 130), (60, 100, 180)), ((20, 40, 84), 40, haut - 40, (90, 140, 220), (170, 200, 245)))
+    for plan, (col, hmin, hmax, fen, fen_c) in enumerate(plans):
         x = -10
         while x < LW + 10:
-            w = int(rng.integers(26, 50))
+            w = int(rng.integers(28, 54))
             h = int(rng.integers(hmin, hmax))
-            d.rectangle((x, sol - h, x + w, sol), fill=col)
-            if plan == 0 and rng.uniform() < 0.3:
-                d.line([(x + w // 2, sol - h), (x + w // 2, sol - h - 14)], fill=GRIS_F)
-                if int(t * 2) % 2:
-                    d.point((x + w // 2, sol - h - 15), fill=ROUGE)
-            for yy in range(sol - h + 6, sol - 6, 8):
-                for xx in range(x + 4, x + w - 4, 7):
-                    if rng.uniform() < (0.25 if plan == 0 else 0.45):
-                        d.rectangle((xx, yy, xx + 2, yy + 3), fill=fen)
-            x += w + int(rng.integers(0, 6))
-    return d
+            top = sol - h
+            claire = tuple(min(255, c + 10) for c in col)
+            sombre = tuple(max(0, c - 6) for c in col)
+            d.rectangle((x, top, x + w, sol), fill=col)
+            d.rectangle((x + w - max(3, w // 6), top, x + w, sol), fill=sombre)                 # la face à l'ombre
+            d.line([(x, top), (x + w, top)], fill=claire)                                     # la corniche
+            d.rectangle((x - 1, top - 2, x + w + 1, top), fill=sombre)
+            if rng.uniform() < 0.35:                                                          # réservoir d'eau
+                tx = x + int(rng.integers(4, max(5, w - 12)))
+                d.rectangle((tx, top - 10, tx + 8, top - 3), fill=sombre)
+                d.line([(tx + 1, top - 3), (tx + 1, top)], fill=sombre)
+                d.line([(tx + 7, top - 3), (tx + 7, top)], fill=sombre)
+            if rng.uniform() < 0.3:                                                           # antenne à balise
+                ax_ = x + w // 2
+                d.line([(ax_, top), (ax_, top - 16)], fill=GRIS_F)
+                if int(t * 1.5 + ax_) % 3 == 0:
+                    d.point((ax_, top - 17), fill=ROUGE)
+            etage = 9 if plan == 0 else 8
+            grappe = rng.uniform(0.15, 0.55)
+            for yy in range(top + 6, sol - 8, etage):
+                d.line([(x + 1, yy + 6), (x + w - 2, yy + 6)], fill=sombre)                    # dalle d'étage
+                allume_etage = rng.uniform() < grappe * 1.6
+                for xx in range(x + 4, x + w - 5, 6):
+                    on = allume_etage and rng.uniform() < 0.7 or rng.uniform() < 0.08
+                    if on:
+                        c = fen_c if rng.uniform() < 0.25 else fen
+                        d.rectangle((xx, yy, xx + 3, yy + 4), fill=c)
+                        if rng.uniform() < 0.3:                                               # un rideau à moitié tiré
+                            d.line([(xx, yy), (xx, yy + 4)], fill=col)
+                    else:
+                        d.rectangle((xx, yy, xx + 3, yy + 4), fill=sombre)
+            x += w + int(rng.integers(0, 5))
+    for k in range(3):                                                                        # brume au sol
+        lumiere(img, LW / 2, sol - 4, LW * 0.8, 18 + 6 * k, (22, 40, 80), 0.35)
+    return draw(img)
 
 
 def labo(img, t):
@@ -220,16 +216,27 @@ def labo(img, t):
     d.rectangle((0, 306, LW, LH), fill=(16, 28, 56))                                                  # le sol
     for y in range(316, LH, 14):
         d.line([(0, y), (LW, y)], fill=(20, 34, 66))
-    d.rectangle((150, 330, 262, 340), fill=(60, 44, 34), outline=CONTOUR)                             # le bureau
-    d.rectangle((156, 340, 162, 420), fill=(48, 34, 26))
-    d.rectangle((250, 340, 256, 420), fill=(48, 34, 26))
-    lumiere(img, 236, 334, 60, 26, (40, 50, 80), 0.9)
+    bois, bois_o, bois_c = (74, 54, 44), (44, 32, 28), (110, 84, 66)
+    d.rectangle((140, 372, 266, 379), fill=bois, outline=CONTOUR)                                     # le plateau du bureau
+    d.line([(141, 373), (265, 373)], fill=bois_c)
+    d.rectangle((141, 377, 265, 379), fill=bois_o)
+    d.rectangle((146, 379, 152, 432), fill=bois_o, outline=CONTOUR)                                   # pieds
+    d.rectangle((222, 379, 262, 404), fill=bois, outline=CONTOUR)                                     # caisson à tiroirs
+    d.rectangle((226, 383, 258, 392), outline=bois_o)
+    d.rectangle((226, 395, 258, 402), outline=bois_o)
+    d.rectangle((238, 387, 246, 388), fill=GRIS)
+    d.rectangle((256, 404, 262, 432), fill=bois_o, outline=CONTOUR)
+    d.line([(150, 432), (262, 432)], fill=(10, 18, 40))                                               # ombre au sol
+    lumiere(img, 236, 370, 50, 22, (46, 56, 86), 0.9)                                                 # le halo de la lampe
     d = draw(img)
-    d.line([(244, 330), (238, 306), (226, 300)], fill=GRIS, width=2)                                   # la lampe
-    d.polygon([(220, 296), (234, 296), (230, 304), (224, 304)], fill=GRIS_F)
+    d.line([(252, 371), (256, 352), (244, 340)], fill=GRIS, width=2)                                   # la lampe d'architecte
+    d.ellipse((249, 368, 257, 372), fill=GRIS_F, outline=CONTOUR)
+    d.polygon([(236, 336), (248, 336), (245, 344), (239, 344)], fill=GRIS_F, outline=CONTOUR)
+    d.line([(239, 345), (245, 345)], fill=BLANC)
     for k in range(4):                                                                                 # des livres
-        d.rectangle((160 + k * 6, 318, 164 + k * 6, 330), fill=(B1, ROUGE_F, B2, GRIS_F)[k], outline=CONTOUR)
-    d.rectangle((190, 324, 214, 330), fill=BLANC)                                                      # papiers
+        d.rectangle((210 + k * 5, 358 - k % 2 * 2, 214 + k * 5, 371), fill=((40, 60, 110), ROUGE_F, B1, GRIS_F)[k], outline=CONTOUR)
+        d.line([(211 + k * 5, 361), (213 + k * 5, 361)], fill=GRIS)
+    d.polygon([(228, 369), (246, 367), (248, 370), (230, 372)], fill=(220, 226, 240))                 # papiers
     return d
 
 
@@ -256,7 +263,7 @@ def ecran_jeu(d, ex, ey, ew, eh, t, choix=None):
             d.point((px + 1, y0 + 11), fill=P.PEAU)
         if choix == k:
             d.line([(cxv, y1 - 18), (cxv + (6 if k else -6), y0 + 22)], fill=ROUGE)                  # la trajectoire
-    texte(d, (ex + ew / 2, ey + 3), "QUE DOIT FAIRE LA VOITURE ?", 8, B4, centre=True)
+    texte(d, (ex + ew / 2, ey + 3), "QUE DOIT FAIRE LA VOITURE ?" if ew >= 150 else "QUE FAIRE ?", 8, B4, centre=True)
 
 
 # ------------------------------------------------------------------------------------------------ le globe
@@ -330,24 +337,47 @@ def etoiles(d, t, n=60, graine=3):
 
 # ------------------------------------------------------------------------------------------------ balance et podium
 def balance(img, cx, cy, ang, t, contenu_g=None, contenu_d=None, larg=86):
-    """Une balance de justice : socle, fléau incliné (ang en degrés, positif = côté droit plus bas), deux plateaux.
-    contenu_* : fonction(img, x, y) qui pose quelque chose sur le plateau (pieds en x, y)."""
+    """Une balance de justice en métal poli : socle à degrés, colonne cylindrique ombrée, fléau mouluré, chaînes,
+    plateaux creux. ang en degrés (positif = côté droit plus bas). contenu_* : fonction(img, x, y)."""
     d = draw(img)
-    d.polygon([(cx - 26, cy + 150), (cx + 26, cy + 150), (cx + 14, cy + 140), (cx - 14, cy + 140)], fill=GRIS_F, outline=CONTOUR)
-    d.rectangle((cx - 3, cy, cx + 3, cy + 140), fill=GRIS, outline=CONTOUR)
-    d.ellipse((cx - 7, cy - 7, cx + 7, cy + 7), fill=B4, outline=CONTOUR)
+    met, met_o, met_c, met_s = (150, 162, 190), (84, 94, 122), (226, 234, 250), (46, 54, 78)
+    # le socle à deux degrés
+    d.rounded_rectangle((cx - 34, cy + 142, cx + 34, cy + 152), 3, fill=met_o, outline=CONTOUR)
+    d.line([(cx - 32, cy + 143), (cx + 30, cy + 143)], fill=met)
+    d.rounded_rectangle((cx - 22, cy + 132, cx + 22, cy + 143), 3, fill=met, outline=CONTOUR)
+    d.line([(cx - 20, cy + 133), (cx + 18, cy + 133)], fill=met_c)
+    d.rectangle((cx + 8, cy + 134, cx + 21, cy + 142), fill=met_o)
+    # la colonne : cylindre (lumière à gauche, ombre à droite), bagues
+    d.rectangle((cx - 4, cy + 6, cx + 4, cy + 132), fill=met, outline=CONTOUR)
+    d.line([(cx - 2, cy + 8), (cx - 2, cy + 130)], fill=met_c)
+    d.rectangle((cx + 2, cy + 8, cx + 3, cy + 130), fill=met_o)
+    for y in (cy + 40, cy + 100):
+        d.rounded_rectangle((cx - 6, y, cx + 6, y + 4), 1, fill=met, outline=CONTOUR)
+        d.line([(cx - 5, y + 1), (cx + 3, y + 1)], fill=met_c)
     a = math.radians(ang)
-    pts = []
-    for s in (-1, 1):
-        px, py = cx + s * larg * math.cos(a), cy + s * larg * math.sin(a)
-        pts.append((px, py))
-    d.line([pts[0], pts[1]], fill=B4, width=3)
+    pts = [(cx + sg * larg * math.cos(a), cy + sg * larg * math.sin(a)) for sg in (-1, 1)]
+    # le fléau : une barre épaisse, effilée vers les bouts, liseré de lumière
+    nx, ny = -math.sin(a), math.cos(a)
+    for e, col in ((3, CONTOUR), (2, met), (0, met_c)):
+        d.line([(pts[0][0] + nx * (e - 2) * 0, pts[0][1] - e * 0), (pts[1][0], pts[1][1])], fill=col, width=max(1, e * 2))
+    d.line([(pts[0][0] - nx, pts[0][1] - ny), (pts[1][0] - nx, pts[1][1] - ny)], fill=met_c)
+    d.ellipse((cx - 8, cy - 8, cx + 8, cy + 8), fill=met, outline=CONTOUR)                 # le pivot
+    d.ellipse((cx - 5, cy - 5, cx + 3, cy + 3), fill=met_c)
+    d.ellipse((cx - 2, cy - 2, cx + 2, cy + 2), fill=met_o)
+    d.polygon([(cx - 3, cy - 8), (cx + 3, cy - 8), (cx, cy - 20)], fill=met, outline=CONTOUR)   # l'aiguille
     for k, (px, py) in enumerate(pts):
+        d.ellipse((px - 3, py - 3, px + 3, py + 3), fill=met, outline=CONTOUR)
         bas = py + 54
-        d.line([(px, py), (px - 26, bas)], fill=GRIS)
-        d.line([(px, py), (px + 26, bas)], fill=GRIS)
-        d.chord((px - 32, bas - 8, px + 32, bas + 10), 0, 180, fill=B2, outline=CONTOUR)
-        d.line([(px - 30, bas), (px + 30, bas)], fill=B4)
+        for sg in (-1, 1):                                          # les chaînes (maillons)
+            for j in range(9):
+                u0, u1 = j / 9, (j + 0.6) / 9
+                d.line([(px + sg * 27 * u0, py + 54 * u0), (px + sg * 27 * u1, py + 54 * u1)], fill=met if j % 2 else met_o)
+        d.line([(px, py), (px, bas - 4)], fill=met_s)
+        d.chord((px - 34, bas - 9, px + 34, bas + 12), 0, 180, fill=met_o, outline=CONTOUR)   # le plateau creux
+        d.chord((px - 32, bas - 7, px + 32, bas + 8), 0, 180, fill=met)
+        d.arc((px - 30, bas - 6, px + 30, bas + 7), 20, 90, fill=met_c)
+        d.ellipse((px - 34, bas - 3, px + 34, bas + 3), fill=met_s, outline=CONTOUR)        # le dessus du plateau
+        d.line([(px - 30, bas - 2), (px + 10, bas - 2)], fill=met_o)
         fn = contenu_g if k == 0 else contenu_d
         if fn:
             fn(img, px, bas)
@@ -433,14 +463,35 @@ def bundestag(img, t):
 
 
 def telephone(img, d, cx, cy, w, h, t):
-    """Une main qui tient un téléphone (écran renvoyé en coordonnées)."""
-    d.rounded_rectangle((cx - w / 2 - 6, cy - h / 2 - 12, cx + w / 2 + 6, cy + h / 2 + 14), 12, fill=(30, 36, 56), outline=CONTOUR)
-    d.rounded_rectangle((cx - w / 2 - 4, cy - h / 2 - 10, cx + w / 2 + 4, cy + h / 2 + 12), 10, outline=GRIS_F)
-    d.rectangle((cx - 12, cy - h / 2 - 7, cx + 12, cy - h / 2 - 5), fill=NOIR)
-    d.rounded_rectangle((cx - 10, cy + h / 2 + 4, cx + 10, cy + h / 2 + 8), 2, fill=GRIS_F)
-    for k in range(4):                                                                            # les doigts
-        y = cy - 20 + k * 22
-        d.rounded_rectangle((cx + w / 2 + 2, y, cx + w / 2 + 16, y + 16), 6, fill=P.PEAU, outline=CONTOUR)
-    d.rounded_rectangle((cx - w / 2 - 22, cy + 30, cx - w / 2 + 6, cy + 54), 9, fill=P.PEAU, outline=CONTOUR)   # le pouce
-    d.rounded_rectangle((cx + w / 2 - 6, cy + 40, cx + w / 2 + 40, cy + h / 2 + 80), 18, fill=P.PEAU_O, outline=CONTOUR)
+    """Une main gauche qui tient un smartphone, la nuit : seule la lumière de l'écran l'éclaire. Le pouce longe le bord
+    gauche, le bout des quatre doigts dépasse du bord droit, la paume et le poignet sortent par le bas."""
+    pb, po, pc = (132, 152, 198), (84, 100, 146), (180, 198, 236)
+    x0, x1, y0, y1 = cx - w / 2 - 7, cx + w / 2 + 7, cy - h / 2 - 13, cy + h / 2 + 15
+    # la paume et le poignet, sous le téléphone
+    d.polygon([(x0 + 10, y1 - 40), (x1 + 6, y1 - 70), (x1 + 16, y1 + 10), (x1 + 6, LH + 2), (x0 + 30, LH + 2), (x0 - 4, y1 + 6)],
+              fill=po, outline=CONTOUR)
+    d.line([(x0 + 4, y1 + 4), (x0 + 30, LH)], fill=pb)                                                  # tranche éclairée
+    # le téléphone : coque, bord métal, encoche, bouton
+    d.rounded_rectangle((x0, y0, x1, y1), 13, fill=(26, 30, 44), outline=CONTOUR)
+    d.rounded_rectangle((x0 + 1, y0 + 1, x1 - 1, y1 - 1), 12, outline=(110, 118, 142))
+    d.line([(x0 + 2, y0 + 16), (x0 + 2, y1 - 16)], fill=(160, 168, 192))
+    d.rounded_rectangle((cx - 14, y0 + 5, cx + 14, y0 + 9), 2, fill=NOIR)
+    d.point((cx + 8, y0 + 7), fill=(40, 60, 110))
+    d.rectangle((x1, cy - h * 0.3, x1 + 2, cy - h * 0.18), fill=(90, 96, 120))
+    # le bout des quatre doigts sur le bord droit : arrondis, ongle, séparés par une ombre
+    for k in range(4):
+        y = cy + h * 0.02 + k * 17
+        d.rounded_rectangle((x1 - 6, y, x1 + 7, y + 15), 7, fill=pb, outline=CONTOUR)
+        d.rectangle((x1 + 2, y + 2, x1 + 6, y + 13), fill=po)                                            # côté à l'ombre
+        d.rounded_rectangle((x1 - 5, y + 3, x1 - 1, y + 11), 2, fill=pc)                                  # l'ongle
+        d.line([(x1 - 4, y + 4), (x1 - 4, y + 9)], fill=BLANC)
+    # le pouce, posé le long du bord gauche
+    d.rounded_rectangle((x0 - 9, cy + h * 0.06, x0 + 8, cy + h * 0.44), 8, fill=pb, outline=CONTOUR)
+    d.rectangle((x0 - 8, cy + h * 0.08, x0 - 4, cy + h * 0.42), fill=po)
+    d.rounded_rectangle((x0 + 1, cy + h * 0.07, x0 + 6, cy + h * 0.15), 2, fill=pc)                       # l'ongle du pouce
+    d.line([(x0 + 3, cy + h * 0.2), (x0 + 3, cy + h * 0.4)], fill=pc)
     return (cx - w / 2, cy - h / 2, cx + w / 2, cy + h / 2)
+
+
+def teinte_(c, k):
+    return tuple(max(0, min(255, int(v * k))) for v in c)

@@ -19,6 +19,7 @@ from films.styles import oscillo_son as Z
 from films.styles import pixel_bleu as P
 from films.styles import son_jeu as J
 from films.episodes.ep34_moral_machine import decor34 as D
+from films.episodes.ep34_moral_machine import figures34 as F
 from films.styles.pixel_bleu import B0, B1, B2, B3, B4, BLANC, GRIS, GRIS_F, NOIR, ROUGE, ROUGE_F
 
 ICI = os.path.dirname(os.path.abspath(__file__))
@@ -50,91 +51,56 @@ def apres(cle, dt=0.0):
 
 
 # ------------------------------------------------------------------------------------------------ les personnages
+def perso(img, pieds, taille=92, tenue="pull", miroir=False, mains=None, marche=None, assis=False, tronc=0.0,
+          tete=None, **kw):
+    """Un adulte réaliste (figures34) ; mêmes paramètres que l'ancien P.personnage."""
+    sexe = "f" if tenue == "robe" else "h"
+    cheveux = {"robe": "chatain", "gris": "chatain", "clair": "blond", "costume": "noir", "sport": "brun"}.get(tenue, "brun")
+    F.humain(img, pieds, taille, tenue, sexe=sexe, cheveux=kw.pop("cheveux", cheveux), miroir=miroir, mains=mains,
+             marche=marche, assis=assis, tronc=tronc, **kw)
+
+
 def enceinte(img, x, y, taille=40, miroir=False, marche=None, panique=False):
-    s = taille / 92
-    P.personnage(img, (x, y), taille, tenue="robe", miroir=miroir, marche=marche,
-                 mains=(x + 10 * s, y - 98 * s) if panique else (x + 8 * s, y - 52 * s))
-    d = draw(img)
-    sx = -1 if miroir else 1
-    cx, cy, r = x + sx * 7 * s, y - 52 * s, 7 * s
-    d.ellipse((cx - r, cy - r, cx + r, cy + r), fill=B3, outline=P.CONTOUR)
-    d.point((cx + sx * 2, cy - 2), fill=B4)
+    F.humain(img, (x, y), taille, "robe", sexe="f", cheveux="chatain", enceinte=True, miroir=miroir, marche=marche,
+             mains=(x + taille * 0.08 * (-1 if miroir else 1), y - taille * 1.12) if panique else None,
+             bouche="cri" if panique else "neutre")
 
 
-def vieux(img, x, y, taille=40, miroir=False, panique=False):
-    s = taille / 92
-    sx = -1 if miroir else 1
-    P.personnage(img, (x, y), taille, tronc=14 if not panique else 2, flexion=0.3, tenue="vieux", miroir=miroir,
-                 mains=(x + 8 * s, y - 96 * s) if panique else (x + 24 * s, y - 40 * s))
-    if panique:
-        return
-    d = draw(img)
-    cx = x + sx * 26 * s
-    d.line([(cx, y), (cx, y - 40 * s)], fill=GRIS, width=max(1, int(2 * s)))     # la canne
-    d.line([(cx, y - 40 * s), (cx - sx * 4 * s, y - 42 * s)], fill=GRIS, width=max(1, int(2 * s)))
+def vieux(img, x, y, taille=40, miroir=False, panique=False, femme=False):
+    F.humain(img, (x, y), taille, "vieille" if femme else "vieux", age="vieux", sexe="f" if femme else "h",
+             cheveux="blanc", canne=not panique, miroir=miroir,
+             mains=(x + taille * 0.1 * (-1 if miroir else 1), y - taille * 1.08) if panique else None,
+             bouche="cri" if panique else "neutre")
 
 
 def enfant(img, x, y, taille=30, tenue="clair", miroir=False):
-    P.personnage(img, (x, y), taille, tenue=tenue, miroir=miroir)
+    fille = tenue == "robe"
+    F.humain(img, (x, y), taille, "enfant_f" if fille else "enfant_g", age="enfant", sexe="f" if fille else "h",
+             cheveux="blond" if fille else "brun", miroir=miroir)
 
 
 def criminel(img, x, y, taille=40, miroir=False):
-    s = taille / 92
-    P.personnage(img, (x, y), taille, tenue="costume", miroir=miroir)
-    d = draw(img)
-    hy = y - 81 * s
-    d.rectangle((x - 8 * s, hy - 2 * s, x + 8 * s, hy + 1 * s), fill=NOIR)          # le masque
-    for yy in range(int(y - 68 * s), int(y - 44 * s), 3):                            # les rayures
-        d.line([(x - 6 * s, yy), (x + 6 * s, yy)], fill=GRIS)
+    F.humain(img, (x, y), taille, "raye", cheveux="noir", masque=True, miroir=miroir)
 
 
 def sportif(img, x, y, taille=40, miroir=False, t=0.0):
-    P.personnage(img, (x, y), taille, tenue="sport", miroir=miroir, marche=t * 9)
+    F.humain(img, (x, y), taille, "sport", cheveux="brun", miroir=miroir, marche=t * 9)
 
 
 def surpoids(img, x, y, taille=40, miroir=False):
-    s = taille / 92
-    P.personnage(img, (x, y), taille, tenue="gris", miroir=miroir)
-    d = draw(img)
-    sx = -1 if miroir else 1
-    cx, cy, r = x + sx * 5 * s, y - 50 * s, 10 * s
-    d.ellipse((cx - r, cy - r * 0.9, cx + r, cy + r * 0.9), fill=GRIS, outline=P.CONTOUR)
+    F.humain(img, (x, y), taille, "gris", cheveux="chatain", corpulence=1.55, miroir=miroir)
 
 
-def poussette(d, x, y, t=0.0):
-    """Une poussette de profil, avec le bébé."""
-    d.chord((x - 12, y - 24, x + 10, y - 4), 180, 360, fill=B2, outline=P.CONTOUR)
-    d.rectangle((x - 12, y - 14, x + 10, y - 9), fill=B1)
-    d.pieslice((x - 12, y - 26, x + 4, y - 10), 180, 270, fill=B3, outline=P.CONTOUR)    # la capote
-    d.ellipse((x - 1, y - 20, x + 5, y - 14), fill=P.PEAU)                                 # le bébé
-    d.line([(x + 10, y - 14), (x + 16, y - 24)], fill=GRIS, width=2)                      # la poignée
-    for cx in (x - 8, x + 6):
-        d.ellipse((cx - 3, y - 6, cx + 3, y), outline=GRIS, fill=NOIR)
+def poussette(img, x, y, h=44, t=0.0):
+    F.poussette(img, x, y, h, t)
 
 
-def chat(d, x, y, t=0.0, col=GRIS):
-    d.ellipse((x - 7, y - 8, x + 5, y - 1), fill=col, outline=P.CONTOUR)
-    d.ellipse((x + 2, y - 13, x + 9, y - 6), fill=col, outline=P.CONTOUR)
-    d.polygon([(x + 3, y - 12), (x + 4, y - 16), (x + 6, y - 12)], fill=col)
-    d.polygon([(x + 6, y - 12), (x + 8, y - 16), (x + 9, y - 11)], fill=col)
-    d.point((x + 7, y - 10), fill=NOIR)
-    q = math.sin(t * 4) * 3
-    d.line([(x - 7, y - 5), (x - 11, y - 10 + q), (x - 10, y - 14 + q)], fill=col, width=2)
-    for k in (-5, -2, 1, 3):
-        d.line([(x + k, y - 2), (x + k, y)], fill=col)
+def chat(img, x, y, h=30, t=0.0):
+    F.chat(img, x, y, h, t)
 
 
-def chien(d, x, y, t=0.0, col=(176, 150, 120)):
-    d.rounded_rectangle((x - 10, y - 12, x + 6, y - 4), 3, fill=col, outline=P.CONTOUR)
-    d.ellipse((x + 3, y - 18, x + 13, y - 8), fill=col, outline=P.CONTOUR)
-    d.rectangle((x + 10, y - 13, x + 15, y - 10), fill=col)
-    d.ellipse((x + 3, y - 17, x + 7, y - 9), fill=(120, 96, 70))                          # l'oreille
-    d.point((x + 10, y - 15), fill=NOIR)
-    d.point((x + 15, y - 12), fill=NOIR)
-    q = math.sin(t * 12) * 2
-    d.line([(x - 10, y - 11), (x - 14, y - 15 + q)], fill=col, width=2)
-    for k in (-8, -4, 1, 4):
-        d.line([(x + k, y - 4), (x + k, y)], fill=col, width=2)
+def chien(img, x, y, h=40, t=0.0):
+    F.chien(img, x, y, h, t)
 
 
 # ------------------------------------------------------------------------------------------------ interface
@@ -309,27 +275,26 @@ def s_route(img, d, t, s):
 def s_mit(img, d, t):
     """« Cette question… » → « Résultat » : le bureau du chercheur, l'écran du jeu du MIT, 2016, Toulouse."""
     d = D.labo(img, t)
-    ex, ey, ew, eh = 108, 222, 140, 96                            # le grand écran posé sur le bureau
-    d.rectangle((ex - 5, ey - 5, ex + ew + 5, ey + eh + 5), fill=(30, 36, 56), outline=P.CONTOUR)
-    d.rectangle((ex + ew / 2 - 6, ey + eh + 5, ex + ew / 2 + 6, 330), fill=(30, 36, 56))
+    ex, ey, ew, eh = 146, 280, 110, 72                            # l'écran posé sur le bureau
+    d.rectangle((ex - 4, ey - 4, ex + ew + 4, ey + eh + 4), fill=(30, 36, 56), outline=P.CONTOUR)
+    d.line([(ex - 3, ey - 3), (ex + ew + 3, ey - 3)], fill=(80, 88, 112))
+    d.rectangle((ex + ew / 2 - 4, ey + eh + 4, ex + ew / 2 + 4, 366), fill=(30, 36, 56), outline=P.CONTOUR)
+    d.rectangle((ex + ew / 2 - 16, 366, ex + ew / 2 + 16, 371), fill=(30, 36, 56), outline=P.CONTOUR)
     choix = int((t - T["lance"]) * 1.5) % 2 if t >= T["lance"] else None
-    D.ecran_jeu(d, ex, ey, ew, eh, t, choix)
-    D.lumiere(img, ex + ew / 2, ey + eh / 2, 110, 90, (26, 48, 96), 0.5)
+    D.lumiere(img, ex + ew / 2, ey + eh / 2, 120, 100, (26, 48, 96), 0.5)
     d = draw(img)
     D.ecran_jeu(d, ex, ey, ew, eh, t, choix)
-    d.rectangle((150, 322, 200, 328), fill=GRIS_F, outline=P.CONTOUR)                           # le clavier
-    for k in range(8):
-        if int(t * 9 + k) % 3 == 0:
-            d.point((153 + k * 6, 324), fill=B4)
-    # le chercheur, assis, de profil, qui tape
-    P.siege(d, 94, 420, 1.7)
-    x = 76
-    tape = math.sin(t * 14) * 2
+    d.rectangle((158, 366, 196, 371), fill=GRIS_F, outline=P.CONTOUR)                           # le clavier
+    for k in range(6):
+        d.line([(161 + k * 6, 367), (164 + k * 6, 367)], fill=GRIS if int(t * 9 + k) % 3 else B4)
+    # le chercheur, assis devant le bureau, les mains sur le clavier
+    P.siege(d, 124, 432, 1.7)
+    tape = math.sin(t * 14) * 1.5
     if t >= T["parmi"]:
-        P.personnage(img, (x + 34, 420), 104, assis=True, tenue="costume", mains=(150 + tape, 318))
-        D.lumiere(img, 120, 300, 30, 40, (40, 60, 110), 0.4)
+        perso(img, (150, 432), 94, assis=True, tenue="costume", mains=(164 + tape, 364), tronc=8)
+        D.lumiere(img, 140, 330, 30, 40, (40, 60, 110), 0.35)
     if t >= T["moral"]:
-        over(P.cadre_texte, (120, 206), "MORAL MACHINE", 8, BLANC, ROUGE)
+        over(P.cadre_texte, (150, 262), "MORAL MACHINE", 8, BLANC, ROUGE)
     if t >= T["toulouse"]:
         over(P.cadre_texte, (22, 444), "TOULOUSE", 8, BLANC, ROUGE)
     if t >= T["bonnefon"]:
@@ -371,7 +336,7 @@ def _contenu(*items):
 
 
 def _p(tenue, taille=40, miroir=False):
-    return lambda img, x, y: P.personnage(img, (x, y), taille, tenue=tenue, miroir=miroir)
+    return lambda img, x, y: perso(img, (x, y), taille, tenue=tenue, miroir=miroir)
 
 
 def _salle(img, d, t):
@@ -397,7 +362,7 @@ def s_regles(img, d, t):
         for k in range(5):
             x = 35 + k * 50
             D.ombre(d, x, 380, 10)
-            P.personnage(img, (x, 380), 70, tenue=("pull", "gris", "clair", "costume", "sport")[k], miroir=k % 2,
+            perso(img, (x, 380), 70, tenue=("pull", "gris", "clair", "costume", "sport")[k], miroir=k % 2,
                          tete=10 * math.sin(t * 3 + k))
             if int(t * 3 + k) % 2:
                 over(P.cadre_texte, (x - 6, 250 + 12 * (k % 2)), "?!"[(k + int(t * 2)) % 2], 14, BLANC, B2)
@@ -409,7 +374,7 @@ def s_regles(img, d, t):
         return
     if t < T["plus2"] - 0.1:
         cle, txt = "humains", "HUMAINS > ANIMAUX"
-        g, dr = _contenu((_p("pull", 44), 0)), _contenu((lambda im, x, y: grand(im, chien, x, y, 2, t), 0))
+        g, dr = _contenu((_p("pull", 56), 0)), _contenu((lambda im, x, y: chien(im, x, y, 40, t), 0))
     elif t < T["jeunes"] - 0.1:
         cle, txt = "plus2", "LE + DE VIES"
         g = _contenu(*[(_p(tn, 36), dx) for tn, dx in (("clair", -18), ("pull", -6), ("gris", 6), ("sport", 18))])
@@ -445,7 +410,7 @@ def s_classement(img, d, t, interdit=False):
             continue
         x, y = tops[k]
         if k == 0:
-            grand(img, poussette, x, y, 2, t)
+            poussette(img, x, y, 48, t)
         elif k == 1:
             enfant(img, x, y, 46, "robe")
         elif k == 2:
@@ -473,9 +438,9 @@ def s_classement(img, d, t, interdit=False):
             D.lumiere(img, x, y - 12, 34, 22, (20, 30, 56), 0.8)
             d = draw(img)
             if cle == "chat":
-                grand(img, chat, x, y, 2, t)
+                chat(img, x, y, 30, t)
             elif cle == "chien":
-                grand(img, chien, x, y, 2, t)
+                chien(img, x, y, 40, t)
             else:
                 criminel(img, x, y, 46)
             d = draw(img)
@@ -584,7 +549,7 @@ def s_paradoxe(img, d, t):
             for xx in range(206 + (y // 8) % 2 * 6, 252, 12):
                 d.rectangle((xx, y, xx + 10, y + 6), fill=(70, 50, 60), outline=P.CONTOUR)
         choc = t >= T["sacrifient"] + 0.9
-        grand_profil(img, x, sol, 2, col=B2, t=t, roule=not choc)
+        F.voiture_profil(img, x, sol, 156, col=B2, t=t, roule=not choc)
         d = draw(img)
         if choc:
             k = t - T["sacrifient"] - 0.9
@@ -596,7 +561,7 @@ def s_paradoxe(img, d, t):
                                  209 + r * math.cos(a + math.pi), sol - 37 + r * math.sin(a) * 0.7 + 30 * k * k),
                                 fill=(70, 50, 60) if j % 3 else B4)
         for k in range(3):                                        # les piétons sauvés, sur le trottoir d'en face
-            P.personnage(img, (40 + 22 * k, 420), 50, tenue=("clair", "gris", "robe")[k],
+            perso(img, (40 + 22 * k, 420), 50, tenue=("clair", "gris", "robe")[k],
                          mains=(40 + 22 * k + 6, 380) if choc else None)
         if choc:
             over(P.cadre_texte, (110, 410), "PIETONS SAUVES", 8, B4, B2)
@@ -604,7 +569,7 @@ def s_paradoxe(img, d, t):
             over(P.cadre_texte, (20, 140), "LA VOITURE DES AUTRES :", 8, B4, B2)
             over(P.cadre_texte, (20, 160), "SACRIFIE LE PASSAGER", 8, BLANC, ROUGE)
     else:
-        grand_profil(img, 90, sol, 2, col=B3, t=t, roule=False)
+        F.voiture_profil(img, 90, sol, 156, col=B3, t=t, roule=False)
         d = draw(img)
         if t >= T["protege"]:                                     # le bouclier
             pul = 1 + 0.08 * math.sin(t * 8)
@@ -614,7 +579,7 @@ def s_paradoxe(img, d, t):
             d.polygon(pts, fill=B1, outline=B4)
             d.line([(cx, cy - 26), (cx, cy + 28)], fill=B4)
             d.line([(cx - 26, cy - 6), (cx + 26, cy - 6)], fill=B4)
-        P.personnage(img, (70, sol + 2), 80, tenue="pull", mains=(104, sol - 50), tronc=6)
+        perso(img, (70, sol + 2), 80, tenue="pull", mains=(104, sol - 50), tronc=6)
         over(P.cadre_texte, (20, 140), "MA VOITURE :", 8, B4, B2)
         if t >= T["protege"]:
             over(P.cadre_texte, (20, 160), "PROTEGE-MOI !", 8, BLANC, ROUGE)
@@ -624,11 +589,11 @@ def s_mercedes(img, d, t):
     """« La même année, un responsable de Mercedes le dit tout haut… »"""
     sol = 360
     d = D.salon(img, t, sol)
-    grand_profil(img, 50, sol - 2, 2, col=GRIS, t=t, roule=False)
+    F.voiture_profil(img, 50, sol - 2, 156, col=GRIS, t=t, roule=False)
     d = draw(img)
     D.lumiere(img, 140, 300, 90, 30, (40, 60, 110), 0.4)
     x = 232
-    P.personnage(img, (x, sol - 2), 104, tenue="costume", miroir=True,
+    perso(img, (x, sol - 2), 104, tenue="costume", miroir=True,
                  mains=(x + 14, sol - 92) if t >= T["sauvez"] else None)
     d = draw(img)
     if t >= T["sauvez"]:                                          # le micro
