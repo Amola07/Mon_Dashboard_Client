@@ -226,7 +226,7 @@ def _membre(d, p, q, w0, w1, cols):
 
 
 def personnage(img, pieds, taille=92, tronc=0.0, mains=None, flexion=0.0, tete=None, assis=False, tenue="pull",
-               rotation=0.0, sens=1):
+               rotation=0.0, sens=1, marche=None, miroir=False):
     """Dessine un personnage détaillé, pieds au point `pieds` (sur `img`, image PIL RGB).
     tronc : inclinaison en degrés (négatif = penché en arrière vers la gauche) ; mains : (x, y) visé par les deux
     mains, ou None (bras ballants) ; flexion : 0..1 (jambes) ; rotation : tout le corps tourne (vol)."""
@@ -243,6 +243,11 @@ def personnage(img, pieds, taille=92, tronc=0.0, mains=None, flexion=0.0, tete=N
     if assis:
         hanche = (px - 16 * s, py - 24 * s)
         pied_av, pied_ar = (px + 12 * s, py), (px + 7 * s, py)
+    elif marche is not None:                                     # la marche : les pieds alternent, le corps rebondit
+        ph = marche
+        hanche = (px, py - (cuisse + tibia) * (0.95 - 0.03 * abs(math.cos(ph))))
+        pied_av = (px + 10 * s * math.sin(ph), py - 4 * s * max(0.0, math.cos(ph)))
+        pied_ar = (px - 10 * s * math.sin(ph), py - 4 * s * max(0.0, -math.cos(ph)))
     else:
         hanche = (px - 9 * s * flexion - 1, py - (cuisse + tibia) * (0.97 - 0.2 * flexion))
         pied_av, pied_ar = (px + 7 * s, py), (px - 9 * s, py)
@@ -252,8 +257,9 @@ def personnage(img, pieds, taille=92, tronc=0.0, mains=None, flexion=0.0, tete=N
     cou = (epaule[0] + 3 * s * math.sin(a), epaule[1] - 3 * s * math.cos(a))
     tc = (cou[0] + 8 * s * math.sin(ta), cou[1] - 8 * s * math.cos(ta))
     if mains is None:
-        main_av = (epaule[0] + 6 * s + 2 * s * math.sin(a), epaule[1] + 26 * s)
-        main_ar = (epaule[0] - 3 * s, epaule[1] + 26 * s)
+        bal = 7 * s * math.sin(-marche) if marche is not None else 0.0
+        main_av = (epaule[0] + 4 * s + bal, epaule[1] + 24 * s)
+        main_ar = (epaule[0] - 1 * s - bal, epaule[1] + 24 * s)
     else:
         main_av, main_ar = mains, (mains[0] - 2 * s, mains[1] + 2 * s)
     h, b = T_["haut"], T_["bas"]
@@ -302,6 +308,8 @@ def personnage(img, pieds, taille=92, tronc=0.0, mains=None, flexion=0.0, tete=N
     arr = np.asarray(cal).copy()
     arr[bord & ~al] = (*CONTOUR, 255)
     cal = Image.fromarray(arr)
+    if miroir:
+        cal = cal.transpose(Image.FLIP_LEFT_RIGHT)
     if rotation:
         cal = cal.rotate(-rotation, resample=Image.NEAREST, center=(L / 2, L * 0.6))
     img.paste(cal, (int(pieds[0] - L / 2), int(pieds[1] - L * 0.78)), cal)
