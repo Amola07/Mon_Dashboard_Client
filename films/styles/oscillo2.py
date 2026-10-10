@@ -20,7 +20,7 @@ import os
 
 # Thème : "phosphore" (vert et ambre sur fond sombre, le faisceau brille) ou "papier" (noir sur blanc, comme les
 # planches de dessins au trait : l'oscilloscope devient une table traçante, la plume encre le papier quadrillé).
-# Choisi au lancement : OSC_THEME=papier python -m …
+# Choisi au lancement : OSC_THEME=papier python -m …   (ou OSC_THEME=bleu / bleu_glace : le même écran en bleu)
 PAPIER = os.environ.get("OSC_THEME", "phosphore") == "papier"
 if PAPIER:
     VERT = (95, 95, 95)                                   # le secondaire : gris
@@ -28,6 +28,12 @@ if PAPIER:
     VERT_PALE = (22, 22, 22)                              # le sujet : noir
     AMBRE = (0, 0, 0)                                     # l'important : noir, en trait plus épais
     FOND_CENTRE, FOND_BORD = (252, 251, 247), (236, 234, 228)
+elif os.environ.get("OSC_THEME", "").startswith("bleu"):    # le même écran, en bleu (OSC_THEME=bleu ou bleu_glace)
+    VERT = (70, 170, 255)                                 # le secondaire : bleu électrique
+    VERT_SOMBRE = (24, 64, 130)                           # le quadrillage : bleu nuit
+    VERT_PALE = (205, 232, 255)                           # le sujet : bleu très pâle
+    AMBRE = (190, 245, 255) if os.environ["OSC_THEME"] == "bleu_glace" else (255, 176, 70)   # l'important
+    FOND_CENTRE, FOND_BORD = (6, 16, 34), (1, 3, 10)
 else:
     VERT = (90, 255, 140)
     VERT_SOMBRE = (30, 110, 64)
