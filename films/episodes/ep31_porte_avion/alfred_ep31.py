@@ -26,7 +26,7 @@ FPS = 30
 T = G.T
 SOL = 372
 PORTE = (205, 280, 241, SOL)                                     # x0, y0, x1, y1
-POIGNEE = (211, 331)
+POIGNEE = (211, 313)
 TB = 1.1                                                         # la porte saute
 RNG = np.random.default_rng(31)
 DEBRIS = [(RNG.uniform(20, 190), RNG.uniform(230, 360), RNG.uniform(0, 1.3), RNG.integers(0, 4), RNG.uniform(-1, 1))
@@ -82,19 +82,19 @@ def _dessin_porte(d, x0, y0, x1, y1):
     d.rounded_rectangle((x0 + 3, y0 + 2, x1 - 1, y1 - 1), 7, fill=B4)
     d.rectangle((x0, y1 - 8, x1, y1 - 1), fill=B1)
     cx = (x0 + x1) / 2 + 3
-    d.ellipse((cx - 6, y0 + 14, cx + 6, y0 + 28), fill=B1, outline=B2)
-    d.point((cx - 2, y0 + 18), fill=B3)
-    d.rectangle((x0 + 4, y0 + 49, x0 + 18, y0 + 53), fill=GRIS)  # la poignée-levier
-    d.rectangle((x0 + 4, y0 + 49, x0 + 18, y0 + 50), fill=BLANC)
-    d.rectangle((x0 + 15, y0 + 45, x0 + 19, y0 + 56), fill=GRIS_F)
+    d.ellipse((cx - 6, y0 + 8, cx + 6, y0 + 22), fill=B1, outline=B2)
+    d.point((cx - 2, y0 + 12), fill=B3)
+    d.rectangle((x0 + 4, y0 + 31, x0 + 18, y0 + 35), fill=GRIS)  # la poignée-levier, à hauteur de poitrine
+    d.rectangle((x0 + 4, y0 + 31, x0 + 18, y0 + 32), fill=BLANC)
+    d.rectangle((x0 + 15, y0 + 27, x0 + 19, y0 + 38), fill=GRIS_F)
 
 
 def tirer(t, fort=1.0):
     p = 0.5 + 0.5 * math.sin(2 * math.pi * 1.7 * t)
-    return -(10 + 16 * p * fort), 0.25 + 0.45 * p * fort
+    return -(28 + 12 * p * fort), 0.4 + 0.35 * p * fort
 
 
-def vol(d, depart, t0, s, taille, delai=0.65):
+def vol(d, depart, t0, s, taille, delai=0.65, tenue="pull"):
     """Un passager aspiré vers la porte : il part de `depart`, tourne, file dehors."""
     u = (s - t0) / delai
     if u < 0:
@@ -104,7 +104,7 @@ def vol(d, depart, t0, s, taille, delai=0.65):
     cx, cy = (PORTE[0] + PORTE[2]) / 2, (PORTE[1] + PORTE[3]) / 2
     x = depart[0] + (cx + 120 * max(0, u - 0.8) - depart[0]) * u ** 1.7
     y = depart[1] + (cy + 30 - depart[1]) * u
-    P.bonhomme(d, (x, y), taille, tronc=70 + 220 * u, bras=(x + 26, y - 30), genou=0.6, tete_ang=90 + 200 * u)
+    P.personnage(d._image, (x, y), taille, tronc=10, flexion=0.5, rotation=70 + 220 * u, tenue=tenue)
     return True
 
 
@@ -115,21 +115,24 @@ def scene(img, d, s, t, mode="chaos"):
     rouge = (not tient) and s > TB and int(t * 6) % 2 == 0
     if rouge:                                                    # l'alarme rouge
         d.rectangle((96, 182, 116, 188), fill=ROUGE)
-    sieges = [(48, 0.30), (92, 0.62), (136, 0.95)]
-    for x, delai in sieges:
+    sieges = [(48, 0.30, "gris"), (92, 0.62, "clair"), (136, 0.95, "costume")]
+    for x, delai, tenue in sieges:
         P.siege(d, x, SOL)
         if tient or s < TB + delai:
             lean = 0 if tient or s < TB else 25 * lisse((s - TB) / 0.4)
-            P.bonhomme(d, (x + 4, SOL), 58, tronc=lean, assis=True, bras=(x + 18, SOL - 26), tete_ang=lean * 1.5)
+            P.personnage(img, (x + 4, SOL), 66, tronc=lean, assis=True, mains=(x + 16 + lean / 3, SOL - 20),
+                         tete=lean * 1.5, tenue=tenue)
         else:
-            vol(d, (x + 4, SOL - 20), TB + delai, s, 58)
+            vol(d, (x + 4, SOL - 20), TB + delai, s, 66, tenue=tenue)
     tremble = 1 if tient and int(t * 25) % 2 else 0
     porte(d, s, tient, tremble)
     if tient or s < TB + 0.12:                                   # le passager debout, mains sur la poignée
         tr, ge = tirer(t, 1.6 if tient else (1.0 if s < TB - 0.4 else 1.5))
-        P.bonhomme(d, (168, SOL), 70, tronc=tr, bras=(POIGNEE[0] + tremble, POIGNEE[1]), genou=ge)
+        cible = (POIGNEE[0] + tremble, POIGNEE[1])
+        px = min(P.pieds_pour_saisir(cible, SOL, 84, tr, ge), PORTE[0] - 12)   # jamais les pieds dans la porte
+        P.personnage(img, (px, SOL), 84, tronc=tr, mains=cible, flexion=ge)
     else:
-        vol(d, (170, SOL - 30), TB + 0.12, s, 70, 0.5)
+        vol(d, (170, SOL - 30), TB + 0.12, s, 84, 0.5)
     if not tient and s > TB:                                     # objets aspirés, masques, vent
         for x, y, dt, k, rot in DEBRIS:
             u = (s - TB - dt) / 0.7

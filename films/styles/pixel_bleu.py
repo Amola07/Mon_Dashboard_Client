@@ -183,3 +183,148 @@ def vhs(a, t, force=1.0):
         a[y:y + h] = np.where(m, bruit, a[y:y + h])
     a[..., 2] = np.clip(a[..., 2] + 20 * force, 0, 255)
     return np.clip(a, 0, 255).astype(np.uint8)
+
+
+# ------------------------------------------------------------------------------------------------ personnages détaillés
+# Un vrai sprite : membres en deux segments (coude, genou par cinématique inverse), vêtements ombrés en 3-4 tons,
+# chaussures, ceinture, col, cheveux, oreille, nez ; contour sombre d'un pixel calculé automatiquement autour de tout.
+CONTOUR = (4, 8, 22)
+PEAU, PEAU_O = (214, 232, 255), (150, 186, 236)
+TENUES = {
+    "pull": {"haut": (B2, B1, B3), "bas": (B0, (10, 30, 70), B1), "cheveux": (12, 22, 48)},
+    "gris": {"haut": (GRIS, GRIS_F, (190, 198, 214)), "bas": (B1, B0, B2), "cheveux": (40, 34, 30)},
+    "clair": {"haut": (B3, B2, B4), "bas": (GRIS_F, (50, 56, 70), GRIS), "cheveux": (70, 52, 30)},
+    "costume": {"haut": ((24, 30, 52), (12, 16, 30), (52, 62, 96)), "bas": ((24, 30, 52), (12, 16, 30), (52, 62, 96)),
+                "cheveux": (12, 22, 48)},
+}
+
+
+def _ik(a, cible, l1, l2, sens=1):
+    """Cinématique inverse à deux segments : renvoie l'articulation (coude ou genou) entre a et cible."""
+    dx, dy = cible[0] - a[0], cible[1] - a[1]
+    dist = max(1e-6, min(l1 + l2 - 1e-3, math.hypot(dx, dy)))
+    ang = math.atan2(dy, dx)
+    c = max(-1.0, min(1.0, (l1 * l1 + dist * dist - l2 * l2) / (2 * l1 * dist)))
+    b = ang - sens * math.acos(c)
+    return a[0] + l1 * math.cos(b), a[1] + l1 * math.sin(b)
+
+
+def _membre(d, p, q, w0, w1, cols):
+    """Un segment de membre fuselé et ombré : base, ombre côté dos, reflet côté face."""
+    base, ombre, reflet = cols
+    ang = math.atan2(q[1] - p[1], q[0] - p[0])
+    nx, ny = -math.sin(ang), math.cos(ang)
+    pts = [(p[0] + nx * w0 / 2, p[1] + ny * w0 / 2), (q[0] + nx * w1 / 2, q[1] + ny * w1 / 2),
+           (q[0] - nx * w1 / 2, q[1] - ny * w1 / 2), (p[0] - nx * w0 / 2, p[1] - ny * w0 / 2)]
+    d.polygon(pts, fill=base)
+    for (x, y), w in ((p, w0), (q, w1)):
+        d.ellipse((x - w / 2, y - w / 2, x + w / 2, y + w / 2), fill=base)
+    d.line([(p[0] - nx * (w0 / 2 - 1), p[1] - ny * (w0 / 2 - 1)), (q[0] - nx * (w1 / 2 - 1), q[1] - ny * (w1 / 2 - 1))],
+           fill=ombre, width=max(1, int(w0 / 3)))
+    d.line([(p[0] + nx * (w0 / 2 - 1), p[1] + ny * (w0 / 2 - 1)), (q[0] + nx * (w1 / 2 - 1), q[1] + ny * (w1 / 2 - 1))],
+           fill=reflet, width=1)
+
+
+def personnage(img, pieds, taille=92, tronc=0.0, mains=None, flexion=0.0, tete=None, assis=False, tenue="pull",
+               rotation=0.0, sens=1):
+    """Dessine un personnage détaillé, pieds au point `pieds` (sur `img`, image PIL RGB).
+    tronc : inclinaison en degrés (négatif = penché en arrière vers la gauche) ; mains : (x, y) visé par les deux
+    mains, ou None (bras ballants) ; flexion : 0..1 (jambes) ; rotation : tout le corps tourne (vol)."""
+    from PIL import ImageDraw
+    s = taille / 92
+    T_ = TENUES[tenue]
+    L = int(taille * 2.2)
+    cal = Image.new("RGBA", (L, L), (0, 0, 0, 0))
+    d = ImageDraw.Draw(cal)
+    ox, oy = L / 2 - pieds[0], L * 0.78 - pieds[1]               # repère local : pieds vers le bas du calque
+    P_ = lambda x, y: (x + ox, y + oy)
+    px, py = pieds
+    cuisse, tibia, buste, bras1, bras2 = 22 * s, 21 * s, 28 * s, 14 * s, 13 * s
+    if assis:
+        hanche = (px - 16 * s, py - 24 * s)
+        pied_av, pied_ar = (px + 12 * s, py), (px + 7 * s, py)
+    else:
+        hanche = (px - 9 * s * flexion - 1, py - (cuisse + tibia) * (0.97 - 0.2 * flexion))
+        pied_av, pied_ar = (px + 7 * s, py), (px - 9 * s, py)
+    a = math.radians(tronc)
+    epaule = (hanche[0] + buste * math.sin(a), hanche[1] - buste * math.cos(a))
+    ta = a if tete is None else math.radians(tete)
+    cou = (epaule[0] + 3 * s * math.sin(a), epaule[1] - 3 * s * math.cos(a))
+    tc = (cou[0] + 8 * s * math.sin(ta), cou[1] - 8 * s * math.cos(ta))
+    if mains is None:
+        main_av = (epaule[0] + 6 * s + 2 * s * math.sin(a), epaule[1] + 26 * s)
+        main_ar = (epaule[0] - 3 * s, epaule[1] + 26 * s)
+    else:
+        main_av, main_ar = mains, (mains[0] - 2 * s, mains[1] + 2 * s)
+    h, b = T_["haut"], T_["bas"]
+    sombre = lambda c: tuple(int(v * 0.72) for v in c)
+    # le côté éloigné (plus sombre) : jambe arrière, bras arrière
+    g = _ik(hanche, pied_ar, cuisse, tibia, sens=-1 if not assis else 1)
+    _membre(d, P_(*hanche), P_(*g), 9 * s, 7.5 * s, tuple(sombre(c) for c in b))
+    _membre(d, P_(*g), P_(*pied_ar), 7.5 * s, 6 * s, tuple(sombre(c) for c in b))
+    _chaussure(d, P_(*pied_ar), s, sombre((30, 36, 56)))
+    c_ = _ik(epaule, main_ar, bras1, bras2, sens=1)
+    _membre(d, P_(*epaule), P_(*c_), 7 * s, 6 * s, tuple(sombre(c) for c in h))
+    _membre(d, P_(*c_), P_(*main_ar), 6 * s, 5 * s, tuple(sombre(c) for c in h))
+    _main(d, P_(*main_ar), s, PEAU_O)
+    # le buste : pull ombré, ceinture, col
+    _membre(d, P_(*hanche), P_(*epaule), 15 * s, 17 * s, h)
+    d.line([P_(hanche[0] - 6 * s * math.cos(a), hanche[1] - 6 * s * math.sin(a) - 1),
+            P_(hanche[0] + 7 * s * math.cos(a), hanche[1] + 7 * s * math.sin(a) - 1)], fill=CONTOUR, width=max(1, int(2 * s)))
+    # la jambe avant
+    g = _ik(hanche, pied_av, cuisse, tibia, sens=-1 if not assis else 1)
+    _membre(d, P_(*hanche), P_(*g), 10 * s, 8 * s, b)
+    _membre(d, P_(*g), P_(*pied_av), 8 * s, 6.5 * s, b)
+    _chaussure(d, P_(*pied_av), s, (30, 36, 56))
+    # la tête : cou, visage, cheveux, oreille, nez
+    _membre(d, P_(*epaule), P_(*cou), 6 * s, 6 * s, (PEAU_O, PEAU_O, PEAU))
+    r = 8 * s
+    X, Y = P_(*tc)
+    d.ellipse((X - r, Y - r * 1.05, X + r, Y + r * 1.05), fill=PEAU)
+    d.ellipse((X - r, Y - r * 1.05, X + r * 0.2, Y + r * 1.05), fill=PEAU_O)
+    d.ellipse((X - r * 0.3, Y - r * 1.05, X + r, Y + r * 0.9), fill=PEAU)
+    nx_, ny_ = X + r * math.cos(ta) * 1.0, Y + r * math.sin(ta) * 1.0 + 1
+    d.polygon([(nx_ - 1, ny_ - 2), (nx_ + 2 * s, ny_ + 1), (nx_ - 1, ny_ + 2)], fill=PEAU)
+    cheveux = T_["cheveux"]
+    d.chord((X - r - 1, Y - r * 1.15 - 1, X + r + 1, Y + r * 0.6), 150 + math.degrees(ta), 360 + math.degrees(ta) - 10,
+            fill=cheveux)
+    d.ellipse((X - r * 0.35, Y - 2 * s, X + r * 0.1, Y + 2 * s), fill=PEAU_O)       # l'oreille
+    # le bras avant, par-dessus tout
+    c_ = _ik(epaule, main_av, bras1, bras2, sens=1)
+    _membre(d, P_(*epaule), P_(*c_), 8 * s, 7 * s, h)
+    _membre(d, P_(*c_), P_(*main_av), 7 * s, 5.5 * s, h)
+    _main(d, P_(*main_av), s, PEAU)
+    # le contour d'un pixel, puis la pose sur l'image
+    al = np.asarray(cal)[..., 3] > 0
+    bord = np.zeros_like(al)
+    for dx_, dy_ in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+        bord |= np.roll(np.roll(al, dx_, 1), dy_, 0)
+    arr = np.asarray(cal).copy()
+    arr[bord & ~al] = (*CONTOUR, 255)
+    cal = Image.fromarray(arr)
+    if rotation:
+        cal = cal.rotate(-rotation, resample=Image.NEAREST, center=(L / 2, L * 0.6))
+    img.paste(cal, (int(pieds[0] - L / 2), int(pieds[1] - L * 0.78)), cal)
+
+
+def _chaussure(d, p, s, col):
+    x, y = p
+    d.rounded_rectangle((x - 4 * s, y - 4 * s, x + 7 * s, y), max(1, int(2 * s)), fill=col)
+    d.line([(x - 4 * s, y - 1), (x + 7 * s, y - 1)], fill=GRIS, width=1)
+
+
+def _main(d, p, s, col):
+    x, y = p
+    d.ellipse((x - 2.6 * s, y - 2.6 * s, x + 2.6 * s, y + 2.6 * s), fill=col)
+
+
+def pieds_pour_saisir(cible, sol, taille, tronc, flexion, marge=0.99):
+    """Où poser les pieds pour que les mains atteignent `cible` bras presque tendus (pas de bras élastiques)."""
+    s = taille / 92
+    a = math.radians(tronc)
+    epaule_dx = -9 * s * flexion - 1 + 28 * s * math.sin(a)
+    epaule_y = sol - 43 * s * (0.97 - 0.2 * flexion) - 28 * s * math.cos(a)
+    portee = marge * 27 * s
+    dy = cible[1] - epaule_y
+    dx = math.sqrt(max(0.0, portee ** 2 - dy ** 2))
+    return cible[0] - dx - epaule_dx
