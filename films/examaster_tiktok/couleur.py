@@ -81,19 +81,25 @@ def hachures(masque, pas, angle):
     return [[(float(x), float(y)) for x, y in s] for s in segs]
 
 
-def convertir_case(img, pal):
+def convertir_case(img, pal, seuil_fin=30):
     fg = premier_plan(img).astype(np.uint8)
     fg = cv2.morphologyEx(fg, cv2.MORPH_OPEN, np.ones((2, 2), np.uint8))
-    n, lab, st, _ = cv2.connectedComponentsWithStats(fg, 8)
+    n, lab, st, cen = cv2.connectedComponentsWithStats(fg, 8)
     garde = np.zeros(n, bool)
-    garde[1:] = st[1:, cv2.CC_STAT_AREA] >= max(80, 0.04 * st[1:, cv2.CC_STAT_AREA].max())   # poussières et voisins qui débordent
+    if n > 1:
+        gros = 1 + int(st[1:, cv2.CC_STAT_AREA].argmax())                  # le personnage
+        x, y, w, h = st[gros, :4]
+        for i in range(1, n):                                              # on garde ce qui est dans son cadre (yeux, bouche, doigts)
+            dedans = x - 6 <= cen[i][0] <= x + w + 6 and y - 6 <= cen[i][1] <= y + h + 6
+            garde[i] = dedans and st[i, cv2.CC_STAT_AREA] >= 5
+        garde[gros] = True
     fg = garde[lab]
     ys, xs = np.nonzero(fg)
     bbox = [int(xs.min()), int(ys.min()), int(xs.max()), int(ys.max())] if len(xs) else [0, 0, 1, 1]
     gris = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     sombre = (gris < SEUIL_SOMBRE) & fg
     cheveux = cv2.morphologyEx(sombre.astype(np.uint8), cv2.MORPH_OPEN, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))).astype(bool)
-    fin = cv2.morphologyEx(gris, cv2.MORPH_BLACKHAT, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (9, 9))) > 30   # traits fins plus sombres que leur voisinage
+    fin = cv2.morphologyEx(gris, cv2.MORPH_BLACKHAT, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (9, 9))) > seuil_fin   # traits fins plus sombres que leur voisinage
     traits = (sombre | (fin & fg.astype(bool))) & ~cv2.dilate(cheveux.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)
     lignes = ordonner(simplifier(suivre(amincir(traits)), eps=1.2, mini=4))
     zones = []
@@ -101,6 +107,9 @@ def convertir_case(img, pal):
         zones.append({"couleur": [int(v) for v in img[cheveux][:, ::-1].mean(axis=0)], "role": "cheveux",
                       "hachures": hachures(cheveux, 3, 0)})
     clair = fg & ~sombre
+    if len(pal) == 0:                                                      # dessin au trait (noir et blanc) : pas d'aplats
+        return {"px": [bbox[2] - bbox[0], bbox[3] - bbox[1]], "bbox": bbox, "masque_fg": fg,
+                "lignes": [[(round(x, 1), round(y, 1)) for x, y in l] for l in lignes], "zones": zones}
     d2 = ((img.astype(np.float32)[:, :, None, :] - pal[None, None, :, :]) ** 2).sum(axis=3)
     etiquette = d2.argmin(axis=2)
     for j in range(len(pal)):
@@ -117,16 +126,19 @@ def convertir_case(img, pal):
 
 def main():
     chemin, grille, noms = sys.argv[1], sys.argv[2], sys.argv[3:]
+    nb = bool(noms) and noms[0] == "--nb"                                   # --nb : dessin au trait noir sur blanc, sans couleurs
+    if nb:
+        noms = noms[1:]
     cols, rangs = (int(v) for v in grille.split("x"))
     img = cv2.imread(chemin)
     fg = premier_plan(img)
     bl, br = coupures(fg, cols, 1), coupures(fg, rangs, 0)
-    pal = palette(img)
+    pal = np.zeros((0, 3), np.float32) if nb else palette(img)
     os.makedirs(DOSSIER, exist_ok=True)
     cases = []
     for k, nom in enumerate(noms):
         r, c = divmod(k, cols)
-        d = convertir_case(img[br[r]:br[r + 1], bl[c]:bl[c + 1]], pal)
+        d = convertir_case(img[br[r]:br[r + 1], bl[c]:bl[c + 1]], pal, 45 if nb else 30)
         cases.append(d)
     # alignement des cases entre elles (utile pour les bouches : même tête, seule la bouche change)
     H = max(d["masque_fg"].shape[0] for d in cases)
@@ -145,7 +157,8 @@ def main():
         json.dump(d, open(os.path.join(DOSSIER, nom + ".json"), "w"))
         nh = sum(len(z["hachures"]) for z in d["zones"])
         print(f"{nom} : {len(d['lignes'])} traits, {len(d['zones'])} zones, {nh} hachures, taille {d['px']}, décalage {d['decalage']}")
-    print("palette (RGB) :", [tuple(int(v) for v in p[::-1]) for p in pal])
+    if len(pal):
+        print("palette (RGB) :", [tuple(int(v) for v in p[::-1]) for p in pal])
 
 
 if __name__ == "__main__":

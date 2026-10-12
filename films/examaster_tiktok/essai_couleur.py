@@ -106,12 +106,13 @@ def bas_tete(nom):
     return centre_bas(nom)
 
 
-POSES = [("pz_salut", 0.0, 1.0), ("pz_pointe", 2.6, 2.6), ("pz_phone", 3.4, 2.6), ("pz_pouce", 4.2, 2.6),
-         ("pz_surpris", 5.0, 2.6), ("pz_poing", 5.8, 2.6), ("pz_haussement", 6.6, 2.6)]
-T_TETE = 7.5
+PREF = os.environ.get("EXA_PREFIXE", "pz_")                       # pz_ : planche de poses en couleurs ; nbl_ : en dessin au trait
+POSES = [(PREF + n, t0, v) for n, t0, v in (("salut", 0.0, 1.0), ("pointe", 2.6, 2.6), ("phone", 3.4, 2.6), ("pouce", 4.2, 2.6),
+                                           ("surpris", 5.0, 2.6), ("poing", 5.8, 2.6), ("haussement", 6.6, 2.6))]
+T_TETE = 7.5 if PREF == "pz_" else 99.0
 PAROLE = ["ex_neutre", "ex_ah", "ex_oh", "ex_ii", "ex_ah", "ex_sourire", "ex_oh", "ex_ii", "ex_ah", "ex_neutre",
           "ex_grand_sourire", "ex_ah", "ex_oh", "ex_ii", "ex_ah", "ex_oh", "ex_sourire", "ex_ah"]
-DUREE = 11.8
+DUREE = 11.8 if PREF == "pz_" else 7.8
 
 
 def image(c, th, t):
