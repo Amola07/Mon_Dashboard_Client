@@ -35,8 +35,11 @@ enseignants). Rien de ce qui est interne à l'application n'a sa place dans ce d
 - **Un jeune homme africain** (étudiant béninois, une vingtaine d'années), dessiné dans un style inspiré des animes :
   grands yeux expressifs, cheveux courts naturels, chemise légère ouverte sur un t-shirt, une bretelle de sac, des
   écouteurs autour du cou. Personnage inventé, jamais le visage d'une personne réelle. Le nom reste à choisir.
-- **Des dessins sophistiqués, générés par IA**, convertis en traits par nos outils comme d'habitude : **traits noirs sur
-  fond blanc** (l'inverse de l'oscilloscope vert), les traits se dessinent à l'écran au rythme de la voix.
+- **Des dessins sophistiqués, générés par IA**, convertis en traits par nos outils : **noir et blanc** (décision finale du
+  12 octobre, après l'essai en couleurs). Les contours sont tracés au faisceau puis les volumes sont gravés en hachures
+  grises : plus la couleur d'origine est sombre, plus la hachure est noire ; les teintes très claires restent du papier.
+  Les planches déjà générées en couleurs servent telles quelles (`couleur.py`, thème `nb` de `essai_couleur.py`) ; les
+  nouvelles images peuvent être demandées en noir et blanc (prompts dans `PROMPTS.md`).
 - **Pas de personnage codé** : l'essai « Oscar » (oscilloscope à tête d'écran) est abandonné.
 - Pour la voix, une planche de **bouches** (même tête, seule la bouche change) permet de caler les lèvres sur les mots.
 - Les prompts des planches sont dans `PROMPTS.md`.

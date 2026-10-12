@@ -37,7 +37,18 @@ def encre(r):
     return tuple(int(255 * c) for c in colorsys.hsv_to_rgb(h, min(1.0, s * 1.05 + 0.1), min(v, 0.8)))
 
 
+def gris(r):
+    """Noir et blanc : la couleur d'aplat devient un gris d'encre (plus la couleur est sombre, plus le trait est noir) ;
+    les teintes très claires (le t-shirt) restent du papier blanc."""
+    lum = 0.299 * r[0] + 0.587 * r[1] + 0.114 * r[2]
+    if lum > 205:
+        return None
+    g = int(25 + lum * 0.9)
+    return (g, g, g)
+
+
 THEMES = {
+    "nb": dict(fond=(252, 251, 247), contour=(14, 14, 14), cheveux=(20, 20, 20), titre="NOIR ET BLANC", ecran=False, coul=gris),
     "neon": dict(fond=(7, 6, 22), contour=(240, 244, 255), cheveux=(150, 130, 255), titre="NÉON", ecran=True, coul=vif),
     "papier": dict(fond=(250, 246, 238), contour=(27, 21, 48), cheveux=(60, 46, 120), titre="PAPIER", ecran=False, coul=encre),
 }
@@ -75,6 +86,8 @@ def dessiner(c, th, nom, ancre, X, Y, k, t_loc, recale=True):
         if u <= 0:
             continue
         col = th["cheveux"] if z["role"] == "cheveux" else th["coul"](tuple(z["couleur"]))
+        if col is None:
+            continue
         faisceau(c, hach, u, col, 1.1, 1.0)
     faisceau(c, lignes, ease(max(0.0, min(1.0, t_loc / 0.9))), th["contour"], 1.0, 1.0)
 
@@ -120,7 +133,7 @@ def image(c, th, t):
             tt = 9.0
         dessiner(c, th, nom, bas_tete("ex_neutre"), 540, 1935, 3.0, tt)
     f = skia.Font(MONO, 34)
-    c.drawString(f"ESSAI · COULEUR · {th['titre']}", 40, 80, f, P(th["contour"], 0, 200, fill=True))
+    c.drawString(f"ESSAI · {th['titre']}", 40, 80, f, P(th["contour"], 0, 200, fill=True))
 
 
 def rendre(theme, sortie):
