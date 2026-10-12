@@ -1,7 +1,7 @@
 # ExaMaster sur TikTok — dossier de lancement (brouillon du 12 octobre 2026)
 
-Changement de cap : on arrête les épisodes « situations impossibles » et on met le style oscillogramme **en noir et
-blanc** au service d'une seule chose, faire connaître l'application ExaMaster, avec une mascotte récurrente.
+Changement de cap : on arrête les épisodes « situations impossibles » et on met nos dessins convertis en traits, **noir sur
+blanc**, au service d'une seule chose : faire connaître l'application ExaMaster, avec une mascotte récurrente.
 Ce dossier ne reprend que ce qu'ExaMaster dit publiquement d'elle-même (écran d'accueil, page de présentation aux
 enseignants). Rien de ce qui est interne à l'application n'a sa place dans ce dépôt public.
 
@@ -30,28 +30,27 @@ enseignants). Rien de ce qui est interne à l'application n'a sa place dans ce d
   l'image 0, une raison concrète de suivre au milieu (règle de `films/REGLES_SCRIPTS.md`, sans « abonne-toi »).
 - Un seul style, tenu sur au moins 5 vidéos de suite, pour pouvoir mesurer ce qui marche.
 
-## La mascotte : « Oscar » (proposition de nom)
+## La mascotte et le style (décision du 12 octobre)
 
-Un petit oscilloscope qui parle, 100 % code (`mascotte.py`), toujours identique d'une vidéo à l'autre :
-
-- une **tête-écran** (double cadre, quadrillage pâle), deux **boutons de réglage** pour oreilles, une antenne ;
-- une **bouche-onde** : plate quand il se tait, d'amplitude égale au volume de la voix quand il parle ;
-- un **corps-boîtier** avec son mini-écran, des bras à deux segments qui montrent, pointent, tiennent un téléphone ;
-- blanc sur noir (un seul accent possible plus tard, le violet de l'application, pour le bouton « télécharger »).
-
-Idée de fond : la **courbe de l'oubli**. Une onde qui s'éteint quand on ne révise pas et qui remonte à chaque
-révision : c'est exactement ce que fait ExaMaster, et c'est le même objet qu'un oscillogramme.
+- **Un jeune homme africain** (étudiant béninois, une vingtaine d'années), dessiné dans un style inspiré des animes :
+  grands yeux expressifs, cheveux courts naturels, chemise légère ouverte sur un t-shirt, une bretelle de sac, des
+  écouteurs autour du cou. Personnage inventé, jamais le visage d'une personne réelle. Le nom reste à choisir.
+- **Des dessins sophistiqués, générés par IA**, convertis en traits par nos outils comme d'habitude : **traits noirs sur
+  fond blanc** (l'inverse de l'oscilloscope vert), les traits se dessinent à l'écran au rythme de la voix.
+- **Pas de personnage codé** : l'essai « Oscar » (oscilloscope à tête d'écran) est abandonné.
+- Pour la voix, une planche de **bouches** (même tête, seule la bouche change) permet de caler les lèvres sur les mots.
+- Les prompts des planches sont dans `PROMPTS.md`.
 
 ## Trois séries possibles
 
 1. **La minute révision** (étudiants) : une technique, une preuve, un geste (se tester plutôt que relire, réviser
-   avant l'oubli, la veille d'examen…). Oscar explique ; l'application n'apparaît qu'au milieu, comme la suite
+   avant l'oubli, la veille d'examen…). La mascotte explique ; l'application n'apparaît qu'au milieu, comme la suite
    logique.
-2. **Dans ta poche** (étudiants) : Oscar montre l'application (lire hors connexion, se tester, payer par Mobile
+2. **Dans ta poche** (étudiants) : La mascotte montre l'application (lire hors connexion, se tester, payer par Mobile
    Money) en 20 à 30 secondes.
-3. **Prof, publie ton cours** (enseignants) : Oscar explique le partage 70 % / 85 % et le temps nécessaire.
+3. **Prof, publie ton cours** (enseignants) : La mascotte explique le partage 70 % / 85 % et le temps nécessaire.
 
 ## À trancher
 
 Lien à mettre dans la bio, durée visée (25-45 s pour la promotion, ou plus de 60 s pour la rémunération TikTok),
-nom de la mascotte, noir sur blanc ou blanc sur noir, ordre des séries.
+nom de la mascotte, ordre des séries.
