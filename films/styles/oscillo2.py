@@ -28,6 +28,12 @@ if PAPIER:
     VERT_PALE = (22, 22, 22)                              # le sujet : noir
     AMBRE = (0, 0, 0)                                     # l'important : noir, en trait plus épais
     FOND_CENTRE, FOND_BORD = (252, 251, 247), (236, 234, 228)
+elif os.environ.get("OSC_THEME", "") == "noir_blanc":       # faisceau blanc sur écran noir (OSC_THEME=noir_blanc)
+    VERT = (150, 150, 150)                                # le secondaire : gris lumineux
+    VERT_SOMBRE = (70, 70, 70)                            # le quadrillage : gris sombre
+    VERT_PALE = (232, 232, 232)                           # le sujet : blanc cassé
+    AMBRE = (255, 255, 255)                               # l'important : blanc pur (le halo le fait briller)
+    FOND_CENTRE, FOND_BORD = (16, 16, 16), (0, 0, 0)
 elif os.environ.get("OSC_THEME", "").startswith("bleu"):    # le même écran, en bleu (OSC_THEME=bleu ou bleu_glace)
     VERT = (70, 170, 255)                                 # le secondaire : bleu électrique
     VERT_SOMBRE = (24, 64, 130)                           # le quadrillage : bleu nuit
